@@ -10,4 +10,25 @@
 
 package ch.ubique.n2step.sdk.backend.data;
 
-public interface N2StepDataService {}
+import ch.ubique.n2step.sdk.backend.model.TraceKey;
+import java.time.LocalDateTime;
+import java.util.List;
+
+public interface N2StepDataService {
+
+    /**
+     * Inserts the given trace key into the db
+     *
+     * @param traceKey
+     */
+    public void insertTraceKey(TraceKey traceKey);
+
+    /**
+     * Returns trace keys that where submitted (/created) after the given date. Returns all trace
+     * keys if after == null.
+     *
+     * @param after
+     * @return
+     */
+    public List<TraceKey> findTraceKeys(LocalDateTime after);
+}

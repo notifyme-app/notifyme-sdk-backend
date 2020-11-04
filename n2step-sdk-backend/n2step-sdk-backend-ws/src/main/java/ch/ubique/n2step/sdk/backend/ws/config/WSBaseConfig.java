@@ -79,7 +79,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
     @Bean
     public N2StepDataService n2StepDataService() {
-        return new JdbcN2StepDataServiceImpl();
+        return new JdbcN2StepDataServiceImpl(getDbType(), dataSource());
     }
 
     @Bean
