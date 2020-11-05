@@ -400,8 +400,8 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <generateGitPropertiesFile>true</generateGitPropertiesFile>
                     <injectAllReactorProjects>true</injectAllReactorProjects>
-                    <runOnlyOnce>true</runOnlyOnce>
                     <skipPoms>false</skipPoms>
                     <dateFormat>yyyyMMddHHmmss</dateFormat>
                     <dateFormatTimeZone>UTC</dateFormatTimeZone>
