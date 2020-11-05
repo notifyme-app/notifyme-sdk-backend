@@ -12,6 +12,7 @@ package ch.ubique.n2step.sdk.backend.ws.config;
 
 import ch.ubique.n2step.sdk.backend.data.JdbcN2StepDataServiceImpl;
 import ch.ubique.n2step.sdk.backend.data.N2StepDataService;
+import ch.ubique.n2step.sdk.backend.ws.controller.DebugController;
 import ch.ubique.n2step.sdk.backend.ws.controller.N2StepController;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -85,6 +86,11 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
     @Bean
     public N2StepController n2StepController(N2StepDataService n2StepDataService) {
         return new N2StepController(n2StepDataService);
+    }
+
+    @Bean
+    public DebugController debugController(N2StepDataService n2StepDataService) {
+        return new DebugController(n2StepDataService);
     }
 
     @Override

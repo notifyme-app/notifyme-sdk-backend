@@ -1,0 +1,14 @@
+GET {{baseUrl}}/v1/traceKeys?lastSync=1604542547000
+Accept: application/json
+
+###
+POST {{baseUrl}}/v1/debug/traceKey
+Content-Type: application/json
+
+{
+  "secretKey": "dGVzdA==",
+  "startTime": 1604542547000,
+  "endTime": 1604562547000
+}
+
+###
