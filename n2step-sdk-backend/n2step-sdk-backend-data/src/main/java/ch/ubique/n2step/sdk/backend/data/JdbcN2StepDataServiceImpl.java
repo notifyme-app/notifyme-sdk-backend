@@ -50,4 +50,12 @@ public class JdbcN2StepDataServiceImpl implements N2StepDataService {
         }
         return jt.query(sql, params, new TraceKeyRowMapper());
     }
+
+    @Override
+    public int removeTraceKeys(LocalDateTime before) {
+        String sql = "delete from t_trace_key where end_time < :before";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("before", DateUtil.toDate(before));
+        return jt.update(sql, params);
+    }
 }

@@ -31,4 +31,12 @@ public interface N2StepDataService {
      * @return
      */
     public List<TraceKey> findTraceKeys(LocalDateTime after);
+
+    /**
+     * Removes trace keys with an end time before the given date
+     *
+     * @param before
+     * @return
+     */
+    public int removeTraceKeys(LocalDateTime before);
 }
