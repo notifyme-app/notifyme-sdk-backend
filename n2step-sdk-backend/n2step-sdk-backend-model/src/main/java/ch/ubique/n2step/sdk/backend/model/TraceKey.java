@@ -5,15 +5,18 @@ import ch.ubique.n2step.sdk.backend.model.util.LocalDateTimeSerializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.time.LocalDateTime;
+import javax.validation.constraints.NotNull;
 
 public class TraceKey {
     private Integer id;
-    private byte[] secretKey;
+    @NotNull private byte[] secretKey;
 
+    @NotNull
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime startTime;
 
+    @NotNull
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime endTime;

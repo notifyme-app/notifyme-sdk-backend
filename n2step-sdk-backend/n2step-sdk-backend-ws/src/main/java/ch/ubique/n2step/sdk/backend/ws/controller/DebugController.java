@@ -2,6 +2,7 @@ package ch.ubique.n2step.sdk.backend.ws.controller;
 
 import ch.ubique.n2step.sdk.backend.data.N2StepDataService;
 import ch.ubique.n2step.sdk.backend.model.TraceKey;
+import javax.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,7 +27,7 @@ public class DebugController {
 
     @PostMapping(value = "/traceKey")
     public @ResponseBody ResponseEntity<String> uploadTraceKey(
-            @RequestBody(required = false) TraceKey traceKey) {
+            @Valid @RequestBody TraceKey traceKey) {
         dataService.insertTraceKey(traceKey);
         return ResponseEntity.ok().body("OK");
     }
