@@ -1,0 +1,15 @@
+syntax = "proto2";
+package ch.ubique.n2step.sdk.backend.model;
+option java_package = "ch.ubique.n2step.sdk.backend.model";
+
+message ProblematicEventWrapper {
+    required int32 version = 1;
+    repeated ProblematicEvent events = 2;
+}
+
+message ProblematicEvent {
+    required bytes secretKey = 1;
+    required int64 startTime = 2;
+    required int64 endTime = 3;
+    optional bytes message = 4;
+}
