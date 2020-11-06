@@ -2,17 +2,18 @@ package ch.ubique.n2step.sdk.backend.ws.controller;
 
 import ch.ubique.n2step.sdk.backend.data.N2StepDataService;
 import ch.ubique.n2step.sdk.backend.model.TraceKey;
-import ch.ubique.n2step.sdk.backend.model.TraceKeyUpload;
+import ch.ubique.n2step.sdk.backend.model.util.DateUtil;
 import ch.ubique.n2step.sdk.backend.ws.SodiumWrapper;
 import com.google.protobuf.InvalidProtocolBufferException;
-import javax.validation.Valid;
+import java.io.UnsupportedEncodingException;
+import java.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
@@ -36,12 +37,15 @@ public class DebugController {
 
     @PostMapping(value = "/traceKey")
     public @ResponseBody ResponseEntity<String> uploadTraceKey(
-            @Valid @RequestBody TraceKeyUpload traceKeyUpload) {
+            @RequestParam Long startTime, @RequestParam Long endTime, @RequestParam String ctx)
+            throws UnsupportedEncodingException {
         TraceKey traceKey = new TraceKey();
-        traceKey.setStartTime(traceKeyUpload.getStartTime());
-        traceKey.setEndTime(traceKeyUpload.getEndTime());
+        traceKey.setStartTime(DateUtil.toLocalDateTime(startTime));
+        traceKey.setEndTime(DateUtil.toLocalDateTime(endTime));
         try {
-            traceKey.setSecretKey(sodiumWrapper.decryptQrTrace(traceKeyUpload.getCtx()));
+            traceKey.setSecretKey(
+                    sodiumWrapper.decryptQrTrace(
+                            Base64.getUrlDecoder().decode(ctx.getBytes("UTF-8"))));
         } catch (InvalidProtocolBufferException e) {
             logger.error("unable to parse decrypted ctx protobuf", e);
         }
