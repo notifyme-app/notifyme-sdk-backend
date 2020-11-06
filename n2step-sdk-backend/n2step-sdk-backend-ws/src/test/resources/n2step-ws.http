@@ -3,12 +3,20 @@ Accept: application/json
 
 ###
 POST {{baseUrl}}/v1/debug/traceKey
-Content-Type: application/json
+Content-Type: multipart/form-data; boundary=WebAppBoundary
 
-{
-  "secretKey": "dGVzdA==",
-  "startTime": 1604542547000,
-  "endTime": 1604562547000
-}
+--WebAppBoundary
+Content-Disposition: form-data; name="ctx"
+
+zFpds-bkQTfpx9qi5zzPzjkeZtDhrFgI_V_uqerB9Ww77Lf3w-ASMi8HtZNRx_e6ArBVYBfa5_YBEbt43Yg54TaRT9TGwYJG6T2FTn1nQ4zIWNDAiWIw44XWL0KTELecU-ctPAoBWb30j_nQICpE_7XObn41IBf-RQbbm5YpvliLmPhfI4-SdI3eRmA
+--WebAppBoundary
+Content-Disposition: form-data; name="startTime"
+
+1604542547000
+--WebAppBoundary
+Content-Disposition: form-data; name="endTime"
+
+1604562547000
+--WebAppBoundary--
 
 ###

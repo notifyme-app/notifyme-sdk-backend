@@ -21,7 +21,10 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.TimeZone;
 import javax.sql.DataSource;
@@ -31,6 +34,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.protobuf.ProtobufHttpMessageConverter;
@@ -61,11 +66,30 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
     @Value("${healthAuthority.pkHex}")
     String healthAuthorityPkHex;
 
+    @Value("${git.commit.id}")
+    private String commitId;
+
+    @Value("${git.commit.id.abbrev}")
+    private String commitIdAbbrev;
+
+    @Value("${git.commit.time}")
+    private String commitTime;
+
     public abstract DataSource dataSource();
 
     public abstract Flyway flyway();
 
     public abstract String getDbType();
+
+    @Bean
+    public static PropertySourcesPlaceholderConfigurer placeholderConfigurer() {
+        PropertySourcesPlaceholderConfigurer propsConfig =
+                new PropertySourcesPlaceholderConfigurer();
+        propsConfig.setLocation(new ClassPathResource("git.properties"));
+        propsConfig.setIgnoreResourceNotFound(true);
+        propsConfig.setIgnoreUnresolvablePlaceholders(true);
+        return propsConfig;
+    }
 
     @Bean
     public MappingJackson2HttpMessageConverter converter() {
@@ -103,8 +127,21 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
     }
 
     @Bean
-    public N2StepController n2StepController(N2StepDataService n2StepDataService) {
-        return new N2StepController(n2StepDataService);
+    public N2StepController n2StepController(N2StepDataService n2StepDataService, String revision) {
+        return new N2StepController(n2StepDataService, revision);
+    }
+
+    @Bean
+    public String revision() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        ZonedDateTime zonedDateTime =
+                LocalDateTime.parse(commitTime, formatter).atZone(ZoneId.of("UTC"));
+        DateTimeFormatter prettyFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
+        String prettyTime =
+                zonedDateTime
+                        .withZoneSameInstant(ZoneId.of("Europe/Zurich"))
+                        .format(prettyFormatter);
+        return "Rev: " + commitId + "\n" + prettyTime;
     }
 
     @Bean

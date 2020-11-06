@@ -20,9 +20,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping("/v1")
 public class N2StepController {
     private final N2StepDataService dataService;
+    private final String revision;
 
-    public N2StepController(N2StepDataService dataService) {
+    public N2StepController(N2StepDataService dataService, String revision) {
         this.dataService = dataService;
+        this.revision = revision;
     }
 
     @GetMapping(value = "")
@@ -30,7 +32,7 @@ public class N2StepController {
             description = "Hello return",
             responses = {"200=>server live"})
     public @ResponseBody ResponseEntity<String> hello() {
-        return ResponseEntity.ok().header("X-HELLO", "n2step").body("Hello from N2STEP WS v1");
+        return ResponseEntity.ok().header("X-HELLO", "n2step").body("Hello from N2STEP WS v1.\n" + revision);
     }
 
     @GetMapping(
