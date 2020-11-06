@@ -75,7 +75,7 @@
                         </goals>
                         <configuration>
                             <inputDirectories>
-                                <include>${project.basedir}/src/main/proto</include>
+                                <include>${project.basedir}/src/main/resources/proto</include>
                             </inputDirectories>
                         </configuration>
                     </execution>

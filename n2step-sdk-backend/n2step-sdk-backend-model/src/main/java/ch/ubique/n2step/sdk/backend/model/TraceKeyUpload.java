@@ -8,12 +8,10 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.time.LocalDateTime;
 import javax.validation.constraints.NotNull;
 
-public class TraceKey {
-    private Integer id;
-
+public class TraceKeyUpload {
     @JsonDeserialize(using = UrlBase64StringDeserializer.class)
     @NotNull
-    private byte[] secretKey;
+    private byte[] ctx;
 
     @NotNull
     @JsonSerialize(using = LocalDateTimeSerializer.class)
@@ -25,24 +23,12 @@ public class TraceKey {
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime endTime;
 
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    private LocalDateTime createdAt;
-
-    public Integer getId() {
-        return id;
+    public byte[] getCtx() {
+        return ctx;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public byte[] getSecretKey() {
-        return secretKey;
-    }
-
-    public void setSecretKey(byte[] secretKey) {
-        this.secretKey = secretKey;
+    public void setCtx(byte[] ctx) {
+        this.ctx = ctx;
     }
 
     public LocalDateTime getStartTime() {
@@ -59,13 +45,5 @@ public class TraceKey {
 
     public void setEndTime(LocalDateTime endTime) {
         this.endTime = endTime;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
     }
 }

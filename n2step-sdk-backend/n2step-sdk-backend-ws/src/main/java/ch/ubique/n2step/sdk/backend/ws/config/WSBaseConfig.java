@@ -12,6 +12,7 @@ package ch.ubique.n2step.sdk.backend.ws.config;
 
 import ch.ubique.n2step.sdk.backend.data.JdbcN2StepDataServiceImpl;
 import ch.ubique.n2step.sdk.backend.data.N2StepDataService;
+import ch.ubique.n2step.sdk.backend.ws.SodiumWrapper;
 import ch.ubique.n2step.sdk.backend.ws.controller.DebugController;
 import ch.ubique.n2step.sdk.backend.ws.controller.N2StepController;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -53,6 +54,12 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
     @Value("${db.removeAfterDays:14}")
     Integer removeAfterDays;
+
+    @Value("${healthAuthority.skHex}")
+    String healthAuthoritySkHex;
+
+    @Value("${healthAuthority.pkHex}")
+    String healthAuthorityPkHex;
 
     public abstract DataSource dataSource();
 
@@ -101,8 +108,14 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
     }
 
     @Bean
-    public DebugController debugController(N2StepDataService n2StepDataService) {
-        return new DebugController(n2StepDataService);
+    public DebugController debugController(
+            N2StepDataService n2StepDataService, SodiumWrapper sodiumWrapper) {
+        return new DebugController(n2StepDataService, sodiumWrapper);
+    }
+
+    @Bean
+    SodiumWrapper sodiumWrapper() {
+        return new SodiumWrapper(healthAuthoritySkHex, healthAuthorityPkHex);
     }
 
     @Override

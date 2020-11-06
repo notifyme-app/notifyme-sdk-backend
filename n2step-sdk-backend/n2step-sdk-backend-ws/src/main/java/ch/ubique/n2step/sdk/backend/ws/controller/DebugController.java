@@ -2,7 +2,12 @@ package ch.ubique.n2step.sdk.backend.ws.controller;
 
 import ch.ubique.n2step.sdk.backend.data.N2StepDataService;
 import ch.ubique.n2step.sdk.backend.model.TraceKey;
+import ch.ubique.n2step.sdk.backend.model.TraceKeyUpload;
+import ch.ubique.n2step.sdk.backend.ws.SodiumWrapper;
+import com.google.protobuf.InvalidProtocolBufferException;
 import javax.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,10 +18,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping("/v1/debug")
 public class DebugController {
-    private final N2StepDataService dataService;
+    private static final Logger logger = LoggerFactory.getLogger(DebugController.class);
 
-    public DebugController(N2StepDataService dataService) {
+    private final N2StepDataService dataService;
+    private final SodiumWrapper sodiumWrapper;
+
+    public DebugController(N2StepDataService dataService, SodiumWrapper sodiumWrapper) {
         this.dataService = dataService;
+        this.sodiumWrapper = sodiumWrapper;
     }
 
     public @ResponseBody ResponseEntity<String> hello() {
@@ -27,7 +36,15 @@ public class DebugController {
 
     @PostMapping(value = "/traceKey")
     public @ResponseBody ResponseEntity<String> uploadTraceKey(
-            @Valid @RequestBody TraceKey traceKey) {
+            @Valid @RequestBody TraceKeyUpload traceKeyUpload) {
+        TraceKey traceKey = new TraceKey();
+        traceKey.setStartTime(traceKeyUpload.getStartTime());
+        traceKey.setEndTime(traceKeyUpload.getEndTime());
+        try {
+            traceKey.setSecretKey(sodiumWrapper.decryptQrTrace(traceKeyUpload.getCtx()));
+        } catch (InvalidProtocolBufferException e) {
+            logger.error("unable to parse decrypted ctx protobuf", e);
+        }
         dataService.insertTraceKey(traceKey);
         return ResponseEntity.ok().body("OK");
     }
