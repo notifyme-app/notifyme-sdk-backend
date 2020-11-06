@@ -1,7 +1,7 @@
 # Dockerfile for N2STEP-WS
 # http://www.ubique.ch/
 
-FROM openjdk:11.0.7-jre-slim
+FROM openjdk:11.0.7-jre-buster
 MAINTAINER Martin Alig <alig@ubique.ch>
 MAINTAINER Felix Haller <haller@ubique.ch>
 MAINTAINER Fabian Aggeler <aggeler@ubique.ch>
