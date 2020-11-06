@@ -3,6 +3,7 @@ package ch.ubique.n2step.sdk.backend.model;
 import ch.ubique.n2step.sdk.backend.model.util.LocalDateTimeDeserializer;
 import ch.ubique.n2step.sdk.backend.model.util.LocalDateTimeSerializer;
 import ch.ubique.n2step.sdk.backend.model.util.UrlBase64StringDeserializer;
+import ch.ubique.n2step.sdk.backend.model.util.UrlBase64StringSerializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.time.LocalDateTime;
@@ -11,6 +12,7 @@ import javax.validation.constraints.NotNull;
 public class TraceKey {
     private Integer id;
 
+    @JsonSerialize(using = UrlBase64StringSerializer.class)
     @JsonDeserialize(using = UrlBase64StringDeserializer.class)
     @NotNull
     private byte[] secretKey;
