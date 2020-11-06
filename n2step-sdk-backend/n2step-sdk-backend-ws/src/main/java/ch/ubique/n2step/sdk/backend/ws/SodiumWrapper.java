@@ -64,7 +64,9 @@ public class SodiumWrapper {
 		logger.debug(result + " msg: " + seed.toString());
 		byte[] newPk = new byte[64];
 		byte[] newSk = new byte[64];
-		sodium.crypto_sign_seed_keypair(newPk, newSk, msg);
+		byte[] msgSHA256 = new byte[32];
+		sodium.crypto_hash_sha256(msgSHA256, msg, msg.length);
+		sodium.crypto_sign_seed_keypair(newPk, newSk, msgSHA256);
 		logger.debug(newSk.toString());
 		return newSk;
 	}

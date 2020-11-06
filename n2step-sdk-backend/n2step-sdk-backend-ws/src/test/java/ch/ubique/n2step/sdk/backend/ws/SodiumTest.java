@@ -39,6 +39,8 @@ public class SodiumTest {
                 pwHashLazy.cryptoPwHashStr(
                         "A cool password", PwHash.OPSLIMIT_MIN, PwHash.MEMLIMIT_MIN);
     }
+    
+    
 
     @Test
 	@Ignore("requires pk and sk")
