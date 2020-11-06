@@ -1,0 +1,1 @@
+The libsodium libs cannot be read out of the Spring Boot fatjar at runtime. Therefore we bundle the native libs in our own jar and use the layzjar helpers to load the libs.
