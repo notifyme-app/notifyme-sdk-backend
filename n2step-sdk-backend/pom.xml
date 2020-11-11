@@ -539,7 +539,7 @@
         <repository>
             <id>github</id>
             <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/UbiqueInnovation/n2step-sdk-backend</url>
+            <url>https://maven.pkg.github.com/notifyme-app/notifyme-sdk-backend</url>
         </repository>
     </distributionManagement>
 </project>
