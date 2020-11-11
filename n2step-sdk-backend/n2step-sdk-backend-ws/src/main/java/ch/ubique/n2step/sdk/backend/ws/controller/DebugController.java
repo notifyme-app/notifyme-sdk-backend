@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("/v1/debug")
-@CrossOrigin(origins = {"https://upload-dev.n2s.ch", "https://upload.n2s.ch"})
+@CrossOrigin(origins = {"https://upload-dev.notify-me.ch", "https://upload.notify-me.ch"})
 public class DebugController {
     private static final Logger logger = LoggerFactory.getLogger(DebugController.class);
 

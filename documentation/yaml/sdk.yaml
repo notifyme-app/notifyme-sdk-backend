@@ -1,8 +1,8 @@
 openapi: 3.0.0
 servers:
-- url: https://app-dev-ws.n2s.ch
+- url: https://app-dev-ws.notify-me.ch
   description: ''
-- url: https://app-prod-ws.n2s.ch
+- url: https://app-prod-ws.notify-me.ch
   description: ''
 info:
   version: 1.0-develop
