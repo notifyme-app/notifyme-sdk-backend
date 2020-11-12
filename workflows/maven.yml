@@ -33,13 +33,13 @@ jobs:
         repositories: '[{"id" : "github", "url" : "https://maven.pkg.github.com/Ubique-OSS/springboot-swagger3"}, {"id" : "github-annotation", "url" : "https://maven.pkg.github.com/Ubique-OSS/springboot-swagger3-annotations"}]'
     - name: Build with Maven
       run: |
-        mvn install --file n2step-sdk-backend/pom.xml;
-        mvn springboot-swagger-3:springboot-swagger-3 -f n2step-sdk-backend/n2step-sdk-backend-ws/pom.xml
+        mvn install --file notifyme-sdk-backend/pom.xml;
+        mvn springboot-swagger-3:springboot-swagger-3 -f notifyme-sdk-backend/notifyme-sdk-backend-ws/pom.xml
       env:
         GITHUB_TOKEN: ${{ github.token }}
         TESTCONTAINERS_RYUK_DISABLED: true
     - name: SonarCloud Scan (develop)
-      run: mvn verify -B sonar:sonar --file n2step-sdk-backend/n2step-sdk-backend-ws/pom.xml
+      run: mvn verify -B sonar:sonar --file notifyme-sdk-backend/notifyme-sdk-backend-ws/pom.xml
       if: github.ref == 'refs/heads/develop'
       env:
         SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
@@ -47,7 +47,7 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
         TESTCONTAINERS_RYUK_DISABLED: true
     - name: SonarCloud Scan (PR)
-      run: mvn verify -B sonar:sonar -Dsonar.pullrequest.base=develop -Dsonar.pullrequest.key=$PULL_NUMBER --file n2step-sdk-backend/n2step-sdk-backend-ws/pom.xml
+      run: mvn verify -B sonar:sonar -Dsonar.pullrequest.base=develop -Dsonar.pullrequest.key=$PULL_NUMBER --file notifyme-sdk-backend/notifyme-sdk-backend-ws/pom.xml
       if: github.ref != 'refs/heads/develop'
       env:
         SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
@@ -56,11 +56,11 @@ jobs:
         TESTCONTAINERS_RYUK_DISABLED: true
     - name: Publish to GitHub Packages Apache Maven
       if: github.ref == 'refs/heads/develop'
-      run: mvn deploy -Dmaven.test.skip=true --file n2step-sdk-backend/pom.xml -s $GITHUB_WORKSPACE/settings.xml
+      run: mvn deploy -Dmaven.test.skip=true --file notifyme-sdk-backend/pom.xml -s $GITHUB_WORKSPACE/settings.xml
       env:
         GITHUB_TOKEN: ${{ github.token }}
     - name: shasum
-      run: shasum -a 256 n2step-sdk-backend/n2step-sdk-backend-ws/target/n2step-sdk-backend-ws.jar > n2step-sdk-backend/n2step-sdk-backend-ws/target/n2step-sdk-backend-ws.sha256
+      run: shasum -a 256 notifyme-sdk-backend/notifyme-sdk-backend-ws/target/notifyme-sdk-backend-ws.jar > notifyme-sdk-backend/notifyme-sdk-backend-ws/target/notifyme-sdk-backend-ws.sha256
       shell: bash
     - name: Create Snapshot Release
       uses: ncipollo/release-action@v1
@@ -69,7 +69,7 @@ jobs:
       with:
         name: Snapshot Release ${{ github.ref }}
         tag: SNAPSHOT
-        artifacts: "n2step-sdk-backend/n2step-sdk-backend-ws/target/n2step-sdk-backend-ws.jar,n2step-sdk-backend/n2step-sdk-backend-ws/target/n2step-sdk-backend-ws.sha256,n2step-sdk-backend/n2step-sdk-backend-ws/generated/swagger/swagger.yaml"
+        artifacts: "notifyme-sdk-backend/notifyme-sdk-backend-ws/target/notifyme-sdk-backend-ws.jar,notifyme-sdk-backend/notifyme-sdk-backend-ws/target/notifyme-sdk-backend-ws.sha256,notifyme-sdk-backend/notifyme-sdk-backend-ws/generated/swagger/swagger.yaml"
         body: |
             Changes in this Release
             - Snapshot release

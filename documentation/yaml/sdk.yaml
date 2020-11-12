@@ -6,8 +6,8 @@ servers:
   description: ''
 info:
   version: 1.0-develop
-  description: N2STEP API
-  title: N2STEP API
+  description: NotifyMe API
+  title: NotifyMe API
 paths:
   /v1/:
     get:
@@ -32,7 +32,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ch.ubique.n2step.sdk.backend.model.TraceKey'
+                  $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.TraceKey'
             application/protobuf:
               schema:
                 type: string
@@ -61,11 +61,11 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ch.ubique.n2step.sdk.backend.model.TraceKey'
+              $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.TraceKey'
         description: N/A
 components:
   schemas:
-    ch.ubique.n2step.sdk.backend.model.TraceKey:
+    ch.ubique.notifyme.sdk.backend.model.TraceKey:
       type: object
       required:
       - secretKey

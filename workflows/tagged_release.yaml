@@ -28,13 +28,13 @@ jobs:
         repositories: '[{"id" : "github", "url" : "https://maven.pkg.github.com/Ubique-OSS/springboot-swagger3"}, {"id" : "github-annotation", "url" : "https://maven.pkg.github.com/Ubique-OSS/springboot-swagger3-annotations"}]'
     - name: Build with Maven
       run: |
-        mvn install --file n2step-sdk-backend/pom.xml;
-        mvn springboot-swagger-3:springboot-swagger-3 -f n2step-sdk-backend/n2step-sdk-backend-ws/pom.xml
+        mvn install --file notifyme-sdk-backend/pom.xml;
+        mvn springboot-swagger-3:springboot-swagger-3 -f notifyme-sdk-backend/notifyme-sdk-backend-ws/pom.xml
       env:
         GITHUB_TOKEN: ${{ github.token }}
         TESTCONTAINERS_RYUK_DISABLED: true
     - name: shasum
-      run: shasum -a 256 n2step-sdk-backend/n2step-sdk-backend-ws/target/n2step-sdk-backend-ws.jar > n2step-sdk-backend/n2step-sdk-backend-ws/target/n2step-sdk-backend-ws.sha256
+      run: shasum -a 256 notifyme-sdk-backend/notifyme-sdk-backend-ws/target/notifyme-sdk-backend-ws.jar > notifyme-sdk-backend/notifyme-sdk-backend-ws/target/notifyme-sdk-backend-ws.sha256
       shell: bash
     - name: "Create new release"
       uses: "marvinpinto/action-automatic-releases@latest"
@@ -42,6 +42,6 @@ jobs:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         prerelease: false
         files: |
-          n2step-sdk-backend/n2step-sdk-backend-ws/target/n2step-sdk-backend-ws.jar
-          n2step-sdk-backend/n2step-sdk-backend-ws/target/n2step-sdk-backend-ws.sha256
-          n2step-sdk-backend/n2step-sdk-backend-ws/generated/swagger/swagger.yaml
+          notifyme-sdk-backend/notifyme-sdk-backend-ws/target/notifyme-sdk-backend-ws.jar
+          notifyme-sdk-backend/notifyme-sdk-backend-ws/target/notifyme-sdk-backend-ws.sha256
+          notifyme-sdk-backend/notifyme-sdk-backend-ws/generated/swagger/swagger.yaml
