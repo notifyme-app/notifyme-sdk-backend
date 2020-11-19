@@ -43,9 +43,12 @@ public class JdbcNotifyMeDataServiceImpl implements NotifyMeDataService {
     @Override
     public List<TraceKey> findTraceKeys(LocalDateTime after) {
         String sql = "select * from t_trace_key";
-        MapSqlParameterSource params = new MapSqlParameterSource();
+        MapSqlParameterSource params =
+                new MapSqlParameterSource(
+                        "before", new Date(DateUtil.getLastFullBucketEndEpochMilli()));
+        sql += " where created_at < :before";
         if (after != null) {
-            sql += " where created_at > :after";
+            sql += " and created_at >= :after";
             params.addValue("after", DateUtil.toDate(after));
         }
         return jt.query(sql, params, new TraceKeyRowMapper());

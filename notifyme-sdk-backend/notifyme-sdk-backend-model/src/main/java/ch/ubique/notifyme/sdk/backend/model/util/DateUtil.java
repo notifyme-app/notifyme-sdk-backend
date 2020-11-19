@@ -27,4 +27,18 @@ public class DateUtil {
             return LocalDateTime.ofInstant(Instant.ofEpochMilli(epochMilli), ZoneOffset.UTC);
         }
     }
+
+    private static long bucketSizeInMs = 3600000; // buckets aligned at full hour
+
+    public static boolean isBucketAligned(Long epochMilli) {
+        return epochMilli % bucketSizeInMs == 0;
+    }
+
+    public static boolean isInThePast(Long lastKeyBundleTag) {
+        return lastKeyBundleTag < System.currentTimeMillis();
+    }
+
+    public static long getLastFullBucketEndEpochMilli() {
+        return (System.currentTimeMillis() / bucketSizeInMs) * bucketSizeInMs;
+    }
 }

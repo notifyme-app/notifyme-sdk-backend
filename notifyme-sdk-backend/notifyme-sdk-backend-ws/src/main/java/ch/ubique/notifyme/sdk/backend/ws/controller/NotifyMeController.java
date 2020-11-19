@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 @RequestMapping("/v1")
 public class NotifyMeController {
+    private static final String HEADER_X_KEY_BUNDLE_TAG = "x-key-bundle-tag";
+
     private final NotifyMeDataService dataService;
     private final String revision;
 
@@ -32,30 +34,52 @@ public class NotifyMeController {
             description = "Hello return",
             responses = {"200=>server live"})
     public @ResponseBody ResponseEntity<String> hello() {
-        return ResponseEntity.ok().header("X-HELLO", "notifyme").body("Hello from NotifyMe WS v1.\n" + revision);
+        return ResponseEntity.ok()
+                .header("X-HELLO", "notifyme")
+                .body("Hello from NotifyMe WS v1.\n" + revision);
     }
 
     @GetMapping(
             value = "/traceKeys",
             produces = {"application/json"})
     public @ResponseBody ResponseEntity<List<TraceKey>> getTraceKeysJson(
-            @RequestParam(required = false) Long lastSync) {
+            @RequestParam(required = false) Long lastKeyBundleTag) {
+        if (!isValidKeyBundleTag(lastKeyBundleTag)) {
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok()
-                .body(dataService.findTraceKeys(DateUtil.toLocalDateTime(lastSync)));
+                .header(
+                        HEADER_X_KEY_BUNDLE_TAG,
+                        Long.toString(DateUtil.getLastFullBucketEndEpochMilli()))
+                .body(dataService.findTraceKeys(DateUtil.toLocalDateTime(lastKeyBundleTag)));
+    }
+
+    private boolean isValidKeyBundleTag(Long lastKeyBundleTag) {
+        return lastKeyBundleTag == null
+                || ((DateUtil.isBucketAligned(lastKeyBundleTag))
+                        && (DateUtil.isInThePast(lastKeyBundleTag)));
     }
 
     @GetMapping(
             value = "/traceKeys",
             produces = {"application/protobuf"})
     public @ResponseBody ResponseEntity<byte[]> getTraceKeys(
-            @RequestParam(required = false) Long lastSync) {
-        List<TraceKey> traceKeys = dataService.findTraceKeys(DateUtil.toLocalDateTime(lastSync));
+            @RequestParam(required = false) Long lastKeyBundleTag) {
+        if (!isValidKeyBundleTag(lastKeyBundleTag)) {
+            return ResponseEntity.notFound().build();
+        }
+        List<TraceKey> traceKeys =
+                dataService.findTraceKeys(DateUtil.toLocalDateTime(lastKeyBundleTag));
         ProblematicEventWrapper pew =
                 ProblematicEventWrapper.newBuilder()
                         .setVersion(1)
                         .addAllEvents(mapToProblematicEvents(traceKeys))
                         .build();
-        return ResponseEntity.ok().body(pew.toByteArray());
+        return ResponseEntity.ok()
+                .header(
+                        HEADER_X_KEY_BUNDLE_TAG,
+                        Long.toString(DateUtil.getLastFullBucketEndEpochMilli()))
+                .body(pew.toByteArray());
     }
 
     private List<ProblematicEvent> mapToProblematicEvents(List<TraceKey> traceKeys) {
