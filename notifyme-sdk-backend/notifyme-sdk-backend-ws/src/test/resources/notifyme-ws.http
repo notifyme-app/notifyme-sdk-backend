@@ -1,4 +1,4 @@
-GET {{baseUrl}}/v1/traceKeys?lastKeyBundleTag=1605776400000
+GET {{baseUrl}}/v1/traceKeys
 Accept: application/json
 
 ###
@@ -17,6 +17,10 @@ Content-Disposition: form-data; name="startTime"
 Content-Disposition: form-data; name="endTime"
 
 1604562547000
+--WebAppBoundary--
+Content-Disposition: form-data; name="message"
+
+test message
 --WebAppBoundary--
 
 ###

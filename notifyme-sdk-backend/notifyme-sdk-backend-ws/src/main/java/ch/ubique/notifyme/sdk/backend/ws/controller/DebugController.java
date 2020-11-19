@@ -45,7 +45,11 @@ public class DebugController {
 
     @PostMapping(value = "/traceKey")
     public @ResponseBody ResponseEntity<String> uploadTraceKey(
-            @RequestParam Long startTime, @RequestParam Long endTime, @RequestParam String ctx)
+            @RequestParam Long startTime,
+            @RequestParam Long endTime,
+            @RequestParam @Documentation(description = "url base64 encoded encrypted secret key")
+                    String ctx,
+            @RequestParam String message)
             throws UnsupportedEncodingException {
         TraceKey traceKey = new TraceKey();
         traceKey.setStartTime(DateUtil.toLocalDateTime(startTime));
@@ -57,6 +61,7 @@ public class DebugController {
         } catch (InvalidProtocolBufferException e) {
             logger.error("unable to parse decrypted ctx protobuf", e);
         }
+        traceKey.setMessage(message.getBytes());
         dataService.insertTraceKey(traceKey);
         return ResponseEntity.ok().body("OK");
     }

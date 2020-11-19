@@ -19,6 +19,7 @@ public class TraceKeyRowMapper implements RowMapper<TraceKey> {
                 rs.getTimestamp("end_time").toInstant().atZone(ZoneOffset.UTC).toLocalDateTime());
         traceKey.setCreatedAt(
                 rs.getTimestamp("created_at").toInstant().atZone(ZoneOffset.UTC).toLocalDateTime());
+        traceKey.setMessage(rs.getBytes("message"));
         return traceKey;
     }
 }

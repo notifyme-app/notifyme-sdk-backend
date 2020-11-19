@@ -4,6 +4,7 @@ import ch.ubique.notifyme.sdk.backend.model.util.LocalDateTimeDeserializer;
 import ch.ubique.notifyme.sdk.backend.model.util.LocalDateTimeSerializer;
 import ch.ubique.notifyme.sdk.backend.model.util.UrlBase64StringDeserializer;
 import ch.ubique.notifyme.sdk.backend.model.util.UrlBase64StringSerializer;
+import ch.ubique.openapi.docannotations.Documentation;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.time.LocalDateTime;
@@ -30,6 +31,10 @@ public class TraceKey {
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime createdAt;
+
+    @JsonSerialize(using = UrlBase64StringSerializer.class)
+    @JsonDeserialize(using = UrlBase64StringDeserializer.class)
+    private byte[] message;
 
     public Integer getId() {
         return id;
@@ -69,5 +74,13 @@ public class TraceKey {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public byte[] getMessage() {
+        return message;
+    }
+
+    public void setMessage(byte[] message) {
+        this.message = message;
     }
 }

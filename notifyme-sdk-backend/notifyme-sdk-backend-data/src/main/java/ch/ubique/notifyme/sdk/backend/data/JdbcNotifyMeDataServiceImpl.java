@@ -37,6 +37,7 @@ public class JdbcNotifyMeDataServiceImpl implements NotifyMeDataService {
         params.addValue("start_time", DateUtil.toDate(traceKey.getStartTime()));
         params.addValue("end_time", DateUtil.toDate(traceKey.getEndTime()));
         params.addValue("created_at", new Date());
+        params.addValue("message", traceKey.getMessage());
         traceKeyInsert.execute(params);
     }
 

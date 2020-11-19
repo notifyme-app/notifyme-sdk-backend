@@ -5,7 +5,7 @@ servers:
 - url: https://app-prod-ws.notify-me.ch
   description: ''
 info:
-  version: 1.0-develop
+  version: 1.0-MVP
   description: NotifyMe API
   title: NotifyMe API
 paths:
@@ -26,7 +26,13 @@ paths:
       description: getTraceKeysJson
       responses:
         '200':
-          description: ''
+          description: protobuf/json of all keys in that interval. response header
+            _x-key-bundle-tag_ contains _lastKeyBundleTag_ for next request
+          headers:
+            x-key-bundle-tag:
+              schema:
+                type: integer
+                format: long
           content:
             application/json:
               schema:
@@ -37,14 +43,29 @@ paths:
               schema:
                 type: string
                 format: binary
+        '404':
+          description: Invalid _lastKeyBundleTag_
       parameters:
-      - name: lastSync
+      - name: lastKeyBundleTag
         in: query
-        description: ''
+        description: in millis since epoch. must be aligned to a full hour, and <
+          now()
+        example: ''
         required: false
         schema:
           type: integer
           format: long
+  /v1/debug/:
+    get:
+      summary: hello
+      description: Hello return
+      responses:
+        '200':
+          description: server live
+          content:
+            application/json:
+              schema:
+                type: string
   /v1/debug/traceKey:
     post:
       summary: uploadTraceKey
@@ -56,13 +77,34 @@ paths:
             application/json:
               schema:
                 type: string
-      requestBody:
+      parameters:
+      - name: startTime
+        in: query
+        description: ''
         required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.TraceKey'
-        description: N/A
+        schema:
+          type: integer
+          format: long
+      - name: endTime
+        in: query
+        description: ''
+        required: true
+        schema:
+          type: integer
+          format: long
+      - name: ctx
+        in: query
+        description: url base64 encoded encrypted secret key
+        example: ''
+        required: true
+        schema:
+          type: string
+      - name: message
+        in: query
+        description: ''
+        required: true
+        schema:
+          type: string
 components:
   schemas:
     ch.ubique.notifyme.sdk.backend.model.TraceKey:
@@ -72,12 +114,16 @@ components:
       - startTime
       - endTime
       properties:
-        secretKey:
-          type: string
-          format: binary
+        id:
+          type: integer
         startTime:
           type: integer
           format: long
         endTime:
           type: integer
           format: long
+        createdAt:
+          type: integer
+          format: long
+        message:
+          type: string

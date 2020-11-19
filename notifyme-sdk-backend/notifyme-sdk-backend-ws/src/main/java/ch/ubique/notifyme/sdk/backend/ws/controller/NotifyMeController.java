@@ -63,8 +63,19 @@ public class NotifyMeController {
     @GetMapping(
             value = "/traceKeys",
             produces = {"application/protobuf"})
+    @Documentation(
+            description =
+                    "Requests trace keys uploaded after _lastKeyBundleTag_. If _lastKeyBundleTag_ is ommited, all uploaded trace keys are returned",
+            responses = {
+                "200 => protobuf/json of all keys in that interval. response header _x-key-bundle-tag_ contains _lastKeyBundleTag_ for next request",
+                "404 => Invalid _lastKeyBundleTag_"
+            })
     public @ResponseBody ResponseEntity<byte[]> getTraceKeys(
-            @RequestParam(required = false) Long lastKeyBundleTag) {
+            @RequestParam(required = false)
+                    @Documentation(
+                            description =
+                                    "in millis since epoch. must be aligned to a full hour, and < now()")
+                    Long lastKeyBundleTag) {
         if (!isValidKeyBundleTag(lastKeyBundleTag)) {
             return ResponseEntity.notFound().build();
         }
