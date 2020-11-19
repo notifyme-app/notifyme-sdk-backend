@@ -29,7 +29,7 @@
         <jackson-version>2.11.1</jackson-version>
         <jsonwebtoken-version>0.11.2</jsonwebtoken-version>
         <protobuf-java-version>3.12.1</protobuf-java-version>
-        <spring-boot-version>2.3.5.RELEASE</spring-boot-version>
+        <spring-boot-version>2.4.0</spring-boot-version>
         <testcontainers-version>1.15.0-rc2</testcontainers-version>
 
         <itCoverageAgent></itCoverageAgent>
@@ -204,7 +204,7 @@
             <dependency>
                 <groupId>org.springframework.security.oauth</groupId>
                 <artifactId>spring-security-oauth2</artifactId>
-                <version>2.4.0.RELEASE</version>
+                <version>2.5.0.RELEASE</version>
             </dependency>
 
             <dependency>
