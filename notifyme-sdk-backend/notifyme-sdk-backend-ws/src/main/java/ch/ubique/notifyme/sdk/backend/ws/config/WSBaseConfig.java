@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -144,6 +145,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
         return "Rev: " + commitId + "\n" + prettyTime;
     }
 
+    @Profile("enable-debug")
     @Bean
     public DebugController debugController(
             NotifyMeDataService notifyMeDataService, SodiumWrapper sodiumWrapper) {

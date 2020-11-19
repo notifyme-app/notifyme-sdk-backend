@@ -4,6 +4,7 @@ import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataService;
 import ch.ubique.notifyme.sdk.backend.model.TraceKey;
 import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
 import ch.ubique.notifyme.sdk.backend.ws.SodiumWrapper;
+import ch.ubique.openapi.docannotations.Documentation;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,6 +33,10 @@ public class DebugController {
         this.sodiumWrapper = sodiumWrapper;
     }
 
+    @GetMapping(value = "")
+    @Documentation(
+            description = "Hello return",
+            responses = {"200=>server live"})
     public @ResponseBody ResponseEntity<String> hello() {
         return ResponseEntity.ok()
                 .header("X-HELLO", "notifyme")
