@@ -67,6 +67,9 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
     @Value("${healthAuthority.pkHex}")
     String healthAuthorityPkHex;
 
+    @Value("${traceKey.bucketSizeInMs}")
+    Long bucketSizeInMs;
+
     @Value("${git.commit.id}")
     private String commitId;
 
@@ -124,12 +127,13 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
     @Bean
     public NotifyMeDataService notifyMeDataService() {
-        return new JdbcNotifyMeDataServiceImpl(getDbType(), dataSource());
+        return new JdbcNotifyMeDataServiceImpl(getDbType(), dataSource(), bucketSizeInMs);
     }
 
     @Bean
-    public NotifyMeController notifyMeController(NotifyMeDataService notifyMeDataService, String revision) {
-        return new NotifyMeController(notifyMeDataService, revision);
+    public NotifyMeController notifyMeController(
+            NotifyMeDataService notifyMeDataService, String revision) {
+        return new NotifyMeController(notifyMeDataService, revision, bucketSizeInMs);
     }
 
     @Bean

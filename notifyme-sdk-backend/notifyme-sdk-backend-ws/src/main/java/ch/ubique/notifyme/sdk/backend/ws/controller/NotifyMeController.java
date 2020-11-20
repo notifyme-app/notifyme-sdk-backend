@@ -23,10 +23,13 @@ public class NotifyMeController {
 
     private final NotifyMeDataService dataService;
     private final String revision;
+    private final Long bucketSizeInMs;
 
-    public NotifyMeController(NotifyMeDataService dataService, String revision) {
+    public NotifyMeController(
+            NotifyMeDataService dataService, String revision, Long bucketSizeInMs) {
         this.dataService = dataService;
         this.revision = revision;
+        this.bucketSizeInMs = bucketSizeInMs;
     }
 
     @GetMapping(value = "")
@@ -50,13 +53,13 @@ public class NotifyMeController {
         return ResponseEntity.ok()
                 .header(
                         HEADER_X_KEY_BUNDLE_TAG,
-                        Long.toString(DateUtil.getLastFullBucketEndEpochMilli()))
+                        Long.toString(DateUtil.getLastFullBucketEndEpochMilli(bucketSizeInMs)))
                 .body(dataService.findTraceKeys(DateUtil.toLocalDateTime(lastKeyBundleTag)));
     }
 
     private boolean isValidKeyBundleTag(Long lastKeyBundleTag) {
         return lastKeyBundleTag == null
-                || ((DateUtil.isBucketAligned(lastKeyBundleTag))
+                || ((DateUtil.isBucketAligned(lastKeyBundleTag, bucketSizeInMs))
                         && (DateUtil.isInThePast(lastKeyBundleTag)));
     }
 
@@ -89,7 +92,7 @@ public class NotifyMeController {
         return ResponseEntity.ok()
                 .header(
                         HEADER_X_KEY_BUNDLE_TAG,
-                        Long.toString(DateUtil.getLastFullBucketEndEpochMilli()))
+                        Long.toString(DateUtil.getLastFullBucketEndEpochMilli(bucketSizeInMs)))
                 .body(pew.toByteArray());
     }
 

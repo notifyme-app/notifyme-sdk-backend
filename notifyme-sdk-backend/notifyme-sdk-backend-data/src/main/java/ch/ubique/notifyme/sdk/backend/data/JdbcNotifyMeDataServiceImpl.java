@@ -16,11 +16,13 @@ public class JdbcNotifyMeDataServiceImpl implements NotifyMeDataService {
 
     private static final Logger logger = LoggerFactory.getLogger(JdbcNotifyMeDataServiceImpl.class);
 
+    private final Long bucketSizeInMs;
     private final String dbType;
     private final NamedParameterJdbcTemplate jt;
     private final SimpleJdbcInsert traceKeyInsert;
 
-    public JdbcNotifyMeDataServiceImpl(String dbType, DataSource dataSource) {
+    public JdbcNotifyMeDataServiceImpl(String dbType, DataSource dataSource, Long bucketSizeInMs) {
+        this.bucketSizeInMs = bucketSizeInMs;
         this.dbType = dbType;
         this.jt = new NamedParameterJdbcTemplate(dataSource);
         this.traceKeyInsert =
@@ -46,7 +48,8 @@ public class JdbcNotifyMeDataServiceImpl implements NotifyMeDataService {
         String sql = "select * from t_trace_key";
         MapSqlParameterSource params =
                 new MapSqlParameterSource(
-                        "before", new Date(DateUtil.getLastFullBucketEndEpochMilli()));
+                        "before",
+                        new Date(DateUtil.getLastFullBucketEndEpochMilli(bucketSizeInMs)));
         sql += " where created_at < :before";
         if (after != null) {
             sql += " and created_at >= :after";

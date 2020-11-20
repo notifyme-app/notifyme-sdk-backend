@@ -28,9 +28,7 @@ public class DateUtil {
         }
     }
 
-    private static long bucketSizeInMs = 3600000; // buckets aligned at full hour
-
-    public static boolean isBucketAligned(Long epochMilli) {
+    public static boolean isBucketAligned(Long epochMilli, Long bucketSizeInMs) {
         return epochMilli % bucketSizeInMs == 0;
     }
 
@@ -38,7 +36,7 @@ public class DateUtil {
         return lastKeyBundleTag < System.currentTimeMillis();
     }
 
-    public static long getLastFullBucketEndEpochMilli() {
+    public static long getLastFullBucketEndEpochMilli(Long bucketSizeInMs) {
         return (System.currentTimeMillis() / bucketSizeInMs) * bucketSizeInMs;
     }
 }

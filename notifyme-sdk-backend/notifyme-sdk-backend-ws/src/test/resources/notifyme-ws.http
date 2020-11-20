@@ -1,4 +1,4 @@
-GET {{baseUrl}}/v1/traceKeys
+GET {{baseUrl}}/v1/traceKeys?lastKeyBundleTag=1605855000000
 Accept: application/json
 
 ###
