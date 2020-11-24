@@ -10,13 +10,11 @@
 
 package ch.ubique.notifyme.sdk.backend.model.tracekey;
 
-import ch.ubique.notifyme.sdk.backend.model.util.LocalDateTimeDeserializer;
-import ch.ubique.notifyme.sdk.backend.model.util.LocalDateTimeSerializer;
 import ch.ubique.notifyme.sdk.backend.model.util.UrlBase64StringDeserializer;
 import ch.ubique.notifyme.sdk.backend.model.util.UrlBase64StringSerializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import javax.validation.constraints.NotNull;
 
 public class TraceKey {
@@ -27,19 +25,11 @@ public class TraceKey {
     @NotNull
     private byte[] secretKey;
 
-    @NotNull
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    private LocalDateTime startTime;
+    @NotNull private Instant startTime;
 
-    @NotNull
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    private LocalDateTime endTime;
+    @NotNull private Instant endTime;
 
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @JsonSerialize(using = UrlBase64StringSerializer.class)
     @JsonDeserialize(using = UrlBase64StringDeserializer.class)
@@ -61,27 +51,27 @@ public class TraceKey {
         this.secretKey = secretKey;
     }
 
-    public LocalDateTime getStartTime() {
+    public Instant getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(LocalDateTime startTime) {
+    public void setStartTime(Instant startTime) {
         this.startTime = startTime;
     }
 
-    public LocalDateTime getEndTime() {
+    public Instant getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(LocalDateTime endTime) {
+    public void setEndTime(Instant endTime) {
         this.endTime = endTime;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public Instant getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
     }
 

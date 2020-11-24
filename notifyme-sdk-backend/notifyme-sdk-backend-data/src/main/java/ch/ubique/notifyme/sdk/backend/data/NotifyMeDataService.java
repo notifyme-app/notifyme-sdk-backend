@@ -11,17 +11,10 @@
 package ch.ubique.notifyme.sdk.backend.data;
 
 import ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 public interface NotifyMeDataService {
-
-    /**
-     * Inserts the given trace keys into the db
-     *
-     * @param traceKeys
-     */
-    public void insertTraceKeys(List<TraceKey> traceKeys);
 
     /**
      * Inserts the given trace key into the db
@@ -37,7 +30,7 @@ public interface NotifyMeDataService {
      * @param after
      * @return
      */
-    public List<TraceKey> findTraceKeys(LocalDateTime after);
+    public List<TraceKey> findTraceKeys(Instant after);
 
     /**
      * Removes trace keys with an end time before the given date
@@ -45,5 +38,5 @@ public interface NotifyMeDataService {
      * @param before
      * @return
      */
-    public int removeTraceKeys(LocalDateTime before);
+    public int removeTraceKeys(Instant before);
 }

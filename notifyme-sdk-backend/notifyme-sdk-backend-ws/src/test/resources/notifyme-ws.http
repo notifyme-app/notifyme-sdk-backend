@@ -24,3 +24,14 @@ test message
 --WebAppBoundary--
 
 ###
+POST {{baseUrl}}/v1/traceKeys
+Content-Type: application/json
+
+{
+  "secretKey": "dXJsIGJhc2U2NCBlbmNvZGVkIHNlY3JldCBrZXk=",
+  "startTime": 1604542547000,
+  "endTime": 1604562547000,
+  "message": "b3B0aW9uYWwgdXJsIGJhc2U2NCBlbmNvZGVkIG1lc3NhZ2U="
+}
+
+###

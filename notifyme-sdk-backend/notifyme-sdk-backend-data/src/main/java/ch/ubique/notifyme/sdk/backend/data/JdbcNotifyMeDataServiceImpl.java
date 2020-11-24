@@ -12,7 +12,7 @@ package ch.ubique.notifyme.sdk.backend.data;
 
 import ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey;
 import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import javax.sql.DataSource;
@@ -41,14 +41,6 @@ public class JdbcNotifyMeDataServiceImpl implements NotifyMeDataService {
                         .usingGeneratedKeyColumns("pk_trace_key");
     }
 
-    @Override
-    public void insertTraceKeys(List<TraceKey> traceKeys) {
-        traceKeyInsert.executeBatch(
-                traceKeys.stream()
-                        .map(traceKey -> getTraceKeyParams(traceKey))
-                        .toArray(MapSqlParameterSource[]::new));
-    }
-
     private MapSqlParameterSource getTraceKeyParams(TraceKey traceKey) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("pk_trace_key", traceKey.getId());
@@ -62,11 +54,11 @@ public class JdbcNotifyMeDataServiceImpl implements NotifyMeDataService {
 
     @Override
     public void insertTraceKey(TraceKey traceKey) {
-        insertTraceKeys(List.of(traceKey));
+        traceKeyInsert.execute(getTraceKeyParams(traceKey));
     }
 
     @Override
-    public List<TraceKey> findTraceKeys(LocalDateTime after) {
+    public List<TraceKey> findTraceKeys(Instant after) {
         String sql = "select * from t_trace_key";
         MapSqlParameterSource params =
                 new MapSqlParameterSource(
@@ -81,7 +73,7 @@ public class JdbcNotifyMeDataServiceImpl implements NotifyMeDataService {
     }
 
     @Override
-    public int removeTraceKeys(LocalDateTime before) {
+    public int removeTraceKeys(Instant before) {
         String sql = "delete from t_trace_key where end_time < :before";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("before", DateUtil.toDate(before));

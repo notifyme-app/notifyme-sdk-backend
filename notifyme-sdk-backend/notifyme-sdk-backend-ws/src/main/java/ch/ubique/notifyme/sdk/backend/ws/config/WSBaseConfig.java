@@ -16,15 +16,18 @@ import ch.ubique.notifyme.sdk.backend.ws.SodiumWrapper;
 import ch.ubique.notifyme.sdk.backend.ws.controller.DebugController;
 import ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeController;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.TimeZone;
 import javax.sql.DataSource;
@@ -162,6 +165,24 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
     }
 
     @Override
+    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+        converters.add(customJacksonJsonConverter());
+    }
+
+    @Bean
+    public MappingJackson2HttpMessageConverter customJacksonJsonConverter() {
+        ObjectMapper mapper =
+                new ObjectMapper()
+                        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                        .setSerializationInclusion(JsonInclude.Include.NON_ABSENT)
+                        .registerModule(new JavaTimeModule())
+                        .disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)
+                        .enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                        .disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
+        return new MappingJackson2HttpMessageConverter(mapper);
+    }
+
+    @Override
     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
         // remove old trace keys
         taskRegistrar.addCronTask(
@@ -170,9 +191,8 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
                             @Override
                             public void run() {
                                 try {
-                                    LocalDateTime removeBefore =
-                                            LocalDateTime.now(ZoneOffset.UTC)
-                                                    .minusDays(removeAfterDays);
+                                    Instant removeBefore =
+                                            Instant.now().minus(removeAfterDays, ChronoUnit.DAYS);
                                     logger.info(
                                             "removing trace keys with end_time before: "
                                                     + removeBefore);

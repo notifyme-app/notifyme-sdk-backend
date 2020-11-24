@@ -11,30 +11,28 @@
 package ch.ubique.notifyme.sdk.backend.model.util;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.Date;
 
 public class DateUtil {
-    public static Date toDate(LocalDateTime dateTime) {
-        if (dateTime == null) {
+    public static Date toDate(Instant instant) {
+        if (instant == null) {
             return null;
         }
-        return new Date(dateTime.toInstant(ZoneOffset.UTC).toEpochMilli());
+        return Date.from(instant);
     }
 
-    public static Long toEpochMilli(LocalDateTime dateTime) {
-        if (dateTime == null) {
+    public static Long toEpochMilli(Instant instant) {
+        if (instant == null) {
             return null;
         }
-        return dateTime.toInstant(ZoneOffset.UTC).toEpochMilli();
+        return instant.toEpochMilli();
     }
 
-    public static LocalDateTime toLocalDateTime(Long epochMilli) {
+    public static Instant toInstant(Long epochMilli) {
         if (epochMilli == null) {
             return null;
         } else {
-            return LocalDateTime.ofInstant(Instant.ofEpochMilli(epochMilli), ZoneOffset.UTC);
+            return Instant.ofEpochMilli(epochMilli);
         }
     }
 

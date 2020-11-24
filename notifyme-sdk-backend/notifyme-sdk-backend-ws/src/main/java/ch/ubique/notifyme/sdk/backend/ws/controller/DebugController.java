@@ -62,8 +62,8 @@ public class DebugController {
             @RequestParam String message)
             throws UnsupportedEncodingException {
         TraceKey traceKey = new TraceKey();
-        traceKey.setStartTime(DateUtil.toLocalDateTime(startTime));
-        traceKey.setEndTime(DateUtil.toLocalDateTime(endTime));
+        traceKey.setStartTime(DateUtil.toInstant(startTime));
+        traceKey.setEndTime(DateUtil.toInstant(endTime));
         try {
             traceKey.setSecretKey(
                     sodiumWrapper.decryptQrTrace(

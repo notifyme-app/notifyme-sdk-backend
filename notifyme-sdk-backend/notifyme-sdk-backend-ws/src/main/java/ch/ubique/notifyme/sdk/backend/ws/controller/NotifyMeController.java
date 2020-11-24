@@ -14,7 +14,6 @@ import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataService;
 import ch.ubique.notifyme.sdk.backend.model.ProblematicEventWrapperOuterClass.ProblematicEvent;
 import ch.ubique.notifyme.sdk.backend.model.ProblematicEventWrapperOuterClass.ProblematicEventWrapper;
 import ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey;
-import ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKeyUploadPayload;
 import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
 import ch.ubique.openapi.docannotations.Documentation;
 import com.google.protobuf.ByteString;
@@ -69,7 +68,7 @@ public class NotifyMeController {
                 .header(
                         HEADER_X_KEY_BUNDLE_TAG,
                         Long.toString(DateUtil.getLastFullBucketEndEpochMilli(bucketSizeInMs)))
-                .body(dataService.findTraceKeys(DateUtil.toLocalDateTime(lastKeyBundleTag)));
+                .body(dataService.findTraceKeys(DateUtil.toInstant(lastKeyBundleTag)));
     }
 
     private boolean isValidKeyBundleTag(Long lastKeyBundleTag) {
@@ -97,8 +96,7 @@ public class NotifyMeController {
         if (!isValidKeyBundleTag(lastKeyBundleTag)) {
             return ResponseEntity.notFound().build();
         }
-        List<TraceKey> traceKeys =
-                dataService.findTraceKeys(DateUtil.toLocalDateTime(lastKeyBundleTag));
+        List<TraceKey> traceKeys = dataService.findTraceKeys(DateUtil.toInstant(lastKeyBundleTag));
         ProblematicEventWrapper pew =
                 ProblematicEventWrapper.newBuilder()
                         .setVersion(1)
@@ -131,13 +129,13 @@ public class NotifyMeController {
                 "403=>Authentication failed"
             })
     public @ResponseBody ResponseEntity<String> uploadTraceKeys(
-            @Documentation(description = "JSON Object containing all keys.") @Valid @RequestBody
-                    TraceKeyUploadPayload payload,
+            @Documentation(description = "Trace key to upload as JSON") @Valid @RequestBody
+                    TraceKey traceKey,
             @AuthenticationPrincipal
                     @Documentation(
                             description = "JWT token that can be verified by the backend server")
                     Object principal) {
-        dataService.insertTraceKeys(payload.getTraceKeys());
+        dataService.insertTraceKey(traceKey);
         return ResponseEntity.ok().body("OK");
     }
 }
