@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -131,7 +132,11 @@ public class NotifyMeController {
             })
     public @ResponseBody ResponseEntity<String> uploadTraceKeys(
             @Documentation(description = "JSON Object containing all keys.") @Valid @RequestBody
-                    TraceKeyUploadPayload payload) {
+                    TraceKeyUploadPayload payload,
+            @AuthenticationPrincipal
+                    @Documentation(
+                            description = "JWT token that can be verified by the backend server")
+                    Object principal) {
         dataService.insertTraceKeys(payload.getTraceKeys());
         return ResponseEntity.ok().body("OK");
     }

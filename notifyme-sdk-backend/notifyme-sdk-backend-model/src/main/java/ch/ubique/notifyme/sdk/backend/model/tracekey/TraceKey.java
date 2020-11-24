@@ -14,7 +14,6 @@ import ch.ubique.notifyme.sdk.backend.model.util.LocalDateTimeDeserializer;
 import ch.ubique.notifyme.sdk.backend.model.util.LocalDateTimeSerializer;
 import ch.ubique.notifyme.sdk.backend.model.util.UrlBase64StringDeserializer;
 import ch.ubique.notifyme.sdk.backend.model.util.UrlBase64StringSerializer;
-import ch.ubique.openapi.docannotations.Documentation;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.time.LocalDateTime;
