@@ -7,6 +7,7 @@
  *
  * SPDX-License-Identifier: MPL-2.0
  */
+
 package ch.ubique.notifyme.sdk.backend.ws.config;
 
 import javax.sql.DataSource;

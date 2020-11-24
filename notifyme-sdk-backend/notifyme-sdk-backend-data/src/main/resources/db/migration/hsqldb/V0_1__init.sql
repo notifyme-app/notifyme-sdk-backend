@@ -1,4 +1,3 @@
-
 /*
  * Created by Ubique Innovation AG
  * https://www.ubique.ch
