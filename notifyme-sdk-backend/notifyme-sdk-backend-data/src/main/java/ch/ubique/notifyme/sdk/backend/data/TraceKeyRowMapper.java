@@ -1,6 +1,6 @@
 package ch.ubique.notifyme.sdk.backend.data;
 
-import ch.ubique.notifyme.sdk.backend.model.TraceKey;
+import ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.ZoneOffset;

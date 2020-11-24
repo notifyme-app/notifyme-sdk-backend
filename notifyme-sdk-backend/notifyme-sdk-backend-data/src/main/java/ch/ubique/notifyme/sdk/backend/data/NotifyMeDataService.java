@@ -10,11 +10,18 @@
 
 package ch.ubique.notifyme.sdk.backend.data;
 
-import ch.ubique.notifyme.sdk.backend.model.TraceKey;
+import ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey;
 import java.time.LocalDateTime;
 import java.util.List;
 
 public interface NotifyMeDataService {
+
+    /**
+     * Inserts the given trace keys into the db
+     *
+     * @param traceKeys
+     */
+    public void insertTraceKeys(List<TraceKey> traceKeys);
 
     /**
      * Inserts the given trace key into the db

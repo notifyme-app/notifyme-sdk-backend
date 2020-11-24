@@ -1,4 +1,4 @@
-package ch.ubique.notifyme.sdk.backend.model;
+package ch.ubique.notifyme.sdk.backend.model.tracekey;
 
 import ch.ubique.notifyme.sdk.backend.model.util.LocalDateTimeDeserializer;
 import ch.ubique.notifyme.sdk.backend.model.util.LocalDateTimeSerializer;

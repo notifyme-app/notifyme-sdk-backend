@@ -1,6 +1,6 @@
 package ch.ubique.notifyme.sdk.backend.data;
 
-import ch.ubique.notifyme.sdk.backend.model.TraceKey;
+import ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey;
 import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -32,7 +32,14 @@ public class JdbcNotifyMeDataServiceImpl implements NotifyMeDataService {
     }
 
     @Override
-    public void insertTraceKey(TraceKey traceKey) {
+    public void insertTraceKeys(List<TraceKey> traceKeys) {
+        traceKeyInsert.executeBatch(
+                traceKeys.stream()
+                        .map(traceKey -> getTraceKeyParams(traceKey))
+                        .toArray(MapSqlParameterSource[]::new));
+    }
+
+    private MapSqlParameterSource getTraceKeyParams(TraceKey traceKey) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("pk_trace_key", traceKey.getId());
         params.addValue("secret_key", traceKey.getSecretKey());
@@ -40,7 +47,12 @@ public class JdbcNotifyMeDataServiceImpl implements NotifyMeDataService {
         params.addValue("end_time", DateUtil.toDate(traceKey.getEndTime()));
         params.addValue("created_at", new Date());
         params.addValue("message", traceKey.getMessage());
-        traceKeyInsert.execute(params);
+        return params;
+    }
+
+    @Override
+    public void insertTraceKey(TraceKey traceKey) {
+        insertTraceKeys(List.of(traceKey));
     }
 
     @Override

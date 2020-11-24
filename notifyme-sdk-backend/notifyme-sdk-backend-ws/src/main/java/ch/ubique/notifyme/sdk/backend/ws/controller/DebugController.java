@@ -1,7 +1,7 @@
 package ch.ubique.notifyme.sdk.backend.ws.controller;
 
 import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataService;
-import ch.ubique.notifyme.sdk.backend.model.TraceKey;
+import ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey;
 import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
 import ch.ubique.notifyme.sdk.backend.ws.SodiumWrapper;
 import ch.ubique.openapi.docannotations.Documentation;

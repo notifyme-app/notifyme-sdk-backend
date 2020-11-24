@@ -3,15 +3,19 @@ package ch.ubique.notifyme.sdk.backend.ws.controller;
 import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataService;
 import ch.ubique.notifyme.sdk.backend.model.ProblematicEventWrapperOuterClass.ProblematicEvent;
 import ch.ubique.notifyme.sdk.backend.model.ProblematicEventWrapperOuterClass.ProblematicEventWrapper;
-import ch.ubique.notifyme.sdk.backend.model.TraceKey;
+import ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey;
+import ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKeyUploadPayload;
 import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
 import ch.ubique.openapi.docannotations.Documentation;
 import com.google.protobuf.ByteString;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -106,5 +110,19 @@ public class NotifyMeController {
                                         .setEndTime(DateUtil.toEpochMilli(t.getEndTime()))
                                         .build())
                 .collect(Collectors.toList());
+    }
+
+    @PostMapping("/traceKeys")
+    @Documentation(
+            description = "Endpoint used to upload trace keys to the backend",
+            responses = {
+                "200=>The trace keys have been stored in the database",
+                "403=>Authentication failed"
+            })
+    public @ResponseBody ResponseEntity<String> uploadTraceKeys(
+            @Documentation(description = "JSON Object containing all keys.") @Valid @RequestBody
+                    TraceKeyUploadPayload payload) {
+        dataService.insertTraceKeys(payload.getTraceKeys());
+        return ResponseEntity.ok().body("OK");
     }
 }
