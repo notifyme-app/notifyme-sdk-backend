@@ -49,11 +49,9 @@ public class SodiumTest {
                 pwHashLazy.cryptoPwHashStr(
                         "A cool password", PwHash.OPSLIMIT_MIN, PwHash.MEMLIMIT_MIN);
     }
-    
-    
 
     @Test
-	@Ignore("requires pk and sk")
+    @Ignore("requires pk and sk")
     public void testDecryptQRTrace()
             throws SodiumException, DecoderException, UnsupportedEncodingException,
                     InvalidProtocolBufferException {
