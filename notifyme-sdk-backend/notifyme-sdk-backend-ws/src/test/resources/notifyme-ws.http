@@ -35,3 +35,8 @@ Content-Type: application/json
 }
 
 ###
+GET {{baseUrl}}/v1/config
+User-Agent: ch.ubique.ios.notifyme;1.0;iOS;14.2
+Accept: application/json
+
+###

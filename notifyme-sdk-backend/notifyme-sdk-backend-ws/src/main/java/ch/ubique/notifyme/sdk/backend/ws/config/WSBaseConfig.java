@@ -13,6 +13,7 @@ package ch.ubique.notifyme.sdk.backend.ws.config;
 import ch.ubique.notifyme.sdk.backend.data.JdbcNotifyMeDataServiceImpl;
 import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataService;
 import ch.ubique.notifyme.sdk.backend.ws.SodiumWrapper;
+import ch.ubique.notifyme.sdk.backend.ws.controller.ConfigController;
 import ch.ubique.notifyme.sdk.backend.ws.controller.DebugController;
 import ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeController;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -137,6 +138,11 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
     public NotifyMeController notifyMeController(
             NotifyMeDataService notifyMeDataService, String revision) {
         return new NotifyMeController(notifyMeDataService, revision, bucketSizeInMs);
+    }
+
+    @Bean
+    public ConfigController configController() {
+        return new ConfigController();
     }
 
     @Bean
