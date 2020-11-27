@@ -12,6 +12,7 @@ package ch.ubique.notifyme.sdk.backend.model.tracekey;
 
 import ch.ubique.notifyme.sdk.backend.model.util.UrlBase64StringDeserializer;
 import ch.ubique.notifyme.sdk.backend.model.util.UrlBase64StringSerializer;
+import ch.ubique.openapi.docannotations.Documentation;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.time.Instant;
@@ -23,6 +24,7 @@ public class TraceKey {
     @JsonSerialize(using = UrlBase64StringSerializer.class)
     @JsonDeserialize(using = UrlBase64StringDeserializer.class)
     @NotNull
+    @Documentation(description = "base64 url encoded bytes")
     private byte[] secretKey;
 
     @NotNull private Instant startTime;
@@ -33,6 +35,7 @@ public class TraceKey {
 
     @JsonSerialize(using = UrlBase64StringSerializer.class)
     @JsonDeserialize(using = UrlBase64StringDeserializer.class)
+    @Documentation(description = "base64 url encoded bytes")
     private byte[] message;
 
     public Integer getId() {

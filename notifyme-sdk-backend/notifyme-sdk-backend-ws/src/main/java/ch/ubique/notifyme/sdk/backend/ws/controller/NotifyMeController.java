@@ -86,6 +86,9 @@ public class NotifyMeController {
             responses = {
                 "200 => protobuf/json of all keys in that interval. response header _x-key-bundle-tag_ contains _lastKeyBundleTag_ for next request",
                 "404 => Invalid _lastKeyBundleTag_"
+            },
+            responseHeaders = {
+                HEADER_X_KEY_BUNDLE_TAG + ":_lastKeyBundleTag_ to send with next request:string"
             })
     public @ResponseBody ResponseEntity<byte[]> getTraceKeys(
             @RequestParam(required = false)
@@ -117,6 +120,7 @@ public class NotifyMeController {
                                         .setSecretKey(ByteString.copyFrom(t.getSecretKey()))
                                         .setStartTime(DateUtil.toEpochMilli(t.getStartTime()))
                                         .setEndTime(DateUtil.toEpochMilli(t.getEndTime()))
+                                        .setMessage(ByteString.copyFrom(t.getMessage()))
                                         .build())
                 .collect(Collectors.toList());
     }
