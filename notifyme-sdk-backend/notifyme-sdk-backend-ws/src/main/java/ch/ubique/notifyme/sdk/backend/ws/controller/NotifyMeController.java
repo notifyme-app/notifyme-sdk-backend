@@ -121,6 +121,7 @@ public class NotifyMeController {
                                         .setStartTime(DateUtil.toEpochMilli(t.getStartTime()))
                                         .setEndTime(DateUtil.toEpochMilli(t.getEndTime()))
                                         .setMessage(ByteString.copyFrom(t.getMessage()))
+                                        .setNonce(ByteString.copyFrom(t.getNonce()))
                                         .build())
                 .collect(Collectors.toList());
     }

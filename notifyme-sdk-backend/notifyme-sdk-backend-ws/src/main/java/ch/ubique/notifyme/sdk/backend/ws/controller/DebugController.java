@@ -65,13 +65,19 @@ public class DebugController {
         traceKey.setStartTime(DateUtil.toInstant(startTime));
         traceKey.setEndTime(DateUtil.toInstant(endTime));
         try {
-            traceKey.setSecretKey(
+            byte[] secretKey =
                     sodiumWrapper.decryptQrTrace(
-                            Base64.getUrlDecoder().decode(ctx.getBytes("UTF-8"))));
+                            Base64.getUrlDecoder().decode(ctx.getBytes("UTF-8")));
+            traceKey.setSecretKey(secretKey);
+            byte[] nonce = sodiumWrapper.createNonceForMessageEncytion();
+            byte[] encryptedMessage =
+                    sodiumWrapper.encryptMessage(traceKey.getSecretKey(), nonce, message);
+            traceKey.setMessage(encryptedMessage);
+            traceKey.setNonce(nonce);
         } catch (InvalidProtocolBufferException e) {
             logger.error("unable to parse decrypted ctx protobuf", e);
         }
-        traceKey.setMessage(message.getBytes());
+
         dataService.insertTraceKey(traceKey);
         return ResponseEntity.ok().body("OK");
     }

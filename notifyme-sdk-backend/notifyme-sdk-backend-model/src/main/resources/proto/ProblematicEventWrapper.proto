@@ -12,4 +12,5 @@ message ProblematicEvent {
   required int64 startTime = 2;
   required int64 endTime = 3;
   optional bytes message = 4;
+  optional bytes nonce = 5;
 }

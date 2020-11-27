@@ -80,6 +80,21 @@ public class SodiumWrapper {
         return newSk;
     }
 
+    public byte[] createNonceForMessageEncytion() {
+        byte[] nonce = new byte[Box.NONCEBYTES];
+        sodium.randombytes_buf(nonce, nonce.length);
+        return nonce;
+    }
+
+    public byte[] encryptMessage(byte[] secretKey, byte[] nonce, String message) {
+        byte[] messageBytes = message.getBytes();
+        byte[] encrytpedMessage = new byte[messageBytes.length + Box.MACBYTES];
+        sodium.randombytes_buf(nonce, nonce.length);
+        sodium.crypto_secretbox_easy(
+                encrytpedMessage, messageBytes, messageBytes.length, nonce, secretKey);
+        return encrytpedMessage;
+    }
+
     /**
      * Returns the absolute path to sodium library inside JAR (beginning with '/'), e.g.
      * /linux/libsodium.so.
