@@ -12,6 +12,7 @@ package ch.ubique.notifyme.sdk.backend.ws.controller;
 
 import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataService;
 import ch.ubique.notifyme.sdk.backend.model.ProblematicEventWrapperOuterClass.ProblematicEvent;
+import ch.ubique.notifyme.sdk.backend.model.ProblematicEventWrapperOuterClass.ProblematicEvent.Builder;
 import ch.ubique.notifyme.sdk.backend.model.ProblematicEventWrapperOuterClass.ProblematicEventWrapper;
 import ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey;
 import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
@@ -79,7 +80,7 @@ public class NotifyMeController {
 
     @GetMapping(
             value = "/traceKeys",
-            produces = {"application/protobuf"})
+            produces = {"application/x-protobuf", "application/protobuf"})
     @Documentation(
             description =
                     "Requests trace keys uploaded after _lastKeyBundleTag_. If _lastKeyBundleTag_ is ommited, all uploaded trace keys are returned",
@@ -90,7 +91,7 @@ public class NotifyMeController {
             responseHeaders = {
                 HEADER_X_KEY_BUNDLE_TAG + ":_lastKeyBundleTag_ to send with next request:string"
             })
-    public @ResponseBody ResponseEntity<byte[]> getTraceKeys(
+    public @ResponseBody ResponseEntity<ProblematicEventWrapper> getTraceKeys(
             @RequestParam(required = false)
                     @Documentation(
                             description =
@@ -106,24 +107,32 @@ public class NotifyMeController {
                         .addAllEvents(mapToProblematicEvents(traceKeys))
                         .build();
         return ResponseEntity.ok()
+                .header("content-type", "application/x-protobuf")
                 .header(
                         HEADER_X_KEY_BUNDLE_TAG,
                         Long.toString(DateUtil.getLastFullBucketEndEpochMilli(bucketSizeInMs)))
-                .body(pew.toByteArray());
+                .body(pew);
     }
 
     private List<ProblematicEvent> mapToProblematicEvents(List<TraceKey> traceKeys) {
         return traceKeys.stream()
-                .map(
-                        t ->
-                                ProblematicEvent.newBuilder()
-                                        .setSecretKey(ByteString.copyFrom(t.getSecretKey()))
-                                        .setStartTime(DateUtil.toEpochMilli(t.getStartTime()))
-                                        .setEndTime(DateUtil.toEpochMilli(t.getEndTime()))
-                                        .setMessage(ByteString.copyFrom(t.getMessage()))
-                                        .setNonce(ByteString.copyFrom(t.getNonce()))
-                                        .build())
+                .map(t -> mapTraceKeyToProblematicEvent(t))
                 .collect(Collectors.toList());
+    }
+
+    private ProblematicEvent mapTraceKeyToProblematicEvent(TraceKey t) {
+        Builder b =
+                ProblematicEvent.newBuilder()
+                        .setSecretKey(ByteString.copyFrom(t.getSecretKey()))
+                        .setStartTime(DateUtil.toEpochMilli(t.getStartTime()))
+                        .setEndTime(DateUtil.toEpochMilli(t.getEndTime()));
+        if (t.getMessage() != null) {
+            b.setMessage(ByteString.copyFrom(t.getMessage()));
+        }
+        if (t.getNonce() != null) {
+            b.setNonce(ByteString.copyFrom(t.getNonce()));
+        }
+        return b.build();
     }
 
     @PostMapping("/traceKeys")
