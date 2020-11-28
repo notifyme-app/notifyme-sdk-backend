@@ -11,6 +11,8 @@
 package ch.ubique.notifyme.sdk.backend.ws.controller;
 
 import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataService;
+import ch.ubique.notifyme.sdk.backend.model.SeedMessageOuterClass;
+import ch.ubique.notifyme.sdk.backend.model.SeedMessageOuterClass.SeedMessage;
 import ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey;
 import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
 import ch.ubique.notifyme.sdk.backend.ws.SodiumWrapper;
@@ -65,13 +67,15 @@ public class DebugController {
         traceKey.setStartTime(DateUtil.toInstant(startTime));
         traceKey.setEndTime(DateUtil.toInstant(endTime));
         try {
-            byte[] secretKey =
-                    sodiumWrapper.decryptQrTrace(
-                            Base64.getUrlDecoder().decode(ctx.getBytes("UTF-8")));
+            byte[] ctxBytes = Base64.getUrlDecoder().decode(ctx.getBytes("UTF-8"));
+            byte[] seedBytes = sodiumWrapper.decryptQrTrace(ctxBytes);
+            SeedMessage seed = SeedMessageOuterClass.SeedMessage.parseFrom(seedBytes);
+            byte[] secretKey = sodiumWrapper.deriveSecretKeyFromSeed(seedBytes, ctxBytes);
             traceKey.setSecretKey(secretKey);
             byte[] nonce = sodiumWrapper.createNonceForMessageEncytion();
             byte[] encryptedMessage =
-                    sodiumWrapper.encryptMessage(traceKey.getSecretKey(), nonce, message);
+                    sodiumWrapper.encryptMessage(
+                            seed.getNotificationKey().toByteArray(), nonce, message);
             traceKey.setMessage(encryptedMessage);
             traceKey.setNonce(nonce);
         } catch (InvalidProtocolBufferException e) {

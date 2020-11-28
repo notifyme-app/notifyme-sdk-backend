@@ -10,8 +10,6 @@
 
 package ch.ubique.notifyme.sdk.backend.ws;
 
-import ch.ubique.notifyme.sdk.backend.model.SeedMessageOuterClass;
-import ch.ubique.notifyme.sdk.backend.model.SeedMessageOuterClass.SeedMessage;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.goterl.lazycode.lazysodium.SodiumJava;
 import com.goterl.lazycode.lazysodium.interfaces.Box;
@@ -34,6 +32,10 @@ public class SodiumWrapper {
     public final byte[] sk;
     public final byte[] pk;
     private final SodiumJava sodium;
+
+    public SodiumJava getSodium() {
+        return this.sodium;
+    }
 
     public SodiumWrapper(String skHex, String pkHex) {
         try {
@@ -68,15 +70,16 @@ public class SodiumWrapper {
 
     public byte[] decryptQrTrace(byte[] ctx) throws InvalidProtocolBufferException {
         byte[] msg = new byte[ctx.length - Box.SEALBYTES];
-        int result = sodium.crypto_box_seal_open(msg, ctx, ctx.length, pk, sk);
-        SeedMessage seed = SeedMessageOuterClass.SeedMessage.parseFrom(msg);
-        logger.debug(result + " msg: " + seed.toString());
+        sodium.crypto_box_seal_open(msg, ctx, ctx.length, pk, sk);
+        return msg;
+    }
+
+    public byte[] deriveSecretKeyFromSeed(byte[] seedBytes, byte[] ctx) {
         byte[] newPk = new byte[64];
         byte[] newSk = new byte[64];
-        byte[] msgSHA256 = new byte[32];
-        sodium.crypto_hash_sha256(msgSHA256, msg, msg.length);
-        sodium.crypto_sign_seed_keypair(newPk, newSk, msgSHA256);
-        logger.debug(newSk.toString());
+        byte[] seedSHA256 = new byte[32];
+        sodium.crypto_hash_sha256(seedSHA256, seedBytes, seedBytes.length);
+        sodium.crypto_sign_seed_keypair(newPk, newSk, seedSHA256);
         return newSk;
     }
 
