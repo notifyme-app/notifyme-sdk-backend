@@ -79,7 +79,7 @@ public class SodiumWrapper {
         byte[] newSk = new byte[64];
         byte[] seedSHA256 = new byte[32];
         sodium.crypto_hash_sha256(seedSHA256, seedBytes, seedBytes.length);
-        sodium.crypto_sign_seed_keypair(newPk, newSk, seedSHA256);
+        sodium.crypto_box_seed_keypair(newPk, newSk, seedSHA256);
         return newSk;
     }
 
