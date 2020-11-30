@@ -10,16 +10,9 @@
 
 package ch.ubique.notifyme.sdk.backend.ws.controller;
 
-import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataService;
-import ch.ubique.notifyme.sdk.backend.model.SeedMessageOuterClass;
-import ch.ubique.notifyme.sdk.backend.model.SeedMessageOuterClass.SeedMessage;
-import ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey;
-import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
-import ch.ubique.notifyme.sdk.backend.ws.SodiumWrapper;
-import ch.ubique.openapi.docannotations.Documentation;
-import com.google.protobuf.InvalidProtocolBufferException;
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +23,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.google.protobuf.InvalidProtocolBufferException;
+
+import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataService;
+import ch.ubique.notifyme.sdk.backend.model.QRTraceOuterClass;
+import ch.ubique.notifyme.sdk.backend.model.QRTraceOuterClass.QRTrace;
+import ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey;
+import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
+import ch.ubique.notifyme.sdk.backend.ws.SodiumWrapper;
+import ch.ubique.openapi.docannotations.Documentation;
 
 @Controller
 @RequestMapping("/v1/debug")
@@ -68,17 +71,17 @@ public class DebugController {
         traceKey.setEndTime(DateUtil.toInstant(endTime));
         try {
             byte[] ctxBytes = Base64.getUrlDecoder().decode(ctx.getBytes("UTF-8"));
-            byte[] seedBytes = sodiumWrapper.decryptQrTrace(ctxBytes);
-            SeedMessage seed = SeedMessageOuterClass.SeedMessage.parseFrom(seedBytes);
-            byte[] secretKey = sodiumWrapper.deriveSecretKeyFromSeed(seedBytes, ctxBytes);
+            byte[] qrTraceBytes = sodiumWrapper.decryptQrTrace(ctxBytes);
+            QRTrace qrTrace = QRTraceOuterClass.QRTrace.parseFrom(qrTraceBytes);
+            byte[] secretKey = sodiumWrapper.deriveSecretKeyFromQRTrace(qrTraceBytes, ctxBytes);
             traceKey.setSecretKey(secretKey);
             byte[] nonce = sodiumWrapper.createNonceForMessageEncytion();
             byte[] encryptedMessage =
                     sodiumWrapper.encryptMessage(
-                            seed.getNotificationKey().toByteArray(), nonce, message);
+                            qrTrace.getContent().getNotificationKey().toByteArray(), nonce, message);
             traceKey.setMessage(encryptedMessage);
             traceKey.setNonce(nonce);
-            // TODO martin tracekey.setR2
+            traceKey.setR2(qrTrace.getR2().toByteArray());
         } catch (InvalidProtocolBufferException e) {
             logger.error("unable to parse decrypted ctx protobuf", e);
         }

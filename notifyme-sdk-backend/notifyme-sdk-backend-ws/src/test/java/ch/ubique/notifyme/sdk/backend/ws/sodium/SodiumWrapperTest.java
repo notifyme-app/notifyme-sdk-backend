@@ -2,15 +2,18 @@ package ch.ubique.notifyme.sdk.backend.ws.sodium;
 
 import static org.junit.Assert.assertEquals;
 
-import ch.ubique.notifyme.sdk.backend.model.SeedMessageOuterClass;
-import ch.ubique.notifyme.sdk.backend.model.SeedMessageOuterClass.SeedMessage;
-import ch.ubique.notifyme.sdk.backend.ws.SodiumWrapper;
+import java.io.UnsupportedEncodingException;
+import java.util.Base64;
+
+import org.junit.Test;
+
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.goterl.lazycode.lazysodium.SodiumJava;
 import com.goterl.lazycode.lazysodium.interfaces.Box;
-import java.io.UnsupportedEncodingException;
-import java.util.Base64;
-import org.junit.Test;
+
+import ch.ubique.notifyme.sdk.backend.model.QRTraceOuterClass;
+import ch.ubique.notifyme.sdk.backend.model.QRTraceOuterClass.QRTrace;
+import ch.ubique.notifyme.sdk.backend.ws.SodiumWrapper;
 
 public class SodiumWrapperTest {
 
@@ -28,12 +31,12 @@ public class SodiumWrapperTest {
         String message = "This is the secret message";
         byte[] ctxBytes = Base64.getUrlDecoder().decode(ctx.getBytes("UTF-8"));
         byte[] seedBytes = sodiumWrapper.decryptQrTrace(ctxBytes);
-        byte[] secretKey = sodiumWrapper.deriveSecretKeyFromSeed(seedBytes, ctxBytes);
-        SeedMessage seed = SeedMessageOuterClass.SeedMessage.parseFrom(seedBytes);
+        byte[] secretKey = sodiumWrapper.deriveSecretKeyFromQRTrace(seedBytes, ctxBytes);
+        QRTrace qrTrace = QRTraceOuterClass.QRTrace.parseFrom(seedBytes);
         byte[] nonce = sodiumWrapper.createNonceForMessageEncytion();
         byte[] encryptedMessage =
                 sodiumWrapper.encryptMessage(
-                        seed.getNotificationKey().toByteArray(), nonce, message);
+                        qrTrace.getContent().getNotificationKey().toByteArray(), nonce, message);
 
         byte[] decryptedMessage = new byte[encryptedMessage.length - Box.MACBYTES];
         sodium.crypto_secretbox_open_easy(
@@ -41,7 +44,7 @@ public class SodiumWrapperTest {
                 encryptedMessage,
                 encryptedMessage.length,
                 nonce,
-                seed.getNotificationKey().toByteArray());
+                qrTrace.getContent().getNotificationKey().toByteArray());
         String decryptedMessageString = new String(decryptedMessage);
         assertEquals(message, decryptedMessageString);
         System.out.println("Message: " + message + " DecryptedMessge: " + decryptedMessageString);

@@ -74,7 +74,7 @@ public class SodiumWrapper {
         return msg;
     }
 
-    public byte[] deriveSecretKeyFromSeed(byte[] seedBytes, byte[] ctx) {
+    public byte[] deriveSecretKeyFromQRTrace(byte[] seedBytes, byte[] ctx) {
         byte[] newPk = new byte[64];
         byte[] newSk = new byte[64];
         byte[] seedSHA256 = new byte[32];
