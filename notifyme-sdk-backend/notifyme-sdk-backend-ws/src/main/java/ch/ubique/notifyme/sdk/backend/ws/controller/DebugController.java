@@ -73,7 +73,7 @@ public class DebugController {
             byte[] ctxBytes = Base64.getUrlDecoder().decode(ctx.getBytes("UTF-8"));
             byte[] qrTraceBytes = sodiumWrapper.decryptQrTrace(ctxBytes);
             QRTrace qrTrace = QRTraceOuterClass.QRTrace.parseFrom(qrTraceBytes);
-            byte[] secretKey = sodiumWrapper.deriveSecretKeyFromQRTrace(qrTraceBytes, ctxBytes);
+            byte[] secretKey = sodiumWrapper.deriveSecretKeyFromQRTrace(qrTrace);
             traceKey.setSecretKey(secretKey);
             byte[] nonce = sodiumWrapper.createNonceForMessageEncytion();
             byte[] encryptedMessage =

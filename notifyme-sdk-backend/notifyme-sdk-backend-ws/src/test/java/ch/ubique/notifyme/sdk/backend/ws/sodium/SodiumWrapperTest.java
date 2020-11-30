@@ -30,9 +30,10 @@ public class SodiumWrapperTest {
 
         String message = "This is the secret message";
         byte[] ctxBytes = Base64.getUrlDecoder().decode(ctx.getBytes("UTF-8"));
-        byte[] seedBytes = sodiumWrapper.decryptQrTrace(ctxBytes);
-        byte[] secretKey = sodiumWrapper.deriveSecretKeyFromQRTrace(seedBytes, ctxBytes);
-        QRTrace qrTrace = QRTraceOuterClass.QRTrace.parseFrom(seedBytes);
+        byte[] qrTraceBytes = sodiumWrapper.decryptQrTrace(ctxBytes);
+        QRTrace qrTrace = QRTraceOuterClass.QRTrace.parseFrom(qrTraceBytes);
+
+        byte[] secretKey = sodiumWrapper.deriveSecretKeyFromQRTrace(qrTrace);
         byte[] nonce = sodiumWrapper.createNonceForMessageEncytion();
         byte[] encryptedMessage =
                 sodiumWrapper.encryptMessage(

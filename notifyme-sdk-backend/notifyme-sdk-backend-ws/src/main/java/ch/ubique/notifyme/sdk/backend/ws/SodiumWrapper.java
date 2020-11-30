@@ -16,12 +16,16 @@ import com.goterl.lazycode.lazysodium.interfaces.Box;
 import com.goterl.lazycode.lazysodium.utils.LibraryLoadingException;
 import com.sun.jna.Native;
 import com.sun.jna.Platform;
+
+import ch.ubique.notifyme.sdk.backend.model.QRTraceOuterClass.QRTrace;
+
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,12 +78,22 @@ public class SodiumWrapper {
         return msg;
     }
 
-    public byte[] deriveSecretKeyFromQRTrace(byte[] seedBytes, byte[] ctx) {
+    public byte[] deriveSecretKeyFromQRTrace(QRTrace qrTrace) {
         byte[] newPk = new byte[64];
         byte[] newSk = new byte[64];
-        byte[] seedSHA256 = new byte[32];
-        sodium.crypto_hash_sha256(seedSHA256, seedBytes, seedBytes.length);
-        sodium.crypto_box_seed_keypair(newPk, newSk, seedSHA256);
+        byte[] innerHash = new byte[32];
+        byte[] outerHash = new byte[32];
+        
+        byte[] contentBytes = qrTrace.getContent().toByteArray();
+        byte[] innerHashIn = ArrayUtils.addAll(contentBytes, qrTrace.getR1().toByteArray());
+        
+        sodium.crypto_hash_sha256(innerHash, innerHashIn, innerHashIn.length);
+
+        byte[] outerHashIn = ArrayUtils.addAll(innerHash, qrTrace.getR2().toByteArray());
+        
+        sodium.crypto_hash_sha256(outerHash, outerHashIn, outerHashIn.length);
+
+        sodium.crypto_box_seed_keypair(newPk, newSk, outerHash);
         return newSk;
     }
 
