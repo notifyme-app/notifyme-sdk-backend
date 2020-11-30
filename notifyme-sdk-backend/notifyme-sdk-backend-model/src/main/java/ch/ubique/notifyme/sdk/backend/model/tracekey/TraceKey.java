@@ -43,6 +43,11 @@ public class TraceKey {
     @Documentation(description = "base64 url encoded bytes")
     private byte[] nonce;
 
+    @JsonSerialize(using = UrlBase64StringSerializer.class)
+    @JsonDeserialize(using = UrlBase64StringDeserializer.class)
+    @Documentation(description = "base64 url encoded bytes")
+    private byte[] r2;
+
     public Integer getId() {
         return id;
     }
@@ -97,5 +102,13 @@ public class TraceKey {
 
     public void setNonce(byte[] nonce) {
         this.nonce = nonce;
+    }
+
+    public byte[] getR2() {
+        return r2;
+    }
+
+    public void setR2(byte[] r2) {
+        this.r2 = r2;
     }
 }

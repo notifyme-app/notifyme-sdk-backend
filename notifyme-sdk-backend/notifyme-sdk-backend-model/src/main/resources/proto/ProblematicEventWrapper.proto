@@ -9,8 +9,9 @@ message ProblematicEventWrapper {
 
 message ProblematicEvent {
   required bytes secretKey = 1;
-  required int64 startTime = 2;
-  required int64 endTime = 3;
-  optional bytes message = 4;
-  optional bytes nonce = 5;
+  required bytes r2 = 2;
+  required int64 startTime = 3;
+  required int64 endTime = 4;
+  optional bytes message = 5;
+  optional bytes nonce = 6;
 }

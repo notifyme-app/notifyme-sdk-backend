@@ -78,6 +78,7 @@ public class DebugController {
                             seed.getNotificationKey().toByteArray(), nonce, message);
             traceKey.setMessage(encryptedMessage);
             traceKey.setNonce(nonce);
+            // TODO martin tracekey.setR2
         } catch (InvalidProtocolBufferException e) {
             logger.error("unable to parse decrypted ctx protobuf", e);
         }

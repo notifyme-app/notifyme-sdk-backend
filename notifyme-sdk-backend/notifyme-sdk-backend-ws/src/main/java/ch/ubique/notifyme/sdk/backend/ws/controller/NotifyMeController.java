@@ -132,6 +132,7 @@ public class NotifyMeController {
         if (t.getNonce() != null) {
             b.setNonce(ByteString.copyFrom(t.getNonce()));
         }
+        b.setR2(ByteString.copyFrom(t.getR2()));
         return b.build();
     }
 

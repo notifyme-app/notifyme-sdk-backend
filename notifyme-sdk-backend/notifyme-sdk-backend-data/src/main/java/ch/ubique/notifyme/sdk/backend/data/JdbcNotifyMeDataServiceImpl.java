@@ -50,6 +50,7 @@ public class JdbcNotifyMeDataServiceImpl implements NotifyMeDataService {
         params.addValue("created_at", new Date());
         params.addValue("message", traceKey.getMessage());
         params.addValue("message_nonce", traceKey.getNonce());
+        params.addValue("r2", traceKey.getR2());
         return params;
     }
 

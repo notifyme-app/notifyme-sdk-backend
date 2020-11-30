@@ -27,6 +27,7 @@ public class TraceKeyRowMapper implements RowMapper<TraceKey> {
         traceKey.setCreatedAt(rs.getTimestamp("created_at").toInstant());
         traceKey.setMessage(rs.getBytes("message"));
         traceKey.setNonce(rs.getBytes("message_nonce"));
+        traceKey.setR2(rs.getBytes("r2"));
         return traceKey;
     }
 }
