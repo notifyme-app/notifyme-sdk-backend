@@ -79,8 +79,8 @@ public class SodiumWrapper {
     }
 
     public byte[] deriveSecretKeyFromQRTrace(QRTrace qrTrace) {
-        byte[] newPk = new byte[64];
-        byte[] newSk = new byte[64];
+        byte[] newPk = new byte[Box.PUBLICKEYBYTES];
+        byte[] newSk = new byte[Box.SECRETKEYBYTES];
         byte[] innerHash = new byte[32];
         byte[] outerHash = new byte[32];
         
