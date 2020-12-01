@@ -49,9 +49,11 @@ public class ConfigController {
                             example = "ch.ubique.ios.notifyme;1.0.0;iOS;13.3")
                     String userAgent) {
         UserAgent nmUserAgent = new UserAgent(userAgent);
+        ConfigResponse configResponse = new ConfigResponse();
+        configResponse.setForceUpdate(true);
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(Duration.ofMinutes(5)))
-                .body(new ConfigResponse());
+                .body(configResponse);
     }
 
     @ExceptionHandler({InvalidUserAgentException.class, InvalidAppVersionFormatException.class})
