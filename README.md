@@ -22,7 +22,7 @@ The NotifyMe SDK Backend contains alpha-quality code only and is not yet complet
 The full set of documents for CrowdNotifier is at https://github.com/CrowdNotifier/documents. Please refer to the technical documents and whitepapers for a description of the implementation.
 
 ## Dependencies
-* Spring Boot 2.2.10
+* Spring Boot 2.4.0
 * Java 11 (or higher)
 * Logback
 * [Springboot-Swagger-3](https://bintray.com/ubique-oss/springboot-swagger3)
