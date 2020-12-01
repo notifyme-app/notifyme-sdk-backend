@@ -49,7 +49,7 @@ There are two endpoints, one for uploading and one for downloading trace keys. H
 
 - /v1/traceKeys?lastBundleTagId=\<lastSync\>: `GET` Returns a list of trace keys. The optional `lastBundleTagId` is returned in each response from the backend and should be used by clients for the follwoing request. If set, only keys are retrived since the last download.
 
-- /v1/debug/traceKeys?startTime=\<startTime\>&endTime=\<endTime\>&ctx=\<ctx\>: `POST` This request is used by the [QR Trace Upload Web App](https://github.com/notifyme-app/notifyme-upload-web) to upload an encoded trace key (`ctx`) together with start and end time of the problematic event in epoch milliseconds.
+- /v1/debug/traceKeys?startTime=\<startTime\>&endTime=\<endTime\>&ctx=\<ctx\>&msg=\<msg\>: `POST` This request is used by the web app [notifyme-webpages](https://github.com/notifyme-app/notifyme-webpages) to upload an encoded trace key (`ctx`) together with start and end time of the problematic event in epoch milliseconds. Optionally, a message (`msg`) can be provided which is then shown to the clients.
 
 ## Swagger
 We use [Springboot-Swagger-3](https://github.com/Ubique-OSS/springboot-swagger3) to generate a `YAML` based on settings and controllers found in the project. We include a up-to-date version in each release. Currently they are lacking the documentation, but should provide enough information to use them in [Swagger Editor](https://editor.swagger.io).
