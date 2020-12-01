@@ -15,7 +15,7 @@
     <parent>
         <groupId>ch.ubique</groupId>
         <artifactId>notifyme-sdk-backend</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.0.0</version>
     </parent>
     <artifactId>notifyme-sdk-backend-ws</artifactId>
     <name>NotifyMe SDK Backend WS</name>

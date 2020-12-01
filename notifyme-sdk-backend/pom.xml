@@ -17,7 +17,7 @@
     <groupId>ch.ubique</groupId>
     <artifactId>notifyme-sdk-backend</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>NotifyMe SDK Backend</name>
 
     <properties>
