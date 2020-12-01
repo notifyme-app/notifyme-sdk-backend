@@ -47,7 +47,7 @@ If you plan to provide new extensions or make adjustments and want to provide th
 ## Trace Keys
 There are two endpoints, one for uploading and one for downloading trace keys. How long trace keys are stored in the database can be configured via the `db.removeAfterDays` property in the properties file.
 
-- /v1/traceKeys?lastSync=\<lastSync\>: `GET` Returns a list of trace keys. The optional `lastSync` parameter needs to be epoch milliseconds. If set, only trace keys uploaded after `lastSync` are returned, otherwise all uploaded trace keys are returned.
+- /v1/traceKeys?lastBundleTagId=\<lastSync\>: `GET` Returns a list of trace keys. The optional `lastBundleTagId` is returned in each response from the backend and should be used by clients for the follwoing request. If set, only keys are retrived since the last download.
 
 - /v1/debug/traceKeys?startTime=\<startTime\>&endTime=\<endTime\>&ctx=\<ctx\>: `POST` This request is used by the [QR Trace Upload Web App](https://github.com/notifyme-app/notifyme-upload-web) to upload an encoded trace key (`ctx`) together with start and end time of the problematic event in epoch milliseconds.
 
