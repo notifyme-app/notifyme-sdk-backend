@@ -47,7 +47,7 @@ If you plan to provide new extensions or make adjustments and want to provide th
 ## Trace Keys
 There are two endpoints, one for uploading and one for downloading trace keys. How long trace keys are stored in the database can be configured via the `db.removeAfterDays` property in the properties file.
 
-- /v1/traceKeys?lastBundleTagId=\<lastSync\>: `GET` Returns a list of trace keys. The optional `lastBundleTagId` is returned in each response from the backend and should be used by clients for the follwoing request. If set, only keys are retrived since the last download.
+- /v1/traceKeys?lastBundleTag=\<lastSync\>: `GET` Returns a list of trace keys. The optional `lastBundleTag` is returned in each response as response header `x-key-bundle-tag` from the backend and should be used by clients for the following request. If set, only keys are retrived since the last download.
 
 - /v1/debug/traceKeys?startTime=\<startTime\>&endTime=\<endTime\>&ctx=\<ctx\>&msg=\<msg\>: `POST` This request is used by the web app [notifyme-webpages](https://github.com/notifyme-app/notifyme-webpages) to upload an encoded trace key (`ctx`) together with start and end time of the problematic event in epoch milliseconds. Optionally, a message (`msg`) can be provided which is then shown to the clients.
 
