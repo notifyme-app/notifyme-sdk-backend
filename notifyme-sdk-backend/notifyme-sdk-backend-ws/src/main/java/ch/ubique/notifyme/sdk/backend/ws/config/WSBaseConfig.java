@@ -73,6 +73,9 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
     @Value("${traceKey.bucketSizeInMs}")
     Long bucketSizeInMs;
+    
+    @Value("${traceKey.traceKeysCacheControlInMs}")
+    Long traceKeysCacheControlInMs;
 
     @Value("${git.commit.id}")
     private String commitId;
@@ -137,7 +140,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
     @Bean
     public NotifyMeController notifyMeController(
             NotifyMeDataService notifyMeDataService, String revision) {
-        return new NotifyMeController(notifyMeDataService, revision, bucketSizeInMs);
+        return new NotifyMeController(notifyMeDataService, revision, bucketSizeInMs, traceKeysCacheControlInMs);
     }
 
     @Bean

@@ -19,8 +19,11 @@ import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
 import ch.ubique.openapi.docannotations.Documentation;
 import com.google.protobuf.ByteString;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
+
+import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -39,12 +42,14 @@ public class NotifyMeController {
     private final NotifyMeDataService dataService;
     private final String revision;
     private final Long bucketSizeInMs;
+    private final Long traceKeysCacheControlInMs;
 
     public NotifyMeController(
-            NotifyMeDataService dataService, String revision, Long bucketSizeInMs) {
+            NotifyMeDataService dataService, String revision, Long bucketSizeInMs, Long traceKeysCacheControlInMs) {
         this.dataService = dataService;
         this.revision = revision;
         this.bucketSizeInMs = bucketSizeInMs;
+        this.traceKeysCacheControlInMs = traceKeysCacheControlInMs;
     }
 
     @GetMapping(value = "")
@@ -66,6 +71,7 @@ public class NotifyMeController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok()
+                .cacheControl(CacheControl.maxAge(traceKeysCacheControlInMs, TimeUnit.MILLISECONDS))              
                 .header(
                         HEADER_X_KEY_BUNDLE_TAG,
                         Long.toString(DateUtil.getLastFullBucketEndEpochMilli(bucketSizeInMs)))
@@ -98,7 +104,7 @@ public class NotifyMeController {
                                     "in millis since epoch. must be aligned to a full hour, and < now()")
                     Long lastKeyBundleTag) {
         if (!isValidKeyBundleTag(lastKeyBundleTag)) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.notFound().cacheControl(CacheControl.maxAge(traceKeysCacheControlInMs, TimeUnit.MILLISECONDS)).build();
         }
         List<TraceKey> traceKeys = dataService.findTraceKeys(DateUtil.toInstant(lastKeyBundleTag));
         ProblematicEventWrapper pew =
@@ -107,6 +113,7 @@ public class NotifyMeController {
                         .addAllEvents(mapToProblematicEvents(traceKeys))
                         .build();
         return ResponseEntity.ok()
+                .cacheControl(CacheControl.maxAge(traceKeysCacheControlInMs, TimeUnit.MILLISECONDS))       
                 .header("content-type", "application/x-protobuf")
                 .header(
                         HEADER_X_KEY_BUNDLE_TAG,
