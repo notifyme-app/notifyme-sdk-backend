@@ -130,7 +130,8 @@ public class NotifyMeController {
     private ProblematicEvent mapTraceKeyToProblematicEvent(TraceKey t) {
         Builder b =
                 ProblematicEvent.newBuilder()
-                        .setSecretKey(ByteString.copyFrom(t.getSecretKey()))
+                        .setSecretKeyForIdentity(ByteString.copyFrom(t.getSecretKeyForIdentity()))
+                        .setIdentity(ByteString.copyFrom(t.getIdentity()))
                         .setStartTime(DateUtil.toEpochMilli(t.getStartTime()))
                         .setEndTime(DateUtil.toEpochMilli(t.getEndTime()));
         if (t.getMessage() != null) {
@@ -139,7 +140,6 @@ public class NotifyMeController {
         if (t.getNonce() != null) {
             b.setNonce(ByteString.copyFrom(t.getNonce()));
         }
-        b.setR2(ByteString.copyFrom(t.getR2()));
         return b.build();
     }
 

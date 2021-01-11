@@ -10,19 +10,6 @@
 
 package ch.ubique.notifyme.sdk.backend.ws.config;
 
-import ch.ubique.notifyme.sdk.backend.data.JdbcNotifyMeDataServiceImpl;
-import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataService;
-import ch.ubique.notifyme.sdk.backend.ws.SodiumWrapper;
-import ch.ubique.notifyme.sdk.backend.ws.controller.ConfigController;
-import ch.ubique.notifyme.sdk.backend.ws.controller.DebugController;
-import ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeController;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -31,7 +18,9 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.TimeZone;
+
 import javax.sql.DataSource;
+
 import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +41,21 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
+
+import ch.ubique.notifyme.sdk.backend.data.JdbcNotifyMeDataServiceImpl;
+import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataService;
+import ch.ubique.notifyme.sdk.backend.ws.CryptoWrapper;
+import ch.ubique.notifyme.sdk.backend.ws.controller.ConfigController;
+import ch.ubique.notifyme.sdk.backend.ws.controller.DebugController;
+import ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeController;
 
 @Configuration
 @EnableScheduling
@@ -164,13 +168,13 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
     @Profile("enable-debug")
     @Bean
     public DebugController debugController(
-            NotifyMeDataService notifyMeDataService, SodiumWrapper sodiumWrapper) {
-        return new DebugController(notifyMeDataService, sodiumWrapper);
+            NotifyMeDataService notifyMeDataService, CryptoWrapper cryptoWrapper) {
+        return new DebugController(notifyMeDataService, cryptoWrapper);
     }
 
     @Bean
-    SodiumWrapper sodiumWrapper() {
-        return new SodiumWrapper(healthAuthoritySkHex, healthAuthorityPkHex);
+    CryptoWrapper cryptoWrapper() {
+        return new CryptoWrapper(healthAuthoritySkHex, healthAuthorityPkHex);
     }
 
     @Override

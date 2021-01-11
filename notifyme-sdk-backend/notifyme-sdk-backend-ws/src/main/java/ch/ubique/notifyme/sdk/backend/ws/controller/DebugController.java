@@ -12,6 +12,7 @@ package ch.ubique.notifyme.sdk.backend.ws.controller;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,66 +28,66 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataService;
-import ch.ubique.notifyme.sdk.backend.model.QRTraceOuterClass;
-import ch.ubique.notifyme.sdk.backend.model.QRTraceOuterClass.QRTrace;
+import ch.ubique.notifyme.sdk.backend.model.PreTraceWithProofOuterClass.PreTraceWithProof;
 import ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey;
 import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
-import ch.ubique.notifyme.sdk.backend.ws.SodiumWrapper;
+import ch.ubique.notifyme.sdk.backend.ws.CryptoWrapper;
 import ch.ubique.openapi.docannotations.Documentation;
 
 @Controller
 @RequestMapping("/v1/debug")
-@CrossOrigin(origins = {"https://upload-dev.notify-me.ch", "https://upload.notify-me.ch"})
+@CrossOrigin(origins = { "https://upload-dev.notify-me.ch", "https://upload.notify-me.ch", "http://localhost:1313" })
 public class DebugController {
     private static final Logger logger = LoggerFactory.getLogger(DebugController.class);
 
     private final NotifyMeDataService dataService;
-    private final SodiumWrapper sodiumWrapper;
+    private final CryptoWrapper cryptoWrapper;
 
-    public DebugController(NotifyMeDataService dataService, SodiumWrapper sodiumWrapper) {
+    public DebugController(NotifyMeDataService dataService, CryptoWrapper cryptoWrapper) {
         this.dataService = dataService;
-        this.sodiumWrapper = sodiumWrapper;
+        this.cryptoWrapper = cryptoWrapper;
     }
 
     @GetMapping(value = "")
-    @Documentation(
-            description = "Hello return",
-            responses = {"200=>server live"})
+    @Documentation(description = "Hello return", responses = { "200=>server live" })
     public @ResponseBody ResponseEntity<String> hello() {
-        return ResponseEntity.ok()
-                .header("X-HELLO", "notifyme")
-                .body("Hello from NotifyMe Debug WS v1");
+        return ResponseEntity.ok().header("X-HELLO", "notifyme").body("Hello from NotifyMe Debug WS v1");
     }
 
     @PostMapping(value = "/traceKey")
     public @ResponseBody ResponseEntity<String> uploadTraceKey(
             @RequestParam Long startTime,
             @RequestParam Long endTime,
-            @RequestParam @Documentation(description = "url base64 encoded encrypted secret key")
-                    String ctx,
+            @RequestParam @Documentation(description = "list of url base64 encoded pre trace keys")
+                    List<String> preTraces,
+            @RequestParam @Documentation(description = "list of the affected hours for the trace keys")
+                    List<Integer> affectedHours,                    
             @RequestParam String message)
             throws UnsupportedEncodingException {
-        TraceKey traceKey = new TraceKey();
-        traceKey.setStartTime(DateUtil.toInstant(startTime));
-        traceKey.setEndTime(DateUtil.toInstant(endTime));
-        try {
-            byte[] ctxBytes = Base64.getUrlDecoder().decode(ctx.getBytes("UTF-8"));
-            byte[] qrTraceBytes = sodiumWrapper.decryptQrTrace(ctxBytes);
-            QRTrace qrTrace = QRTraceOuterClass.QRTrace.parseFrom(qrTraceBytes);
-            byte[] secretKey = sodiumWrapper.deriveSecretKeyFromQRTrace(qrTrace);
-            traceKey.setSecretKey(secretKey);
-            byte[] nonce = sodiumWrapper.createNonceForMessageEncytion();
-            byte[] encryptedMessage =
-                    sodiumWrapper.encryptMessage(
-                            qrTrace.getContent().getNotificationKey().toByteArray(), nonce, message);
-            traceKey.setMessage(encryptedMessage);
-            traceKey.setNonce(nonce);
-            traceKey.setR2(qrTrace.getR2().toByteArray());
-        } catch (InvalidProtocolBufferException e) {
-            logger.error("unable to parse decrypted ctx protobuf", e);
+        
+        for (int i = 0; i < affectedHours.size(); i++) {
+            String preTraceKeyBase64 = preTraces.get(i);
+            Integer affectedHour = affectedHours.get(i);
+            
+            TraceKey traceKey = new TraceKey();
+            traceKey.setStartTime(DateUtil.toInstant(startTime));
+            traceKey.setEndTime(DateUtil.toInstant(endTime));
+            try {
+                byte[] preTraceKeyBytes = Base64.getUrlDecoder().decode(preTraceKeyBase64.getBytes("UTF-8"));
+                PreTraceWithProof preTraceWithProofProto = PreTraceWithProof.parseFrom(preTraceKeyBytes);
+                
+                cryptoWrapper.calculateSecretKeyForIdentityAndIdentity(preTraceWithProofProto, affectedHour, traceKey);
+                
+                byte[] nonce = cryptoWrapper.createNonceForMessageEncytion();
+                byte[] encryptedMessage = cryptoWrapper.encryptMessage(preTraceWithProofProto.getPreTrace().getNotificationKey().toByteArray(), nonce, message);
+                traceKey.setMessage(encryptedMessage);
+                traceKey.setNonce(nonce);
+                
+            } catch (InvalidProtocolBufferException e) {
+                logger.error("unable to parse decrypted ctx protobuf", e);
+            }
+            dataService.insertTraceKey(traceKey); 
         }
-
-        dataService.insertTraceKey(traceKey);
         return ResponseEntity.ok().body("OK");
     }
 }

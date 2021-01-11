@@ -10,17 +10,20 @@
 
 package ch.ubique.notifyme.sdk.backend.data;
 
-import ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey;
-import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+
 import javax.sql.DataSource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+
+import ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey;
+import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
 
 public class JdbcNotifyMeDataServiceImpl implements NotifyMeDataService {
 
@@ -38,19 +41,19 @@ public class JdbcNotifyMeDataServiceImpl implements NotifyMeDataService {
         this.traceKeyInsert =
                 new SimpleJdbcInsert(dataSource)
                         .withTableName("t_trace_key")
-                        .usingGeneratedKeyColumns("pk_trace_key");
+                        .usingGeneratedKeyColumns("pk_trace_key_id");
     }
 
     private MapSqlParameterSource getTraceKeyParams(TraceKey traceKey) {
         MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("pk_trace_key", traceKey.getId());
-        params.addValue("secret_key", traceKey.getSecretKey());
+        params.addValue("pk_trace_key_id", traceKey.getId());
+        params.addValue("secret_key_for_identity", traceKey.getSecretKeyForIdentity());
+        params.addValue("identity", traceKey.getIdentity());
         params.addValue("start_time", DateUtil.toDate(traceKey.getStartTime()));
         params.addValue("end_time", DateUtil.toDate(traceKey.getEndTime()));
         params.addValue("created_at", new Date());
         params.addValue("message", traceKey.getMessage());
         params.addValue("message_nonce", traceKey.getNonce());
-        params.addValue("r2", traceKey.getR2());
         return params;
     }
 
