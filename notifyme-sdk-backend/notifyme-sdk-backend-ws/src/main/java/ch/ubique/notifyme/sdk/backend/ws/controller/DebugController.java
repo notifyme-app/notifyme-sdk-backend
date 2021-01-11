@@ -11,6 +11,7 @@
 package ch.ubique.notifyme.sdk.backend.ws.controller;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
@@ -65,6 +66,7 @@ public class DebugController {
             @RequestParam String message)
             throws UnsupportedEncodingException {
         
+        List<TraceKey> traceKeysToInsert = new ArrayList<>();
         for (int i = 0; i < affectedHours.size(); i++) {
             String preTraceKeyBase64 = preTraces.get(i);
             Integer affectedHour = affectedHours.get(i);
@@ -82,12 +84,12 @@ public class DebugController {
                 byte[] encryptedMessage = cryptoWrapper.encryptMessage(preTraceWithProofProto.getPreTrace().getNotificationKey().toByteArray(), nonce, message);
                 traceKey.setMessage(encryptedMessage);
                 traceKey.setNonce(nonce);
-                
+                traceKeysToInsert.add(traceKey); 
             } catch (InvalidProtocolBufferException e) {
-                logger.error("unable to parse decrypted ctx protobuf", e);
+                logger.error("unable to parse protobuf", e);
             }
-            dataService.insertTraceKey(traceKey); 
         }
+        dataService.insertTraceKey(traceKeysToInsert);
         return ResponseEntity.ok().body("OK");
     }
 }

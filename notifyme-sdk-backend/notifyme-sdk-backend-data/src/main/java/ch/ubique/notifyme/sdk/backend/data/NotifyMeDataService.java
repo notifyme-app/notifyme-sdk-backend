@@ -24,8 +24,8 @@ public interface NotifyMeDataService {
     public void insertTraceKey(TraceKey traceKey);
 
     /**
-     * Returns trace keys that where submitted (/created) after the given date. Returns all trace
-     * keys if after == null.
+     * Returns trace keys that where submitted (/created) after the given date.
+     * Returns all trace keys if after == null.
      *
      * @param after
      * @return
@@ -39,4 +39,11 @@ public interface NotifyMeDataService {
      * @return
      */
     public int removeTraceKeys(Instant before);
+
+    /**
+     * Inserts a list of trace keys
+     * 
+     * @param traceKeysToInsert
+     */
+    public void insertTraceKey(List<TraceKey> traceKeysToInsert);
 }
