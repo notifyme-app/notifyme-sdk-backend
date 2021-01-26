@@ -20,6 +20,7 @@ import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,6 +40,7 @@ import ch.ubique.openapi.docannotations.Documentation;
 
 @Controller
 @RequestMapping("/v1")
+@CrossOrigin(origins = { "https://notify-me.c4dt.org" })
 public class NotifyMeController {
     private static final String HEADER_X_KEY_BUNDLE_TAG = "x-key-bundle-tag";
 
