@@ -119,6 +119,8 @@ public class CryptoWrapper {
         traceKey.setIdentity(identity);
         traceKey.setSecretKeyForIdentity(secretKeyForIdentity.serialize());
 
+        logger.info("secretKeyForIdentity: {}", Hex.encodeHexString(secretKeyForIdentity.serialize()));
+
         return traceKey;
     }
 
@@ -154,6 +156,8 @@ public class CryptoWrapper {
     public byte[] encryptMessage(byte[] secretKey, byte[] nonce, String message) {
         byte[] messageBytes = message.getBytes();
         byte[] encrytpedMessage = new byte[messageBytes.length + Box.MACBYTES];
+        logger.info("nonce: {}", Hex.encodeHexString(nonce));
+        logger.info("key: {}", Hex.encodeHexString(secretKey));
         sodium.randombytes_buf(nonce, nonce.length);
         sodium.crypto_secretbox_easy(encrytpedMessage, messageBytes, messageBytes.length, nonce, secretKey);
         return encrytpedMessage;

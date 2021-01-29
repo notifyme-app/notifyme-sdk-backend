@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
+import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -84,6 +85,8 @@ public class DebugController {
                 byte[] encryptedMessage = cryptoWrapper.encryptMessage(preTraceWithProofProto.getPreTrace().getNotificationKey().toByteArray(), nonce, message);
                 traceKey.setMessage(encryptedMessage);
                 traceKey.setNonce(nonce);
+                logger.info("secretKeyForIdentity in mapper: {}",
+                        Hex.encodeHexString(traceKey.getSecretKeyForIdentity()));
                 traceKeysToInsert.add(traceKey); 
             } catch (InvalidProtocolBufferException e) {
                 logger.error("unable to parse protobuf", e);
