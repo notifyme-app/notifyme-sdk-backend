@@ -32,7 +32,7 @@
         <spring-boot-version>2.4.0</spring-boot-version>
         <testcontainers-version>1.15.0-rc2</testcontainers-version>
 
-        <itCoverageAgent></itCoverageAgent>
+        <itCoverageAgent/>
 
         <build-helper-maven-plugin.version>3.2.0</build-helper-maven-plugin.version>
 
@@ -80,6 +80,7 @@
             <artifactId>commons-io</artifactId>
         </dependency>
 
+        <!-- Testing-->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
