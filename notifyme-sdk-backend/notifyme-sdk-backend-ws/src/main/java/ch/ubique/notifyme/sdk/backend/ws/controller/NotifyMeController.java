@@ -10,23 +10,17 @@
 
 package ch.ubique.notifyme.sdk.backend.ws.controller;
 
-import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataService;
-import ch.ubique.notifyme.sdk.backend.model.ProblematicEventWrapperOuterClass.ProblematicEvent;
-import ch.ubique.notifyme.sdk.backend.model.ProblematicEventWrapperOuterClass.ProblematicEvent.Builder;
-import ch.ubique.notifyme.sdk.backend.model.ProblematicEventWrapperOuterClass.ProblematicEventWrapper;
-import ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey;
-import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
-import ch.ubique.openapi.docannotations.Documentation;
-import com.google.protobuf.ByteString;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
 import javax.validation.Valid;
 
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,8 +28,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.google.protobuf.ByteString;
+
+import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataService;
+import ch.ubique.notifyme.sdk.backend.model.ProblematicEventWrapperOuterClass.ProblematicEvent;
+import ch.ubique.notifyme.sdk.backend.model.ProblematicEventWrapperOuterClass.ProblematicEvent.Builder;
+import ch.ubique.notifyme.sdk.backend.model.ProblematicEventWrapperOuterClass.ProblematicEventWrapper;
+import ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey;
+import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
+import ch.ubique.openapi.docannotations.Documentation;
+
 @Controller
 @RequestMapping("/v1")
+@CrossOrigin(origins = { "https://notify-me.c4dt.org" })
 public class NotifyMeController {
     private static final String HEADER_X_KEY_BUNDLE_TAG = "x-key-bundle-tag";
 
@@ -130,7 +135,8 @@ public class NotifyMeController {
     private ProblematicEvent mapTraceKeyToProblematicEvent(TraceKey t) {
         Builder b =
                 ProblematicEvent.newBuilder()
-                        .setSecretKey(ByteString.copyFrom(t.getSecretKey()))
+                        .setSecretKeyForIdentity(ByteString.copyFrom(t.getSecretKeyForIdentity()))
+                        .setIdentity(ByteString.copyFrom(t.getIdentity()))
                         .setStartTime(DateUtil.toEpochMilli(t.getStartTime()))
                         .setEndTime(DateUtil.toEpochMilli(t.getEndTime()));
         if (t.getMessage() != null) {
@@ -139,7 +145,6 @@ public class NotifyMeController {
         if (t.getNonce() != null) {
             b.setNonce(ByteString.copyFrom(t.getNonce()));
         }
-        b.setR2(ByteString.copyFrom(t.getR2()));
         return b.build();
     }
 
