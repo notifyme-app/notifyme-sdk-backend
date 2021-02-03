@@ -153,10 +153,10 @@ public class CryptoWrapper {
 
     public byte[] encryptMessage(byte[] secretKey, byte[] nonce, String message) {
         byte[] messageBytes = message.getBytes();
-        byte[] encrytpedMessage = new byte[messageBytes.length + Box.MACBYTES];
+        byte[] encryptedMessage = new byte[messageBytes.length + Box.MACBYTES];
         sodium.randombytes_buf(nonce, nonce.length);
-        sodium.crypto_secretbox_easy(encrytpedMessage, messageBytes, messageBytes.length, nonce, secretKey);
-        return encrytpedMessage;
+        sodium.crypto_secretbox_easy(encryptedMessage, messageBytes, messageBytes.length, nonce, secretKey);
+        return encryptedMessage;
     }
 
     /**
@@ -193,30 +193,30 @@ public class CryptoWrapper {
 
     /**
      * Returns the absolute path to sodium library inside JAR (beginning with '/'),
-     * e.g. /linux/libsodium.so.
+     * e.g. /linux/libmcljava.so.
      */
     private static String getMclPathInResources() {
         boolean is64Bit = Native.POINTER_SIZE == 8;
         if (Platform.isWindows()) {
             if (is64Bit) {
-                throw new UnsupportedOperationException("windows64 not suporrted");
+                throw new UnsupportedOperationException("windows64 not supported");
             } else {
-                throw new UnsupportedOperationException("windows not suporrted");
+                throw new UnsupportedOperationException("windows not supported");
 
             }
         }
         if (Platform.isARM()) {
-            throw new UnsupportedOperationException("arm not suporrted");
+            throw new UnsupportedOperationException("arm not supported");
         }
         if (Platform.isLinux()) {
             if (is64Bit) {
                 return getPath("linux64", "libmcljava.so");
             } else {
-                throw new UnsupportedOperationException("linux32 not suporrted");
+                throw new UnsupportedOperationException("linux32 not supported");
             }
         }
         if (Platform.isMac()) {
-            throw new UnsupportedOperationException("mac not suporrted");
+            return getPath("mac", "libmcljava.dylib");
         }
 
         String message = String.format("Unsupported platform: %s/%s", System.getProperty("os.name"),
@@ -225,7 +225,6 @@ public class CryptoWrapper {
     }
 
     private static String getPath(String folder, String name) {
-        String separator = "/";
-        return folder + separator + name;
+        return folder + File.separator + name;
     }
 }
