@@ -141,9 +141,15 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
     }
 
     @Bean
+    public DiaryEntryDataService diaryEntryDataService(final DataSource dataSource) {
+        return new JdbcDiaryEntryDataServiceImpl(dataSource);
+    }
+
+    @Bean
     public NotifyMeController notifyMeController(
             NotifyMeDataService notifyMeDataService, String revision) {
-        return new NotifyMeController(notifyMeDataService, revision, bucketSizeInMs, traceKeysCacheControlInMs);
+        return new NotifyMeController(
+                notifyMeDataService, revision, bucketSizeInMs, traceKeysCacheControlInMs);
     }
 
     @Bean
@@ -167,8 +173,10 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
     @Profile("enable-debug")
     @Bean
     public DebugController debugController(
-            NotifyMeDataService notifyMeDataService, CryptoWrapper cryptoWrapper) {
-        return new DebugController(notifyMeDataService, cryptoWrapper);
+            final NotifyMeDataService notifyMeDataService,
+            final DiaryEntryDataService diaryEntryDataService,
+            final CryptoWrapper cryptoWrapper) {
+        return new DebugController(notifyMeDataService, diaryEntryDataService, cryptoWrapper);
     }
 
     @Bean
@@ -200,21 +208,18 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
         // remove old trace keys
         taskRegistrar.addCronTask(
                 new CronTask(
-                        new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    Instant removeBefore =
-                                            Instant.now().minus(removeAfterDays, ChronoUnit.DAYS);
-                                    logger.info(
-                                            "removing trace keys with end_time before: "
-                                                    + removeBefore);
-                                    int removeCount =
-                                            notifyMeDataService().removeTraceKeys(removeBefore);
-                                    logger.info("removed " + removeCount + " trace keys from db");
-                                } catch (Exception e) {
-                                    logger.error("Exception removing old trace keys", e);
-                                }
+                        () -> {
+                            try {
+                                Instant removeBefore =
+                                        Instant.now().minus(removeAfterDays, ChronoUnit.DAYS);
+                                logger.info(
+                                        "removing trace keys with end_time before: {}",
+                                        removeBefore);
+                                int removeCount =
+                                        notifyMeDataService().removeTraceKeys(removeBefore);
+                                logger.info("removed {} trace keys from db", removeCount);
+                            } catch (Exception e) {
+                                logger.error("Exception removing old trace keys", e);
                             }
                         },
                         new CronTrigger(cleanCron, TimeZone.getTimeZone("UTC"))));

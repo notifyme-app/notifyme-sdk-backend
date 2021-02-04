@@ -10,9 +10,11 @@
 
 package ch.ubique.notifyme.sdk.backend.ws.controller;
 
+import ch.ubique.notifyme.sdk.backend.data.DiaryEntryDataService;
 import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataService;
 import ch.ubique.notifyme.sdk.backend.model.PreTraceWithProofOuterClass.PreTraceWithProof;
 import ch.ubique.notifyme.sdk.backend.model.ProblematicDiaryEntryWrapperOuterClass.ProblematicDiaryEntryWrapper;
+import ch.ubique.notifyme.sdk.backend.model.diaryentry.DiaryEntry;
 import ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey;
 import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
 import ch.ubique.notifyme.sdk.backend.ws.CryptoWrapper;
@@ -22,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -45,11 +48,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class DebugController {
     private static final Logger logger = LoggerFactory.getLogger(DebugController.class);
 
-    private final NotifyMeDataService dataService;
+    private final NotifyMeDataService notifyMeDataService;
+    private final DiaryEntryDataService diaryEntryDataService;
     private final CryptoWrapper cryptoWrapper;
 
-    public DebugController(NotifyMeDataService dataService, CryptoWrapper cryptoWrapper) {
-        this.dataService = dataService;
+    public DebugController(NotifyMeDataService notifyMeDataService,
+            final DiaryEntryDataService diaryEntryDataService,
+            CryptoWrapper cryptoWrapper) {
+        this.notifyMeDataService = notifyMeDataService;
+        this.diaryEntryDataService = diaryEntryDataService;
         this.cryptoWrapper = cryptoWrapper;
     }
 
@@ -108,7 +115,7 @@ public class DebugController {
                 logger.error("unable to parse protobuf", e);
             }
         }
-        dataService.insertTraceKey(traceKeysToInsert);
+        notifyMeDataService.insertTraceKey(traceKeysToInsert);
         return ResponseEntity.ok("OK");
     }
 
@@ -118,11 +125,17 @@ public class DebugController {
     @Documentation(
             description = "Requests upload of all problematic diary entries",
             responses = {"200 => success"})
-    public @ResponseBody ResponseEntity<String> getTraceKeys(
+    public @ResponseBody ResponseEntity<String> postDiaryEntries(
             @RequestBody ProblematicDiaryEntryWrapper problematicDiaryEntryWrapper) {
         logger.debug(
                 "received {} problematicDiaryEntries",
                 problematicDiaryEntryWrapper.getDiaryEntriesCount());
+
+        final var diaryEntries = problematicDiaryEntryWrapper.getDiaryEntriesList().stream()
+                .map(DiaryEntry::from)
+                .collect(Collectors.toList());
+        diaryEntryDataService.insertDiaryEntries(diaryEntries);
+
         return ResponseEntity.ok("OK");
     }
 }

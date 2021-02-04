@@ -17,8 +17,11 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.IOException;
 import org.junit.Before;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -30,8 +33,15 @@ import org.springframework.web.context.WebApplicationContext;
 @ActiveProfiles({"dev"})
 // @TestPropertySource(properties = {})
 public abstract class BaseControllerTest {
-    protected MockMvc mockMvc;
+
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
+
     protected ObjectMapper objectMapper;
+
+    protected MockMvc mockMvc;
+    @LocalServerPort
+    protected int port;
+
     @Autowired private WebApplicationContext webApplicationContext;
 
     @Before
