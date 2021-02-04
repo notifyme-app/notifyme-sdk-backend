@@ -28,16 +28,15 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 @RequestMapping("/v1/debug")
 @CrossOrigin({
     "https://upload-dev.notify-me.ch",
@@ -52,9 +51,10 @@ public class DebugController {
     private final DiaryEntryDataService diaryEntryDataService;
     private final CryptoWrapper cryptoWrapper;
 
-    public DebugController(NotifyMeDataService notifyMeDataService,
+    public DebugController(
+            final NotifyMeDataService notifyMeDataService,
             final DiaryEntryDataService diaryEntryDataService,
-            CryptoWrapper cryptoWrapper) {
+            final CryptoWrapper cryptoWrapper) {
         this.notifyMeDataService = notifyMeDataService;
         this.diaryEntryDataService = diaryEntryDataService;
         this.cryptoWrapper = cryptoWrapper;
@@ -64,14 +64,14 @@ public class DebugController {
     @Documentation(
             description = "Hello return",
             responses = {"200=>server live"})
-    public @ResponseBody ResponseEntity<String> hello() {
+    public ResponseEntity<String> hello() {
         return ResponseEntity.ok()
                 .header("X-HELLO", "notifyme")
                 .body("Hello from NotifyMe Debug WS v1");
     }
 
     @PostMapping("/traceKey")
-    public @ResponseBody ResponseEntity<String> uploadTraceKey(
+    public ResponseEntity<String> uploadTraceKey(
             @RequestParam Long startTime,
             @RequestParam Long endTime,
             @RequestParam @Documentation(description = "list of url base64 encoded pre trace keys")
@@ -125,15 +125,16 @@ public class DebugController {
     @Documentation(
             description = "Requests upload of all problematic diary entries",
             responses = {"200 => success"})
-    public @ResponseBody ResponseEntity<String> postDiaryEntries(
-            @RequestBody ProblematicDiaryEntryWrapper problematicDiaryEntryWrapper) {
+    public ResponseEntity<String> postDiaryEntries(
+            @RequestBody final ProblematicDiaryEntryWrapper problematicDiaryEntryWrapper) {
         logger.debug(
                 "received {} problematicDiaryEntries",
                 problematicDiaryEntryWrapper.getDiaryEntriesCount());
 
-        final var diaryEntries = problematicDiaryEntryWrapper.getDiaryEntriesList().stream()
-                .map(DiaryEntry::from)
-                .collect(Collectors.toList());
+        final var diaryEntries =
+                problematicDiaryEntryWrapper.getDiaryEntriesList().stream()
+                        .map(DiaryEntry::from)
+                        .collect(Collectors.toList());
         diaryEntryDataService.insertDiaryEntries(diaryEntries);
 
         return ResponseEntity.ok("OK");
