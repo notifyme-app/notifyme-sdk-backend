@@ -10,6 +10,21 @@
 
 package ch.ubique.notifyme.sdk.backend.ws.config;
 
+import ch.ubique.notifyme.sdk.backend.data.DiaryEntryDataService;
+import ch.ubique.notifyme.sdk.backend.data.JdbcDiaryEntryDataServiceImpl;
+import ch.ubique.notifyme.sdk.backend.data.JdbcNotifyMeDataServiceImpl;
+import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataService;
+import ch.ubique.notifyme.sdk.backend.ws.CryptoWrapper;
+import ch.ubique.notifyme.sdk.backend.ws.controller.ConfigController;
+import ch.ubique.notifyme.sdk.backend.ws.controller.DebugController;
+import ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeController;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -18,9 +33,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.TimeZone;
-
 import javax.sql.DataSource;
-
 import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +44,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.protobuf.ProtobufHttpMessageConverter;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -41,21 +55,6 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
-
-import ch.ubique.notifyme.sdk.backend.data.JdbcNotifyMeDataServiceImpl;
-import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataService;
-import ch.ubique.notifyme.sdk.backend.ws.CryptoWrapper;
-import ch.ubique.notifyme.sdk.backend.ws.controller.ConfigController;
-import ch.ubique.notifyme.sdk.backend.ws.controller.DebugController;
-import ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeController;
 
 @Configuration
 @EnableScheduling
@@ -77,7 +76,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
     @Value("${traceKey.bucketSizeInMs}")
     Long bucketSizeInMs;
-    
+
     @Value("${traceKey.traceKeysCacheControlInMs}")
     Long traceKeysCacheControlInMs;
 
@@ -90,12 +89,6 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
     @Value("${git.commit.time}")
     private String commitTime;
 
-    public abstract DataSource dataSource();
-
-    public abstract Flyway flyway();
-
-    public abstract String getDbType();
-
     @Bean
     public static PropertySourcesPlaceholderConfigurer placeholderConfigurer() {
         PropertySourcesPlaceholderConfigurer propsConfig =
@@ -105,6 +98,12 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
         propsConfig.setIgnoreUnresolvablePlaceholders(true);
         return propsConfig;
     }
+
+    public abstract DataSource dataSource();
+
+    public abstract Flyway flyway();
+
+    public abstract String getDbType();
 
     @Bean
     public MappingJackson2HttpMessageConverter converter() {
@@ -180,6 +179,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
         converters.add(customJacksonJsonConverter());
+        converters.add(new StringHttpMessageConverter());
     }
 
     @Bean
