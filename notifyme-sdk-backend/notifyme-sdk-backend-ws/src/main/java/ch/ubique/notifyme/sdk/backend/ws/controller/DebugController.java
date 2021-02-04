@@ -37,7 +37,7 @@ import ch.ubique.openapi.docannotations.Documentation;
 
 @Controller
 @RequestMapping("/v1/debug")
-@CrossOrigin(origins = { "https://upload-dev.notify-me.ch", "https://upload.notify-me.ch", "http://localhost:1313", "https://notify-me.c4dt.org" })
+@CrossOrigin(origins = { "https://upload-dev.notify-me.ch", "https://upload.notify-me.ch", "http://localhost:1313", "https://notify-me.c4dt.org", "https://notify-me-dev.c4dt.org" })
 public class DebugController {
     private static final Logger logger = LoggerFactory.getLogger(DebugController.class);
 
