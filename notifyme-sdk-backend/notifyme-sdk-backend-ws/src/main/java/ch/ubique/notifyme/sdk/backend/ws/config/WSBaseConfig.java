@@ -18,6 +18,8 @@ import ch.ubique.notifyme.sdk.backend.ws.CryptoWrapper;
 import ch.ubique.notifyme.sdk.backend.ws.controller.ConfigController;
 import ch.ubique.notifyme.sdk.backend.ws.controller.DebugController;
 import ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeController;
+import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebController;
+import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebCriticalEventController;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -54,6 +56,7 @@ import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
@@ -155,6 +158,16 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
     @Bean
     public ConfigController configController() {
         return new ConfigController();
+    }
+
+    @Bean
+    public WebController webController() {
+        return new WebController();
+    }
+
+    @Bean
+    public WebCriticalEventController webCriticalEventController() {
+        return new WebCriticalEventController();
     }
 
     @Bean
