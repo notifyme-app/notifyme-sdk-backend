@@ -11,7 +11,6 @@ public class WebController {
 
     @GetMapping("/")
     public String web(final Model model) {
-        model.addAttribute("name", "Vorname Nachname");
         return "home";
     }
 }

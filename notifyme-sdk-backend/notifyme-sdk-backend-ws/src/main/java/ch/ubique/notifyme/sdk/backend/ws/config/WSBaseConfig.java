@@ -56,7 +56,6 @@ import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
@@ -166,8 +165,8 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
     }
 
     @Bean
-    public WebCriticalEventController webCriticalEventController() {
-        return new WebCriticalEventController();
+    public WebCriticalEventController webCriticalEventController(final DiaryEntryDataService diaryEntryDataService) {
+        return new WebCriticalEventController(diaryEntryDataService);
     }
 
     @Bean

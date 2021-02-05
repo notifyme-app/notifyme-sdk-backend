@@ -10,18 +10,22 @@
 
 package ch.ubique.notifyme.sdk.backend.data;
 
-import ch.ubique.notifyme.sdk.backend.model.diaryentry.DiaryEntry;
+import ch.ubique.notifyme.sdk.backend.model.event.CriticalEvent;
+import ch.ubique.notifyme.sdk.backend.model.event.DiaryEntry;
 import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
 import java.util.List;
 import javax.sql.DataSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 public class JdbcDiaryEntryDataServiceImpl implements DiaryEntryDataService {
 
+    private final NamedParameterJdbcTemplate jt;
     private final SimpleJdbcInsert diaryEntryInsert;
 
     public JdbcDiaryEntryDataServiceImpl(final DataSource dataSource) {
+        this.jt = new NamedParameterJdbcTemplate(dataSource);
         this.diaryEntryInsert =
                 new SimpleJdbcInsert(dataSource)
                         .withTableName("t_diary_entry")
@@ -40,6 +44,18 @@ public class JdbcDiaryEntryDataServiceImpl implements DiaryEntryDataService {
                         .map(this::getDiaryEntryParams)
                         .toArray(MapSqlParameterSource[]::new);
         diaryEntryInsert.executeBatch(diaryEntryParams);
+    }
+
+    @Override
+    public List<CriticalEvent> getCriticalEvents() {
+        final String sql =
+                "select *"
+                        + " from (select name, location, room, venue_type, count(*) as case_count"
+                        + "       from t_diary_entry"
+                        + "       group by name, location, room, venue_type"
+                        + "      ) as grouped"
+                        + " where grouped.case_count > 1";
+        return jt.query(sql, new MapSqlParameterSource(), new CriticalEntryRowMapper());
     }
 
     private MapSqlParameterSource getDiaryEntryParams(DiaryEntry diaryEntry) {

@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-package ch.ubique.notifyme.sdk.backend.model.diaryentry;
+package ch.ubique.notifyme.sdk.backend.model.event;
 
 import ch.ubique.notifyme.sdk.backend.model.ProblematicDiaryEntryWrapperOuterClass.ProblematicDiaryEntry;
 import ch.ubique.notifyme.sdk.backend.model.VenueTypeOuterClass.VenueType;

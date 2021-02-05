@@ -13,6 +13,28 @@
 
     <h2 class="mt-5" th:text="'Critical Event'"></h2>
 
+    <table class="table table-striped">
+        <thead class="thead-dark">
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Name</th>
+            <th scope="col">Location</th>
+            <th scope="col">Room</th>
+            <th scope="col">Venue Type</th>
+            <th scope="col"># common cases</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="criticalEvent, iter: ${criticalEvents}">
+            <th scope="row" th:text="${iter.index}"></th>
+            <td th:text="${criticalEvent.getName()}"></td>
+            <td th:text="${criticalEvent.getLocation()}"></td>
+            <td th:text="${criticalEvent.getRoom()}"></td>
+            <td th:text="${criticalEvent.getVenueType()}"></td>
+            <td th:text="${criticalEvent.getCaseCount()}"></td>
+        </tr>
+        </tbody>
+    </table>
 
 </div>
 

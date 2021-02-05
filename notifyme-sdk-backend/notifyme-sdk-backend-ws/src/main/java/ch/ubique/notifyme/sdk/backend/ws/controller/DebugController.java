@@ -14,7 +14,7 @@ import ch.ubique.notifyme.sdk.backend.data.DiaryEntryDataService;
 import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataService;
 import ch.ubique.notifyme.sdk.backend.model.PreTraceWithProofOuterClass.PreTraceWithProof;
 import ch.ubique.notifyme.sdk.backend.model.ProblematicDiaryEntryWrapperOuterClass.ProblematicDiaryEntryWrapper;
-import ch.ubique.notifyme.sdk.backend.model.diaryentry.DiaryEntry;
+import ch.ubique.notifyme.sdk.backend.model.event.DiaryEntry;
 import ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey;
 import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
 import ch.ubique.notifyme.sdk.backend.ws.CryptoWrapper;
