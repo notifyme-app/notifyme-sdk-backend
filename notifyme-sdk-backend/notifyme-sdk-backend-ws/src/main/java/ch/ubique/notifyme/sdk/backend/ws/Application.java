@@ -16,13 +16,11 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @Configuration
 @ComponentScan(basePackages = {"ch.ubique.notifyme.sdk.backend.ws.config"})
 @EnableAutoConfiguration(
         exclude = {SecurityAutoConfiguration.class, ManagementWebSecurityAutoConfiguration.class})
-@EnableWebMvc
 public class Application {
 
     public static void main(String[] args) {
