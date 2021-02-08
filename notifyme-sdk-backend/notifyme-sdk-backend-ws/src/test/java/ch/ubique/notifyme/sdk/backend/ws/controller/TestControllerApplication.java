@@ -11,8 +11,6 @@
 package ch.ubique.notifyme.sdk.backend.ws.controller;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.ComponentScan;
 
-@ComponentScan(basePackages = {"ch.ubique.notifyme.sdk.backend.ws.config"})
-@SpringBootApplication
-public class TestApplication {}
+@SpringBootApplication(scanBasePackages = {"ch.ubique.notifyme.sdk.backend.ws.config"})
+public class TestControllerApplication {}

@@ -23,7 +23,6 @@ public class TestConfig {
 
     @Bean
     public PlatformTransactionManager testTransactionManager() throws Exception {
-        DataSourceTransactionManager dstm = new DataSourceTransactionManager(dataSource);
-        return dstm;
+        return new DataSourceTransactionManager(dataSource);
     }
 }
