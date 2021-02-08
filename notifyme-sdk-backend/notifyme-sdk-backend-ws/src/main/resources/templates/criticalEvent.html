@@ -11,30 +11,54 @@
 <div th:replace="fragments/header :: header(criticalevent)"></div>
 <div class="container">
 
-    <h2 class="mt-5" th:text="'Critical Event'"></h2>
+    <h2 class="mt-5" th:text="'Critical Events'"></h2>
 
-    <table class="table table-striped">
-        <thead class="thead-dark">
-        <tr>
-            <th scope="col">#</th>
-            <th scope="col">Name</th>
-            <th scope="col">Location</th>
-            <th scope="col">Room</th>
-            <th scope="col">Venue Type</th>
-            <th scope="col"># common cases</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="criticalEvent, iter: ${criticalEvents}">
-            <th scope="row" th:text="${iter.index}"></th>
-            <td th:text="${criticalEvent.getName()}"></td>
-            <td th:text="${criticalEvent.getLocation()}"></td>
-            <td th:text="${criticalEvent.getRoom()}"></td>
-            <td th:text="${criticalEvent.getVenueType()}"></td>
-            <td th:text="${criticalEvent.getCaseCount()}"></td>
-        </tr>
-        </tbody>
-    </table>
+    <div class="accordion accordion-flush mt-5" id="accordionExample">
+        <div class="accordion-item" th:each="criticalEvent, iter: ${criticalEvents}">
+            <h2 class="accordion-header" id="headingOne">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                        th:data-bs-target="${'#collapse' + iter.index}"
+                        aria-expanded="true" th:aria-controls="${'collapse' + iter.index}">
+                    <div class="row">
+                        <div class="col-md-auto" th:text="${'Event '+ iter.index + ': '}"></div>
+                        <div class="col" th:text="${criticalEvent.getName()}"></div>
+                        <div class="col" th:text="${criticalEvent.getLocation()}"></div>
+                        <div class="col" th:text="${criticalEvent.getRoom()}"></div>
+                        <div class="col" th:text="${criticalEvent.getVenueType()}"></div>
+                    </div>
+                </button>
+            </h2>
+            <div th:id="${'collapse' + iter.index}" class="accordion-collapse collapse show"
+                 aria-labelledby="headingOne">
+                <div class="accordion-body">
+                    <table class="table table-striped" aria-label="all relevant diary entries for he given event">
+                        <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Location</th>
+                            <th scope="col">Room</th>
+                            <th scope="col">Venue Type</th>
+                            <th scope="col">Checkin</th>
+                            <th scope="col">Checkout</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="diaryEntry, iter: ${criticalEvent.getWebDiaryEntries()}">
+                            <th scope="row" th:text="${iter.index}"></th>
+                            <td th:text="${diaryEntry.getName()}"></td>
+                            <td th:text="${diaryEntry.getLocation()}"></td>
+                            <td th:text="${diaryEntry.getRoom()}"></td>
+                            <td th:text="${diaryEntry.getVenueType()}"></td>
+                            <td th:text="${diaryEntry.getCheckinTime()}"></td>
+                            <td th:text="${diaryEntry.getCheckoutTime()}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </div>
 

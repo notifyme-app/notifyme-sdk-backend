@@ -1,6 +1,7 @@
 package ch.ubique.notifyme.sdk.backend.model.event;
 
 import ch.ubique.notifyme.sdk.backend.model.VenueTypeOuterClass.VenueType;
+import java.util.List;
 import javax.validation.constraints.NotNull;
 
 public class CriticalEvent {
@@ -12,6 +13,8 @@ public class CriticalEvent {
     @NotNull private String room;
 
     @NotNull private VenueType venueType;
+
+    @NotNull private List<WebDiaryEntry> webDiaryEntries;
 
     private int caseCount;
 
@@ -53,5 +56,13 @@ public class CriticalEvent {
 
     public void setCaseCount(final int caseCount) {
         this.caseCount = caseCount;
+    }
+
+    public List<WebDiaryEntry> getWebDiaryEntries() {
+        return webDiaryEntries;
+    }
+
+    public void setWebDiaryEntries(final List<WebDiaryEntry> webDiaryEntries) {
+        this.webDiaryEntries = webDiaryEntries;
     }
 }

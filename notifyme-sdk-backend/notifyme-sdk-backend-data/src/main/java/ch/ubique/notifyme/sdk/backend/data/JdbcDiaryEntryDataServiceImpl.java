@@ -58,6 +58,19 @@ public class JdbcDiaryEntryDataServiceImpl implements DiaryEntryDataService {
         return jt.query(sql, new MapSqlParameterSource(), new CriticalEventRowMapper());
     }
 
+    @Override
+    public List<DiaryEntry> getDiaryEntriesForEvent(final CriticalEvent criticalEvent) {
+        final String sql =
+                "select * from t_diary_entry"
+                        + " where name = :name and location = :location and room = :room and venue_type = :venueType";
+        final var params = new MapSqlParameterSource();
+        params.addValue("name", criticalEvent.getName());
+        params.addValue("location", criticalEvent.getLocation());
+        params.addValue("room", criticalEvent.getRoom());
+        params.addValue("venueType", criticalEvent.getVenueType().name());
+        return jt.query(sql, params, new DiaryEntryRowMapper());
+    }
+
     private MapSqlParameterSource getDiaryEntryParams(DiaryEntry diaryEntry) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("pk_diary_entry_id", diaryEntry.getId());

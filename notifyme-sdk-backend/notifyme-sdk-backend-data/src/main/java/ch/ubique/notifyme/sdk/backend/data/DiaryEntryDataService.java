@@ -31,4 +31,6 @@ public interface DiaryEntryDataService {
     void insertDiaryEntries(List<DiaryEntry> diaryEntriesToInsert);
 
     List<CriticalEvent> getCriticalEvents();
+
+    List<DiaryEntry> getDiaryEntriesForEvent(CriticalEvent criticalEvent);
 }
