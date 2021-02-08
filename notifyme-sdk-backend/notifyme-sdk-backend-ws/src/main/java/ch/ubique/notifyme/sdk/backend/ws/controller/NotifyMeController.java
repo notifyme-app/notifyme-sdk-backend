@@ -40,7 +40,7 @@ import ch.ubique.openapi.docannotations.Documentation;
 
 @Controller
 @RequestMapping("/v1")
-@CrossOrigin(origins = { "https://notify-me.c4dt.org" })
+@CrossOrigin(origins = { "https://notify-me.c4dt.org", "https://notify-me-dev.c4dt.org"})
 public class NotifyMeController {
     private static final String HEADER_X_KEY_BUNDLE_TAG = "x-key-bundle-tag";
 
