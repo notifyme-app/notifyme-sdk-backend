@@ -55,7 +55,7 @@ public class JdbcDiaryEntryDataServiceImpl implements DiaryEntryDataService {
                         + "       group by name, location, room, venue_type"
                         + "      ) as grouped"
                         + " where grouped.case_count > 1";
-        return jt.query(sql, new MapSqlParameterSource(), new CriticalEntryRowMapper());
+        return jt.query(sql, new MapSqlParameterSource(), new CriticalEventRowMapper());
     }
 
     private MapSqlParameterSource getDiaryEntryParams(DiaryEntry diaryEntry) {

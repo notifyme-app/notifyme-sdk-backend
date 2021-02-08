@@ -16,7 +16,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.springframework.jdbc.core.RowMapper;
 
-public class CriticalEntryRowMapper implements RowMapper<CriticalEvent> {
+public class CriticalEventRowMapper implements RowMapper<CriticalEvent> {
 
     @Override
     public CriticalEvent mapRow(ResultSet rs, int rowNum) throws SQLException {
