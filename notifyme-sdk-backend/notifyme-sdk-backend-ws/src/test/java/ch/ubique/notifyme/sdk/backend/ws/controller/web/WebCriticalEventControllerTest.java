@@ -18,7 +18,7 @@ public class WebCriticalEventControllerTest extends BaseControllerTest {
 
     @Before
     public void setUp() throws Exception {
-        criticalEventEndPoint = "/v1/criticalevent";
+        criticalEventEndPoint = "/criticalevent";
 
         final ProblematicDiaryEntryWrapper wrapper =
                 DebugControllerTestHelper.getTestProblematicDiaryEntryWrapper();
