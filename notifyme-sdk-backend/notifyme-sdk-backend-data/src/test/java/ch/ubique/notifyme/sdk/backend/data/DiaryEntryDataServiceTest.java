@@ -28,28 +28,44 @@ public class DiaryEntryDataServiceTest extends BaseDataServiceTest {
 
         assertEquals(2, criticalEvents.size());
 
-        final var diaryEntriesForEvent0 =
-                diaryEntryDataService.getDiaryEntriesForEvent(criticalEvents.get(0));
-        assertNotNull(criticalEvents.get(0));
-        assertEquals(4, criticalEvents.get(0).getCaseCount());
-        assertEquals(4, diaryEntriesForEvent0.size());
-        assertEquals("lecture0", diaryEntriesForEvent0.get(0).getName());
-        assertEquals("location0", diaryEntriesForEvent0.get(0).getLocation());
-        assertEquals("room0", diaryEntriesForEvent0.get(0).getRoom());
-        assertEquals(VenueType.LECTURE_ROOM, diaryEntriesForEvent0.get(0).getVenueType());
-        assertEquals(1577746800000L, diaryEntriesForEvent0.get(0).getCheckinTime().toEpochMilli());
-        assertEquals(1577833200000L, diaryEntriesForEvent0.get(0).getCheckoutTime().toEpochMilli());
+        // block to not mix up variables
+        {
+            final var criticalEvent0 = criticalEvents.get(0);
+            assertNotNull(criticalEvent0);
+            assertEquals(4, criticalEvent0.getCaseCount());
 
-        final var diaryEntriesForEvent1 =
-                diaryEntryDataService.getDiaryEntriesForEvent(criticalEvents.get(1));
-        assertNotNull(criticalEvents.get(1));
-        assertEquals(2, criticalEvents.get(1).getCaseCount());
-        assertEquals(2, diaryEntriesForEvent1.size());
-        assertEquals("meeting3", diaryEntriesForEvent1.get(1).getName());
-        assertEquals("location3", diaryEntriesForEvent1.get(1).getLocation());
-        assertEquals("room3", diaryEntriesForEvent1.get(1).getRoom());
-        assertEquals(VenueType.MEETING_ROOM, diaryEntriesForEvent1.get(1).getVenueType());
-        assertEquals(1578006000000L, diaryEntriesForEvent1.get(1).getCheckinTime().toEpochMilli());
-        assertEquals(1578092400000L, diaryEntriesForEvent1.get(1).getCheckoutTime().toEpochMilli());
+            final var diaryEntriesForEvent0 =
+                    diaryEntryDataService.getDiaryEntriesForEvent(criticalEvent0);
+            assertNotNull(diaryEntriesForEvent0);
+            assertEquals(criticalEvent0.getCaseCount(), diaryEntriesForEvent0.size());
+
+            final var diaryEntry0forEvent0 = diaryEntriesForEvent0.get(0);
+            assertEquals("lecture0", diaryEntry0forEvent0.getName());
+            assertEquals("location0", diaryEntry0forEvent0.getLocation());
+            assertEquals("room0", diaryEntry0forEvent0.getRoom());
+            assertEquals(VenueType.LECTURE_ROOM, diaryEntry0forEvent0.getVenueType());
+            assertEquals(1577746800000L, diaryEntry0forEvent0.getCheckinTime().toEpochMilli());
+            assertEquals(1577833200000L, diaryEntry0forEvent0.getCheckoutTime().toEpochMilli());
+        }
+
+        // block to not mix up variables
+        {
+            final var criticalEvent1 = criticalEvents.get(1);
+            assertNotNull(criticalEvent1);
+            assertEquals(2, criticalEvent1.getCaseCount());
+
+            final var diaryEntriesForEvent1 =
+                    diaryEntryDataService.getDiaryEntriesForEvent(criticalEvents.get(1));
+            assertNotNull(diaryEntriesForEvent1);
+            assertEquals(criticalEvent1.getCaseCount(), diaryEntriesForEvent1.size());
+
+            final var diaryEntry0forEvent1 = diaryEntriesForEvent1.get(1);
+            assertEquals("meeting3", diaryEntry0forEvent1.getName());
+            assertEquals("location3", diaryEntry0forEvent1.getLocation());
+            assertEquals("room3", diaryEntry0forEvent1.getRoom());
+            assertEquals(VenueType.MEETING_ROOM, diaryEntry0forEvent1.getVenueType());
+            assertEquals(1578006000000L, diaryEntry0forEvent1.getCheckinTime().toEpochMilli());
+            assertEquals(1578092400000L, diaryEntry0forEvent1.getCheckoutTime().toEpochMilli());
+        }
     }
 }
