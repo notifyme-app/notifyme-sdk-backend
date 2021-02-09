@@ -1,7 +1,6 @@
 package ch.ubique.notifyme.sdk.backend.ws.controller.web;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -21,12 +20,11 @@ public class WebControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void shouldReturnHtml() throws Exception{
+    public void shouldReturnHtml() throws Exception {
         final ProblematicDiaryEntryWrapper wrapper =
                 DebugControllerTestHelper.getTestProblematicDiaryEntryWrapper();
 
         mockMvc.perform(get(webEndPoint).content(wrapper.toByteArray()))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().string(Matchers.startsWith("<!DOCTYPE html>")));
     }

@@ -2,7 +2,6 @@ package ch.ubique.notifyme.sdk.backend.ws.controller.web;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -38,7 +37,6 @@ public class WebCriticalEventControllerTest extends BaseControllerTest {
                         get(criticalEventEndPoint)
                                 .contentType("application/x-protobuf")
                                 .content(wrapper.toByteArray()))
-                .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().string(Matchers.startsWith("<!DOCTYPE html>")));
     }

@@ -1,12 +1,11 @@
 package ch.ubique.notifyme.sdk.backend.data;
 
-import ch.ubique.notifyme.sdk.backend.model.VenueTypeOuterClass.VenueType;
-import ch.ubique.notifyme.sdk.backend.model.event.CriticalEvent;
-import ch.ubique.notifyme.sdk.backend.model.event.DiaryEntry;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import ch.ubique.notifyme.sdk.backend.model.VenueTypeOuterClass.VenueType;
+import ch.ubique.notifyme.sdk.backend.model.event.CriticalEvent;
+import ch.ubique.notifyme.sdk.backend.model.event.DiaryEntry;
 import java.util.List;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +38,7 @@ public class DiaryEntryDataServiceTest extends BaseDataServiceTest {
         assertEquals("room0", diaryEntriesForEvent0.get(0).getRoom());
         assertEquals(VenueType.LECTURE_ROOM, diaryEntriesForEvent0.get(0).getVenueType());
         assertEquals(1577746800000L, diaryEntriesForEvent0.get(0).getCheckinTime().toEpochMilli());
-        assertEquals(1577919600000L, diaryEntriesForEvent0.get(0).getCheckoutTime().toEpochMilli());
+        assertEquals(1577833200000L, diaryEntriesForEvent0.get(0).getCheckoutTime().toEpochMilli());
 
         final var diaryEntriesForEvent1 =
                 diaryEntryDataService.getDiaryEntriesForEvent(criticalEvents.get(1));
@@ -50,7 +49,7 @@ public class DiaryEntryDataServiceTest extends BaseDataServiceTest {
         assertEquals("location3", diaryEntriesForEvent1.get(1).getLocation());
         assertEquals("room3", diaryEntriesForEvent1.get(1).getRoom());
         assertEquals(VenueType.MEETING_ROOM, diaryEntriesForEvent1.get(1).getVenueType());
-        assertEquals(1577919600000L, diaryEntriesForEvent1.get(1).getCheckinTime().toEpochMilli());
+        assertEquals(1578006000000L, diaryEntriesForEvent1.get(1).getCheckinTime().toEpochMilli());
         assertEquals(1578092400000L, diaryEntriesForEvent1.get(1).getCheckoutTime().toEpochMilli());
     }
 }

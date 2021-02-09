@@ -54,7 +54,8 @@ public class JdbcDiaryEntryDataServiceImpl implements DiaryEntryDataService {
                         + "       from t_diary_entry"
                         + "       group by name, location, room, venue_type"
                         + "      ) as grouped"
-                        + " where grouped.case_count > 1";
+                        + " where grouped.case_count > 1"
+                        + " order by grouped.case_count desc, grouped.name, grouped.location, grouped.location";
         return jt.query(sql, new MapSqlParameterSource(), new CriticalEventRowMapper());
     }
 
@@ -62,7 +63,8 @@ public class JdbcDiaryEntryDataServiceImpl implements DiaryEntryDataService {
     public List<DiaryEntry> getDiaryEntriesForEvent(final CriticalEvent criticalEvent) {
         final String sql =
                 "select * from t_diary_entry"
-                        + " where name = :name and location = :location and room = :room and venue_type = :venueType";
+                        + " where name = :name and location = :location and room = :room and venue_type = :venueType"
+                        + " order by checkin_time, checkout_time, pk_diary_entry_id";
         final var params = new MapSqlParameterSource();
         params.addValue("name", criticalEvent.getName());
         params.addValue("location", criticalEvent.getLocation());
