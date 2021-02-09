@@ -1,11 +1,12 @@
 package ch.ubique.notifyme.sdk.backend.data;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 import ch.ubique.notifyme.sdk.backend.model.VenueTypeOuterClass.VenueType;
 import ch.ubique.notifyme.sdk.backend.model.event.CriticalEvent;
 import ch.ubique.notifyme.sdk.backend.model.event.DiaryEntry;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import java.util.List;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
