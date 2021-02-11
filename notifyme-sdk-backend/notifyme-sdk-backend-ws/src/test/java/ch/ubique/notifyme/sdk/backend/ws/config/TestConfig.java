@@ -22,7 +22,7 @@ public class TestConfig {
     @Autowired DataSource dataSource;
 
     @Bean
-    public PlatformTransactionManager testTransactionManager() throws Exception {
+    public PlatformTransactionManager testTransactionManager() {
         return new DataSourceTransactionManager(dataSource);
     }
 }
