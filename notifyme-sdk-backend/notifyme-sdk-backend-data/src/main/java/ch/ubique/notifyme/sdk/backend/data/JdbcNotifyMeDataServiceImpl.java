@@ -17,8 +17,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.sql.DataSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -27,16 +25,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 public class JdbcNotifyMeDataServiceImpl implements NotifyMeDataService {
 
-    private static final Logger logger = LoggerFactory.getLogger(JdbcNotifyMeDataServiceImpl.class);
-
     private final Long bucketSizeInMs;
-    private final String dbType;
     private final NamedParameterJdbcTemplate jt;
     private final SimpleJdbcInsert traceKeyInsert;
 
-    public JdbcNotifyMeDataServiceImpl(String dbType, DataSource dataSource, Long bucketSizeInMs) {
+    public JdbcNotifyMeDataServiceImpl(DataSource dataSource, Long bucketSizeInMs) {
         this.bucketSizeInMs = bucketSizeInMs;
-        this.dbType = dbType;
         this.jt = new NamedParameterJdbcTemplate(dataSource);
         this.traceKeyInsert =
                 new SimpleJdbcInsert(dataSource)
@@ -45,7 +39,7 @@ public class JdbcNotifyMeDataServiceImpl implements NotifyMeDataService {
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional
     public void insertTraceKey(TraceKey traceKey) {
         traceKeyInsert.execute(getTraceKeyParams(traceKey));
     }
@@ -53,11 +47,10 @@ public class JdbcNotifyMeDataServiceImpl implements NotifyMeDataService {
     @Override
     @Transactional(readOnly = true)
     public List<TraceKey> findTraceKeys(Instant after) {
-        String sql = "select * from t_trace_key";
-        MapSqlParameterSource params =
-                new MapSqlParameterSource(
-                        "before",
-                        new Date(DateUtil.getLastFullBucketEndEpochMilli(bucketSizeInMs)));
+        var sql = "select * from t_trace_key";
+        final var before =
+                DateUtil.toInstant(DateUtil.getLastFullBucketEndEpochMilli(bucketSizeInMs));
+        MapSqlParameterSource params = new MapSqlParameterSource("before", DateUtil.toDate(before));
         sql += " where created_at < :before";
         if (after != null) {
             sql += " and created_at >= :after";
@@ -67,16 +60,16 @@ public class JdbcNotifyMeDataServiceImpl implements NotifyMeDataService {
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional
     public int removeTraceKeys(Instant before) {
-        String sql = "delete from t_trace_key where end_time < :before";
-        MapSqlParameterSource params = new MapSqlParameterSource();
+        final var sql = "delete from t_trace_key where end_time < :before";
+        final var params = new MapSqlParameterSource();
         params.addValue("before", DateUtil.toDate(before));
         return jt.update(sql, params);
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional
     public void insertTraceKey(List<TraceKey> traceKeysToInsert) {
         List<SqlParameterSource> batchParams = new ArrayList<>();
         if (!traceKeysToInsert.isEmpty()) {

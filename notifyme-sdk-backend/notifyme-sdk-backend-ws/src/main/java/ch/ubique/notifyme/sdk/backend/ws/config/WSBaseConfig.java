@@ -139,7 +139,7 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
     @Bean
     public NotifyMeDataService notifyMeDataService() {
-        return new JdbcNotifyMeDataServiceImpl(getDbType(), dataSource(), bucketSizeInMs);
+        return new JdbcNotifyMeDataServiceImpl(dataSource(), bucketSizeInMs);
     }
 
     @Bean
