@@ -4,7 +4,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ch.ubique.notifyme.sdk.backend.model.ProblematicDiaryEntryWrapperOuterClass.ProblematicDiaryEntryWrapper;
 import ch.ubique.notifyme.sdk.backend.ws.controller.BaseControllerTest;
 import ch.ubique.notifyme.sdk.backend.ws.controller.DebugControllerTestHelper;
 import org.hamcrest.Matchers;
@@ -21,8 +20,7 @@ public class WebControllerTest extends BaseControllerTest {
 
     @Test
     public void shouldReturnHtml() throws Exception {
-        final ProblematicDiaryEntryWrapper wrapper =
-                DebugControllerTestHelper.getTestDiaryEntryWrapper();
+        final var wrapper = DebugControllerTestHelper.getTestDiaryEntryWrapper();
 
         mockMvc.perform(get(webEndPoint).content(wrapper.toByteArray()))
                 .andExpect(status().isOk())

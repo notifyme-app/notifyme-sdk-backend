@@ -10,7 +10,7 @@
 
 package ch.ubique.notifyme.sdk.backend.model.event;
 
-import ch.ubique.notifyme.sdk.backend.model.ProblematicDiaryEntryWrapper.DiaryEntry;
+import ch.ubique.notifyme.sdk.backend.model.DiaryEntryWrapperOuterClass.DiaryEntry;
 import ch.ubique.notifyme.sdk.backend.model.VenueTypeOuterClass.VenueType;
 import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
 import java.time.Instant;

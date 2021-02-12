@@ -12,7 +12,6 @@ package ch.ubique.notifyme.sdk.backend.ws.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import ch.ubique.notifyme.sdk.backend.model.ProblematicDiaryEntryWrapper.DiaryEntryWrapper;
 import java.net.URI;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -43,9 +42,9 @@ public class LiveDebugControllerTest extends BaseControllerTest {
 
     @Test
     public void uploadDiaryEntryProtobufShouldReturnOk() {
-        final DiaryEntryWrapper wrapper = DebugControllerTestHelper.getTestDiaryEntryWrapper();
+        final var wrapper = DebugControllerTestHelper.getTestDiaryEntryWrapper();
 
-        final HttpHeaders headers = new HttpHeaders();
+        final var headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("application/x-protobuf"));
         final HttpEntity<byte[]> entity = new HttpEntity<>(wrapper.toByteArray(), headers);
         final ResponseEntity<String> response =

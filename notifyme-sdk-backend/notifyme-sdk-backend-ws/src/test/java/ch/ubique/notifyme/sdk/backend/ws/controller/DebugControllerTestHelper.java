@@ -10,8 +10,8 @@
 
 package ch.ubique.notifyme.sdk.backend.ws.controller;
 
-import ch.ubique.notifyme.sdk.backend.model.ProblematicDiaryEntryWrapper.DiaryEntry;
-import ch.ubique.notifyme.sdk.backend.model.ProblematicDiaryEntryWrapper.DiaryEntryWrapper;
+import ch.ubique.notifyme.sdk.backend.model.DiaryEntryWrapperOuterClass.DiaryEntry;
+import ch.ubique.notifyme.sdk.backend.model.DiaryEntryWrapperOuterClass.DiaryEntryWrapper;
 import ch.ubique.notifyme.sdk.backend.model.VenueTypeOuterClass.VenueType;
 import java.util.Calendar;
 import java.util.TimeZone;

@@ -12,8 +12,8 @@ package ch.ubique.notifyme.sdk.backend.ws.controller;
 
 import ch.ubique.notifyme.sdk.backend.data.DiaryEntryDataService;
 import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataService;
+import ch.ubique.notifyme.sdk.backend.model.DiaryEntryWrapperOuterClass.DiaryEntryWrapper;
 import ch.ubique.notifyme.sdk.backend.model.PreTraceWithProofOuterClass.PreTraceWithProof;
-import ch.ubique.notifyme.sdk.backend.model.ProblematicDiaryEntryWrapper.DiaryEntryWrapper;
 import ch.ubique.notifyme.sdk.backend.model.event.JavaDiaryEntry;
 import ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey;
 import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
@@ -124,12 +124,11 @@ public class DebugController {
             value = "/diaryEntries",
             consumes = {"application/x-protobuf", "application/protobuf"})
     @Documentation(
-            description = "Requests upload of all problematic diary entries",
+            description = "Requests upload of all diary entries",
             responses = {"200 => success"})
     public ResponseEntity<String> postDiaryEntries(
             @RequestBody final DiaryEntryWrapper diaryEntryWrapper) {
-        logger.debug(
-                "received {} problematicDiaryEntries", diaryEntryWrapper.getDiaryEntriesCount());
+        logger.debug("received {} diaryEntries", diaryEntryWrapper.getDiaryEntriesCount());
 
         final var diaryEntries =
                 diaryEntryWrapper.getDiaryEntriesList().stream()

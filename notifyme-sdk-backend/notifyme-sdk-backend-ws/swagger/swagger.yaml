@@ -172,7 +172,7 @@ paths:
   /v1/debug/diaryEntries:
     post:
       summary: postDiaryEntries
-      description: Requests upload of all problematic diary entries
+      description: Requests upload of all diary entries
       responses:
         '200':
           description: success
@@ -187,11 +187,11 @@ paths:
         content:
           application/x-protobuf:
             schema:
-              $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.ProblematicDiaryEntryWrapperOuterClass.ProblematicDiaryEntryWrapper'
+              $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.DiaryEntryWrapperOuterClass.DiaryEntryWrapper'
         description: N/A
 components:
   schemas:
-    ch.ubique.notifyme.sdk.backend.model.ProblematicDiaryEntryWrapperOuterClass.ProblematicDiaryEntry:
+    ch.ubique.notifyme.sdk.backend.model.DiaryEntryWrapperOuterClass.DiaryEntry:
       type: object
       properties:
         name_:
@@ -215,7 +215,7 @@ components:
           type: integer
         memoizedHashCode:
           type: integer
-    ch.ubique.notifyme.sdk.backend.model.ProblematicDiaryEntryWrapperOuterClass.ProblematicDiaryEntryWrapper:
+    ch.ubique.notifyme.sdk.backend.model.DiaryEntryWrapperOuterClass.DiaryEntryWrapper:
       type: object
       properties:
         version_:
@@ -223,7 +223,7 @@ components:
         diaryEntries_:
           type: array
           items:
-            $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.ProblematicDiaryEntryWrapperOuterClass.ProblematicDiaryEntry'
+            $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.DiaryEntryWrapperOuterClass.DiaryEntry'
         memoizedIsInitialized:
           allOf:
           - $ref: '#/components/schemas/byte'
