@@ -12,7 +12,7 @@ package ch.ubique.notifyme.sdk.backend.ws.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import ch.ubique.notifyme.sdk.backend.model.ProblematicDiaryEntryWrapperOuterClass.ProblematicDiaryEntryWrapper;
+import ch.ubique.notifyme.sdk.backend.model.ProblematicDiaryEntryWrapper.DiaryEntryWrapper;
 import java.net.URI;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -43,8 +43,7 @@ public class LiveDebugControllerTest extends BaseControllerTest {
 
     @Test
     public void uploadDiaryEntryProtobufShouldReturnOk() {
-        final ProblematicDiaryEntryWrapper wrapper =
-                DebugControllerTestHelper.getTestProblematicDiaryEntryWrapper();
+        final DiaryEntryWrapper wrapper = DebugControllerTestHelper.getTestDiaryEntryWrapper();
 
         final HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType("application/x-protobuf"));

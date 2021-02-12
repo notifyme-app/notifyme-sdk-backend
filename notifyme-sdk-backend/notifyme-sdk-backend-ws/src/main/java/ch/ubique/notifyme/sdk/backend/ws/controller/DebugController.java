@@ -13,8 +13,8 @@ package ch.ubique.notifyme.sdk.backend.ws.controller;
 import ch.ubique.notifyme.sdk.backend.data.DiaryEntryDataService;
 import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataService;
 import ch.ubique.notifyme.sdk.backend.model.PreTraceWithProofOuterClass.PreTraceWithProof;
-import ch.ubique.notifyme.sdk.backend.model.ProblematicDiaryEntryWrapperOuterClass.ProblematicDiaryEntryWrapper;
-import ch.ubique.notifyme.sdk.backend.model.event.DiaryEntry;
+import ch.ubique.notifyme.sdk.backend.model.ProblematicDiaryEntryWrapper.DiaryEntryWrapper;
+import ch.ubique.notifyme.sdk.backend.model.event.JavaDiaryEntry;
 import ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey;
 import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
 import ch.ubique.notifyme.sdk.backend.ws.CryptoWrapper;
@@ -43,7 +43,8 @@ import org.springframework.web.bind.annotation.RestController;
     "https://upload.notify-me.ch",
     "http://localhost:1313",
     "https://notify-me.c4dt.org",
-    "https://notify-me-dev.c4dt.org" })
+    "https://notify-me-dev.c4dt.org"
+})
 public class DebugController {
     private static final Logger logger = LoggerFactory.getLogger(DebugController.class);
 
@@ -126,14 +127,13 @@ public class DebugController {
             description = "Requests upload of all problematic diary entries",
             responses = {"200 => success"})
     public ResponseEntity<String> postDiaryEntries(
-            @RequestBody final ProblematicDiaryEntryWrapper problematicDiaryEntryWrapper) {
+            @RequestBody final DiaryEntryWrapper diaryEntryWrapper) {
         logger.debug(
-                "received {} problematicDiaryEntries",
-                problematicDiaryEntryWrapper.getDiaryEntriesCount());
+                "received {} problematicDiaryEntries", diaryEntryWrapper.getDiaryEntriesCount());
 
         final var diaryEntries =
-                problematicDiaryEntryWrapper.getDiaryEntriesList().stream()
-                        .map(DiaryEntry::from)
+                diaryEntryWrapper.getDiaryEntriesList().stream()
+                        .map(JavaDiaryEntry::from)
                         .collect(Collectors.toList());
         diaryEntryDataService.insertDiaryEntries(diaryEntries);
 

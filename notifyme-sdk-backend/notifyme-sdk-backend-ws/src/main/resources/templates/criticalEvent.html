@@ -14,7 +14,7 @@
     <h2 class="mt-5" th:text="'Critical Events'"></h2>
 
     <div class="accordion accordion-flush mt-5" id="accordionExample">
-        <div class="accordion-item" th:each="criticalEvent, iter: ${criticalEvents}">
+        <div class="accordion-item" th:each="criticalEvent, iter : ${criticalEvents}">
             <h2 class="accordion-header" id="headingOne">
                 <button class="accordion-button" type="button" data-bs-toggle="collapse"
                         th:data-bs-target="${'#collapse' + iter.index}"
@@ -44,14 +44,14 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr th:each="diaryEntry, iter: ${criticalEvent.getWebDiaryEntries()}">
+                        <tr th:each="webDiaryEntry, iter : ${criticalEvent.getWebDiaryEntries()}">
                             <th scope="row" th:text="${iter.index}"></th>
-                            <td th:text="${diaryEntry.getName()}"></td>
-                            <td th:text="${diaryEntry.getLocation()}"></td>
-                            <td th:text="${diaryEntry.getRoom()}"></td>
-                            <td th:text="${diaryEntry.getVenueType()}"></td>
-                            <td th:text="${diaryEntry.getCheckinTime()}"></td>
-                            <td th:text="${diaryEntry.getCheckoutTime()}"></td>
+                            <td th:text="${webDiaryEntry.getName()}"></td>
+                            <td th:text="${webDiaryEntry.getLocation()}"></td>
+                            <td th:text="${webDiaryEntry.getRoom()}"></td>
+                            <td th:text="${webDiaryEntry.getVenueType()}"></td>
+                            <td th:text="${webDiaryEntry.getCheckinTime()}"></td>
+                            <td th:text="${webDiaryEntry.getCheckoutTime()}"></td>
                         </tr>
                         </tbody>
                     </table>

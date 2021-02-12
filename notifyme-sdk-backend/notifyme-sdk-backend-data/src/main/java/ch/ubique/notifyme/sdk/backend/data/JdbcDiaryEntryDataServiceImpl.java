@@ -11,7 +11,7 @@
 package ch.ubique.notifyme.sdk.backend.data;
 
 import ch.ubique.notifyme.sdk.backend.model.event.CriticalEvent;
-import ch.ubique.notifyme.sdk.backend.model.event.DiaryEntry;
+import ch.ubique.notifyme.sdk.backend.model.event.JavaDiaryEntry;
 import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
 import java.util.List;
 import javax.sql.DataSource;
@@ -33,12 +33,12 @@ public class JdbcDiaryEntryDataServiceImpl implements DiaryEntryDataService {
     }
 
     @Override
-    public void insertDiaryEntry(final DiaryEntry diaryEntry) {
-        diaryEntryInsert.execute(getDiaryEntryParams(diaryEntry));
+    public void insertDiaryEntry(final JavaDiaryEntry javaDiaryEntry) {
+        diaryEntryInsert.execute(getDiaryEntryParams(javaDiaryEntry));
     }
 
     @Override
-    public void insertDiaryEntries(final List<DiaryEntry> diaryEntriesToInsert) {
+    public void insertDiaryEntries(final List<JavaDiaryEntry> diaryEntriesToInsert) {
         final var diaryEntryParams =
                 diaryEntriesToInsert.stream()
                         .map(this::getDiaryEntryParams)
@@ -60,7 +60,7 @@ public class JdbcDiaryEntryDataServiceImpl implements DiaryEntryDataService {
     }
 
     @Override
-    public List<DiaryEntry> getDiaryEntriesForEvent(final CriticalEvent criticalEvent) {
+    public List<JavaDiaryEntry> getDiaryEntriesForEvent(final CriticalEvent criticalEvent) {
         final String sql =
                 "select * from t_diary_entry"
                         + " where name = :name and location = :location and room = :room and venue_type = :venueType"
@@ -73,15 +73,15 @@ public class JdbcDiaryEntryDataServiceImpl implements DiaryEntryDataService {
         return jt.query(sql, params, new DiaryEntryRowMapper());
     }
 
-    private MapSqlParameterSource getDiaryEntryParams(DiaryEntry diaryEntry) {
+    private MapSqlParameterSource getDiaryEntryParams(JavaDiaryEntry javaDiaryEntry) {
         MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("pk_diary_entry_id", diaryEntry.getId());
-        params.addValue("name", diaryEntry.getName());
-        params.addValue("location", diaryEntry.getLocation());
-        params.addValue("room", diaryEntry.getRoom());
-        params.addValue("venue_type", diaryEntry.getVenueType().name());
-        params.addValue("checkin_time", DateUtil.toDate(diaryEntry.getCheckinTime()));
-        params.addValue("checkout_time", DateUtil.toDate(diaryEntry.getCheckoutTime()));
+        params.addValue("pk_diary_entry_id", javaDiaryEntry.getId());
+        params.addValue("name", javaDiaryEntry.getName());
+        params.addValue("location", javaDiaryEntry.getLocation());
+        params.addValue("room", javaDiaryEntry.getRoom());
+        params.addValue("venue_type", javaDiaryEntry.getVenueType().name());
+        params.addValue("checkin_time", DateUtil.toDate(javaDiaryEntry.getCheckinTime()));
+        params.addValue("checkout_time", DateUtil.toDate(javaDiaryEntry.getCheckoutTime()));
         return params;
     }
 }

@@ -22,7 +22,7 @@ public class WebControllerTest extends BaseControllerTest {
     @Test
     public void shouldReturnHtml() throws Exception {
         final ProblematicDiaryEntryWrapper wrapper =
-                DebugControllerTestHelper.getTestProblematicDiaryEntryWrapper();
+                DebugControllerTestHelper.getTestDiaryEntryWrapper();
 
         mockMvc.perform(get(webEndPoint).content(wrapper.toByteArray()))
                 .andExpect(status().isOk())

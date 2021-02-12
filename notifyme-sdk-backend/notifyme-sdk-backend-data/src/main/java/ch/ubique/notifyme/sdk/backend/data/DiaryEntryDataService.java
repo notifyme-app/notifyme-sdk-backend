@@ -11,7 +11,7 @@
 package ch.ubique.notifyme.sdk.backend.data;
 
 import ch.ubique.notifyme.sdk.backend.model.event.CriticalEvent;
-import ch.ubique.notifyme.sdk.backend.model.event.DiaryEntry;
+import ch.ubique.notifyme.sdk.backend.model.event.JavaDiaryEntry;
 import java.util.List;
 
 public interface DiaryEntryDataService {
@@ -19,18 +19,18 @@ public interface DiaryEntryDataService {
     /**
      * Inserts the given diaryEntry into the db
      *
-     * @param diaryEntry
+     * @param javaDiaryEntry
      */
-    void insertDiaryEntry(DiaryEntry diaryEntry);
+    void insertDiaryEntry(JavaDiaryEntry javaDiaryEntry);
 
     /**
      * Inserts a list of diaryEntries
      *
      * @param diaryEntriesToInsert
      */
-    void insertDiaryEntries(List<DiaryEntry> diaryEntriesToInsert);
+    void insertDiaryEntries(List<JavaDiaryEntry> diaryEntriesToInsert);
 
     List<CriticalEvent> getCriticalEvents();
 
-    List<DiaryEntry> getDiaryEntriesForEvent(CriticalEvent criticalEvent);
+    List<JavaDiaryEntry> getDiaryEntriesForEvent(CriticalEvent criticalEvent);
 }

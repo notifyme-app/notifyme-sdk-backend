@@ -5,12 +5,12 @@ import static org.junit.Assert.assertNotNull;
 
 import ch.ubique.notifyme.sdk.backend.model.VenueTypeOuterClass.VenueType;
 import ch.ubique.notifyme.sdk.backend.model.event.CriticalEvent;
-import ch.ubique.notifyme.sdk.backend.model.event.DiaryEntry;
+import ch.ubique.notifyme.sdk.backend.model.event.JavaDiaryEntry;
 import java.util.List;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class DiaryEntryDataServiceTest extends BaseDataServiceTest {
+public class JavaDiaryEntryDataServiceTest extends BaseDataServiceTest {
 
     @Autowired private DiaryEntryDataService diaryEntryDataService;
 
@@ -21,7 +21,7 @@ public class DiaryEntryDataServiceTest extends BaseDataServiceTest {
 
     @Test
     public void insertDiaryEntry() {
-        List<DiaryEntry> diaryEntries = DataServiceTestHelper.getDiaryEntries();
+        List<JavaDiaryEntry> diaryEntries = DataServiceTestHelper.getDiaryEntries();
         diaryEntryDataService.insertDiaryEntry(diaryEntries.get(0));
         diaryEntryDataService.insertDiaryEntries(diaryEntries.subList(1, diaryEntries.size() - 1));
         final List<CriticalEvent> criticalEvents = diaryEntryDataService.getCriticalEvents();

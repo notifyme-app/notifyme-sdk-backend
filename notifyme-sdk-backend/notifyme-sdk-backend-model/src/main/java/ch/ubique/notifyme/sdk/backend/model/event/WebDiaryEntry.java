@@ -30,14 +30,14 @@ public class WebDiaryEntry {
 
     @NotNull private String checkoutTime;
 
-    public static WebDiaryEntry from(final DiaryEntry diaryEntry) {
+    public static WebDiaryEntry from(final JavaDiaryEntry javaDiaryEntry) {
         final var webDiaryEntry = new WebDiaryEntry();
-        webDiaryEntry.setName(diaryEntry.getName());
-        webDiaryEntry.setLocation(diaryEntry.getLocation());
-        webDiaryEntry.setRoom(diaryEntry.getRoom());
-        webDiaryEntry.setVenueType(diaryEntry.getVenueType());
-        webDiaryEntry.setCheckinTime(DateUtil.formattedDateTime(diaryEntry.getCheckinTime()));
-        webDiaryEntry.setCheckoutTime(DateUtil.formattedDateTime(diaryEntry.getCheckoutTime()));
+        webDiaryEntry.setName(javaDiaryEntry.getName());
+        webDiaryEntry.setLocation(javaDiaryEntry.getLocation());
+        webDiaryEntry.setRoom(javaDiaryEntry.getRoom());
+        webDiaryEntry.setVenueType(javaDiaryEntry.getVenueType());
+        webDiaryEntry.setCheckinTime(DateUtil.formattedDateTime(javaDiaryEntry.getCheckinTime()));
+        webDiaryEntry.setCheckoutTime(DateUtil.formattedDateTime(javaDiaryEntry.getCheckoutTime()));
         return webDiaryEntry;
     }
 

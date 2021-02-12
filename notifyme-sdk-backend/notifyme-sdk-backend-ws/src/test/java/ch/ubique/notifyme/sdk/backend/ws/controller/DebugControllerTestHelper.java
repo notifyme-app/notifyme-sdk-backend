@@ -10,8 +10,8 @@
 
 package ch.ubique.notifyme.sdk.backend.ws.controller;
 
-import ch.ubique.notifyme.sdk.backend.model.ProblematicDiaryEntryWrapperOuterClass.ProblematicDiaryEntry;
-import ch.ubique.notifyme.sdk.backend.model.ProblematicDiaryEntryWrapperOuterClass.ProblematicDiaryEntryWrapper;
+import ch.ubique.notifyme.sdk.backend.model.ProblematicDiaryEntryWrapper.DiaryEntry;
+import ch.ubique.notifyme.sdk.backend.model.ProblematicDiaryEntryWrapper.DiaryEntryWrapper;
 import ch.ubique.notifyme.sdk.backend.model.VenueTypeOuterClass.VenueType;
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -32,7 +32,7 @@ public class DebugControllerTestHelper {
                 .toEpochMilli();
     }
 
-    public static ProblematicDiaryEntryWrapper getTestProblematicDiaryEntryWrapper() {
+    public static DiaryEntryWrapper getTestDiaryEntryWrapper() {
         final var day0Of2020 = calendarEuropeZurichAsEpochMilli(2020, 0);
         final var day1Of2020 = calendarEuropeZurichAsEpochMilli(2020, 1);
         final var day2Of2020 = calendarEuropeZurichAsEpochMilli(2020, 2);
@@ -40,7 +40,7 @@ public class DebugControllerTestHelper {
         final var day4Of2020 = calendarEuropeZurichAsEpochMilli(2020, 4);
 
         final var diaryEntry0 =
-                ProblematicDiaryEntry.newBuilder()
+                DiaryEntry.newBuilder()
                         .setName("lecture0")
                         .setLocation("location0")
                         .setRoom("room0")
@@ -50,7 +50,7 @@ public class DebugControllerTestHelper {
                         .build();
 
         final var diaryEntry1 =
-                ProblematicDiaryEntry.newBuilder()
+                DiaryEntry.newBuilder()
                         .setName("cafeteria1")
                         .setLocation("location1")
                         .setRoom("room1")
@@ -60,7 +60,7 @@ public class DebugControllerTestHelper {
                         .build();
 
         final var diaryEntry2 =
-                ProblematicDiaryEntry.newBuilder()
+                DiaryEntry.newBuilder()
                         .setName("gym2")
                         .setLocation("location2")
                         .setRoom("room2")
@@ -70,7 +70,7 @@ public class DebugControllerTestHelper {
                         .build();
 
         final var diaryEntry3 =
-                ProblematicDiaryEntry.newBuilder()
+                DiaryEntry.newBuilder()
                         .setName("meeting3")
                         .setLocation("location3")
                         .setRoom("room3")
@@ -80,7 +80,7 @@ public class DebugControllerTestHelper {
                         .build();
 
         final var diaryEntry4 =
-                ProblematicDiaryEntry.newBuilder()
+                DiaryEntry.newBuilder()
                         .setName("library4")
                         .setLocation("location4")
                         .setRoom("room4")
@@ -90,7 +90,7 @@ public class DebugControllerTestHelper {
                         .build();
 
         final var diaryEntry5 =
-                ProblematicDiaryEntry.newBuilder()
+                DiaryEntry.newBuilder()
                         .setName("lecture0")
                         .setLocation("location0")
                         .setRoom("room0")
@@ -100,7 +100,7 @@ public class DebugControllerTestHelper {
                         .build();
 
         final var diaryEntry6 =
-                ProblematicDiaryEntry.newBuilder()
+                DiaryEntry.newBuilder()
                         .setName("lecture0")
                         .setLocation("location0")
                         .setRoom("room0")
@@ -110,7 +110,7 @@ public class DebugControllerTestHelper {
                         .build();
 
         final var diaryEntry7 =
-                ProblematicDiaryEntry.newBuilder()
+                DiaryEntry.newBuilder()
                         .setName("lecture0")
                         .setLocation("location0")
                         .setRoom("room0")
@@ -120,7 +120,7 @@ public class DebugControllerTestHelper {
                         .build();
 
         final var diaryEntry8 =
-                ProblematicDiaryEntry.newBuilder()
+                DiaryEntry.newBuilder()
                         .setName("meeting3")
                         .setLocation("location3")
                         .setRoom("room3")
@@ -130,7 +130,7 @@ public class DebugControllerTestHelper {
                         .build();
 
         final var diaryEntry9 =
-                ProblematicDiaryEntry.newBuilder()
+                DiaryEntry.newBuilder()
                         .setName("meeting3")
                         .setLocation("location3")
                         .setRoom("room3")
@@ -139,7 +139,7 @@ public class DebugControllerTestHelper {
                         .setCheckOutTIme(day1Of2020)
                         .build();
 
-        return ProblematicDiaryEntryWrapper.newBuilder()
+        return DiaryEntryWrapper.newBuilder()
                 .addDiaryEntries(diaryEntry0)
                 .addDiaryEntries(diaryEntry1)
                 .addDiaryEntries(diaryEntry2)

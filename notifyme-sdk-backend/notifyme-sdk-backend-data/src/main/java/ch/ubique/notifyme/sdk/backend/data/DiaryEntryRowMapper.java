@@ -11,22 +11,22 @@
 package ch.ubique.notifyme.sdk.backend.data;
 
 import ch.ubique.notifyme.sdk.backend.model.VenueTypeOuterClass.VenueType;
-import ch.ubique.notifyme.sdk.backend.model.event.DiaryEntry;
+import ch.ubique.notifyme.sdk.backend.model.event.JavaDiaryEntry;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.springframework.jdbc.core.RowMapper;
 
-public class DiaryEntryRowMapper implements RowMapper<DiaryEntry> {
+public class DiaryEntryRowMapper implements RowMapper<JavaDiaryEntry> {
 
     @Override
-    public DiaryEntry mapRow(ResultSet rs, int rowNum) throws SQLException {
-        DiaryEntry diaryEntry = new DiaryEntry();
-        diaryEntry.setName(rs.getString("name"));
-        diaryEntry.setLocation(rs.getString("location"));
-        diaryEntry.setRoom(rs.getString("room"));
-        diaryEntry.setVenueType(VenueType.valueOf(rs.getString("venue_type")));
-        diaryEntry.setCheckinTime(rs.getTimestamp("checkin_time").toInstant());
-        diaryEntry.setCheckoutTime(rs.getTimestamp("checkout_time").toInstant());
-        return diaryEntry;
+    public JavaDiaryEntry mapRow(ResultSet rs, int rowNum) throws SQLException {
+        JavaDiaryEntry javaDiaryEntry = new JavaDiaryEntry();
+        javaDiaryEntry.setName(rs.getString("name"));
+        javaDiaryEntry.setLocation(rs.getString("location"));
+        javaDiaryEntry.setRoom(rs.getString("room"));
+        javaDiaryEntry.setVenueType(VenueType.valueOf(rs.getString("venue_type")));
+        javaDiaryEntry.setCheckinTime(rs.getTimestamp("checkin_time").toInstant());
+        javaDiaryEntry.setCheckoutTime(rs.getTimestamp("checkout_time").toInstant());
+        return javaDiaryEntry;
     }
 }

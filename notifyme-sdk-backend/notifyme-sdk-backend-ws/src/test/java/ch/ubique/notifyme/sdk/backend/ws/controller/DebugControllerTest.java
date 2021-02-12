@@ -14,7 +14,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ch.ubique.notifyme.sdk.backend.model.ProblematicDiaryEntryWrapperOuterClass.ProblematicDiaryEntryWrapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,8 +35,7 @@ public class DebugControllerTest extends BaseControllerTest {
 
     @Test
     public void uploadDiaryEntryProtobufShouldReturnOk() throws Exception {
-        final ProblematicDiaryEntryWrapper wrapper =
-                DebugControllerTestHelper.getTestProblematicDiaryEntryWrapper();
+        final var wrapper = DebugControllerTestHelper.getTestDiaryEntryWrapper();
 
         mockMvc.perform(
                         post(diaryEntriesEndPoint)

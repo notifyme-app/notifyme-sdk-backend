@@ -10,13 +10,13 @@
 
 package ch.ubique.notifyme.sdk.backend.model.event;
 
-import ch.ubique.notifyme.sdk.backend.model.ProblematicDiaryEntryWrapperOuterClass.ProblematicDiaryEntry;
+import ch.ubique.notifyme.sdk.backend.model.ProblematicDiaryEntryWrapper.DiaryEntry;
 import ch.ubique.notifyme.sdk.backend.model.VenueTypeOuterClass.VenueType;
 import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
 import java.time.Instant;
 import javax.validation.constraints.NotNull;
 
-public class DiaryEntry {
+public class JavaDiaryEntry {
 
     private Integer id;
 
@@ -32,15 +32,15 @@ public class DiaryEntry {
 
     @NotNull private Instant checkoutTime;
 
-    public static DiaryEntry from(final ProblematicDiaryEntry problematicDiaryEntry) {
-        final var diaryEntry = new DiaryEntry();
-        diaryEntry.setName(problematicDiaryEntry.getName());
-        diaryEntry.setLocation(problematicDiaryEntry.getLocation());
-        diaryEntry.setRoom(problematicDiaryEntry.getRoom());
-        diaryEntry.setVenueType(problematicDiaryEntry.getVenueType());
-        diaryEntry.setCheckinTime(DateUtil.toInstant(problematicDiaryEntry.getCheckinTime()));
-        diaryEntry.setCheckoutTime(DateUtil.toInstant(problematicDiaryEntry.getCheckOutTIme()));
-        return diaryEntry;
+    public static JavaDiaryEntry from(final DiaryEntry diaryEntry) {
+        final var javaDiaryEntry = new JavaDiaryEntry();
+        javaDiaryEntry.setName(diaryEntry.getName());
+        javaDiaryEntry.setLocation(diaryEntry.getLocation());
+        javaDiaryEntry.setRoom(diaryEntry.getRoom());
+        javaDiaryEntry.setVenueType(diaryEntry.getVenueType());
+        javaDiaryEntry.setCheckinTime(DateUtil.toInstant(diaryEntry.getCheckinTime()));
+        javaDiaryEntry.setCheckoutTime(DateUtil.toInstant(diaryEntry.getCheckOutTIme()));
+        return javaDiaryEntry;
     }
 
     public Integer getId() {
