@@ -16,7 +16,7 @@ RUSTY_SWAGGER = rusty-swagger
 all: clean all1
 all1: clean updateproject updatedoc swagger la la2 la3
 no: clean updateproject updatedoc swagger la la2
-docker-build: updateproject docker
+docker: updateproject docker
 doc: updatedoc swagger la la2 la3
 test: clean run-test
 run-test:
@@ -47,7 +47,7 @@ la3:
 show:
 	cd documentation; open $(FILE_NAME).pdf &
 
-docker:
+docker-build:
 	cp $(WS_MODULE_DIR)/target/${WS_MODULE_NAME}*.jar notifyme-ws/ws/bin/${WS_MODULE_NAME}-1.0.0.jar
 	docker build -t ${DOCKER_IMG_NAME} notifyme-ws/
 	@printf '\033[33m DO NOT USE THIS IN PRODUCTION \033[0m \n'

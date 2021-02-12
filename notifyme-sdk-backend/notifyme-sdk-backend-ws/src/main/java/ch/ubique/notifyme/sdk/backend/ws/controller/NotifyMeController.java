@@ -16,6 +16,10 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import ch.ubique.notifyme.sdk.backend.ws.CryptoWrapper;
+import org.apache.commons.codec.binary.Hex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -42,6 +46,7 @@ import ch.ubique.openapi.docannotations.Documentation;
 @RequestMapping("/v1")
 @CrossOrigin(origins = { "https://notify-me.c4dt.org", "https://notify-me-dev.c4dt.org"})
 public class NotifyMeController {
+    private static final Logger logger = LoggerFactory.getLogger(DebugController.class);
     private static final String HEADER_X_KEY_BUNDLE_TAG = "x-key-bundle-tag";
 
     private final NotifyMeDataService dataService;
@@ -75,6 +80,8 @@ public class NotifyMeController {
         if (!isValidKeyBundleTag(lastKeyBundleTag)) {
             return ResponseEntity.notFound().build();
         }
+        var keys = dataService.findTraceKeys(DateUtil.toInstant(lastKeyBundleTag));
+        logger.info("First key: {}", Hex.encodeHexString(keys.get(0).getSecretKeyForIdentity()));
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(traceKeysCacheControlInMs, TimeUnit.MILLISECONDS))              
                 .header(
@@ -117,6 +124,10 @@ public class NotifyMeController {
                         .setVersion(1)
                         .addAllEvents(mapToProblematicEvents(traceKeys))
                         .build();
+        if (pew.getEventsCount() > 0) {
+            logger.info("First event key is: {}",
+                    Hex.encodeHexString(pew.getEvents(0).getSecretKeyForIdentity().toByteArray()));
+        }
         return ResponseEntity.ok()
                 .cacheControl(CacheControl.maxAge(traceKeysCacheControlInMs, TimeUnit.MILLISECONDS))       
                 .header("content-type", "application/x-protobuf")
