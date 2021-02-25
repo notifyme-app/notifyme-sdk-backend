@@ -25,7 +25,7 @@ import com.sun.jna.Platform;
 import ch.ubique.notifyme.sdk.backend.model.PreTraceWithProofOuterClass.PreTrace;
 import ch.ubique.notifyme.sdk.backend.model.PreTraceWithProofOuterClass.PreTraceWithProof;
 import ch.ubique.notifyme.sdk.backend.model.PreTraceWithProofOuterClass.TraceProof;
-import ch.ubique.notifyme.sdk.backend.model.QrCodeContent.QRCodeContent;
+import ch.ubique.notifyme.sdk.backend.model.QrCodeContentOuterClass.QrCodeContent;
 import ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey;
 
 public class CryptoWrapper {
@@ -107,7 +107,7 @@ public class CryptoWrapper {
 
         Mcl.add(secretKeyForIdentity, partialSecretKeyForIdentityOfLocation,
                         partialSecretKeyForIdentityOfHealthAuthority);
-        QRCodeContent qrCodeContent = QRCodeContent.parseFrom(preTraceWithProof.getInfo());
+        QrCodeContent qrCodeContent = QrCodeContent.parseFrom(preTraceWithProof.getInfo());
         
         byte[] identity = generateIdentity(qrCodeContent, proof.getNonce1().toByteArray(),
                         proof.getNonce2().toByteArray(), affectedHour);
@@ -131,7 +131,7 @@ public class CryptoWrapper {
         return result;
     }
 
-    private byte[] generateIdentity(QRCodeContent qrCodeContent, byte[] nonce1, byte[] nonce2, int hour) {
+    private byte[] generateIdentity(QrCodeContent qrCodeContent, byte[] nonce1, byte[] nonce2, int hour) {
         byte[] hash1 = cryptoHashSHA256(ArrayUtils.addAll(qrCodeContent.toByteArray(), nonce1));
         return cryptoHashSHA256(ArrayUtils.addAll(hash1, ArrayUtils.addAll(nonce2, String.valueOf(hour).getBytes())));
     }

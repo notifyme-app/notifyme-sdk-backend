@@ -30,9 +30,9 @@
         <jsonwebtoken-version>0.11.2</jsonwebtoken-version>
         <protobuf-java-version>3.12.1</protobuf-java-version>
         <spring-boot-version>2.4.0</spring-boot-version>
-        <testcontainers-version>1.15.0-rc2</testcontainers-version>
+        <testcontainers-version>1.15.1</testcontainers-version>
 
-        <itCoverageAgent></itCoverageAgent>
+        <itCoverageAgent/>
 
         <build-helper-maven-plugin.version>3.2.0</build-helper-maven-plugin.version>
 
@@ -63,6 +63,16 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+            <exclusions>
+            	<exclusion>
+            		<groupId>org.junit.jupiter</groupId>
+            		<artifactId>junit-jupiter</artifactId>
+            	</exclusion>
+            	<exclusion>
+            		<groupId>org.mockito</groupId>
+            		<artifactId>mockito-junit-jupiter</artifactId>
+            	</exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -80,6 +90,7 @@
             <artifactId>commons-io</artifactId>
         </dependency>
 
+        <!-- Testing-->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

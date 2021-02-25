@@ -5,12 +5,15 @@ option java_package = "ch.ubique.notifyme.sdk.backend.model";
 
 import "VenueType.proto";
 
-message QrCodeContent {
+message DiaryEntryWrapper {
+  int32 version = 1;
+  repeated DiaryEntry diaryEntries = 2;
+}
+message DiaryEntry {
   string name = 1;
   string location = 2;
   string room = 3;
   VenueType venueType = 4;
-  bytes notificationKey = 5;
-  uint64 validFrom = 6;
-  uint64 validTo = 7;
+  uint64 checkinTime = 5;
+  uint64 checkOutTIme = 6;
 }

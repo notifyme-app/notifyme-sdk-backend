@@ -33,6 +33,10 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
         </dependency>
 
@@ -76,6 +80,11 @@
             <groupId>org.springframework.security.oauth</groupId>
             <artifactId>spring-security-oauth2</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <optional>true</optional>
+        </dependency>
 
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -91,12 +100,6 @@
         <dependency>
             <groupId>ch.ubique</groupId>
             <artifactId>notifyme-sdk-backend-data</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -145,29 +148,37 @@
                 <artifactId>springboot-swagger-3</artifactId>
                 <version>1.3.2</version>
                 <configuration>
-                    <apiVersion>1.0-MVP</apiVersion>
+                    <apiVersion>1.0.0</apiVersion>
+                    <outPath>swagger/</outPath>
                     <basePackages>ch.ubique.notifyme.sdk.backend.model</basePackages>
                     <blackListedPackages>
                         <blackListedPackage>com.google.protobuf</blackListedPackage>
                     </blackListedPackages>
-                    <controllers>
-                        <controller>
-                            ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeController
-                        </controller>
-                        <controller>
-                            ch.ubique.notifyme.sdk.backend.ws.controller.DebugController
-                        </controller>
-                        <controller>
-                            ch.ubique.notifyme.sdk.backend.ws.controller.ConfigController
-                        </controller>
-                    </controllers>
                     <description>NotifyMe API</description>
                     <apiUrls>
                         <apiUrl>https://app-dev-ws.notify-me.ch</apiUrl>
                         <apiUrl>https://app-prod-ws.notify-me.ch</apiUrl>
                     </apiUrls>
-                    <title>NotifyMe API</title>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>all</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>springboot-swagger-3</goal>
+                        </goals>
+                        <configuration>
+                            <outFile>swagger.yaml</outFile>
+                            <controllers>
+                                <controller>ch.ubique.notifyme.sdk.backend.ws.controller.ConfigController</controller>
+                                <controller>ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeController</controller>
+                                <controller>ch.ubique.notifyme.sdk.backend.ws.controller.DebugController</controller>
+                            </controllers>
+                            <title>NotifyMe API</title>
+                            <description>NotifyMe API</description>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

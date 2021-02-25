@@ -48,14 +48,14 @@ public class FlyWayConfig {
         return flyWay;
     }
 
-    @Bean
-    public Flyway fakeFlyway() {
-        Flyway flyWay =
-                Flyway.configure()
-                        .dataSource(fakeDataSource)
-                        .locations("classpath:/db/migration/hsqldb")
-                        .load();
-        flyWay.migrate();
-        return flyWay;
-    }
+    // @Bean
+    // public Flyway fakeFlyway() {
+    //     Flyway flyWay =
+    //             Flyway.configure()
+    //                     .dataSource(fakeDataSource)
+    //                     .locations("classpath:/db/migration/hsqldb")
+    //                     .load();
+    //     flyWay.migrate();
+    //     return flyWay;
+    // }
 }

@@ -22,10 +22,11 @@ public class SingletonPostgresContainer {
     private static final String DB_PASSWORD = "DB_PASSWORD";
     private static SingletonPostgresContainer INSTANCE;
 
-    private PostgreSQLContainer<?> container;
+    private final PostgreSQLContainer<?> container;
+
+    private final String databaseName;
 
     private String jdbcUrl;
-    private String databaseName;
     private String username;
     private String password;
 
@@ -46,9 +47,9 @@ public class SingletonPostgresContainer {
     }
 
     public void start() {
-        String baseUrl = "jdbc:postgresql://%s:%s/test-db";
-        String dbUrl = System.getenv(DB_URL);
-        String dbPort = System.getenv(DB_PORT);
+        final var baseUrl = "jdbc:postgresql://%s:%s/test-db";
+        final var dbUrl = System.getenv(DB_URL);
+        final var dbPort = System.getenv(DB_PORT);
         this.jdbcUrl = String.format(baseUrl, dbUrl, dbPort);
         this.username = System.getenv(DB_USERNAME);
         this.password = System.getenv(DB_PASSWORD);

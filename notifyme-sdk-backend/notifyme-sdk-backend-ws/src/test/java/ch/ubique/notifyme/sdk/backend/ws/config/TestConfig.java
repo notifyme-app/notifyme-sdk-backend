@@ -22,8 +22,7 @@ public class TestConfig {
     @Autowired DataSource dataSource;
 
     @Bean
-    public PlatformTransactionManager testTransactionManager() throws Exception {
-        DataSourceTransactionManager dstm = new DataSourceTransactionManager(dataSource);
-        return dstm;
+    public PlatformTransactionManager testTransactionManager() {
+        return new DataSourceTransactionManager(dataSource);
     }
 }

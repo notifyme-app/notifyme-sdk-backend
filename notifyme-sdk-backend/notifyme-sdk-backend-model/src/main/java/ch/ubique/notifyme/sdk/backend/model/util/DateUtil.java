@@ -11,9 +11,18 @@
 package ch.ubique.notifyme.sdk.backend.model.util;
 
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class DateUtil {
+
+    private static final DateTimeFormatter DATETIME_FORMATTER =
+            DateTimeFormatter.ofPattern("dd.MM.yyyy, HH:mm:ss")
+                    .withZone(ZoneId.of("Europe/Zurich"));
+
+    private DateUtil() {}
+
     public static Date toDate(Instant instant) {
         if (instant == null) {
             return null;
@@ -46,5 +55,9 @@ public class DateUtil {
 
     public static long getLastFullBucketEndEpochMilli(Long bucketSizeInMs) {
         return (System.currentTimeMillis() / bucketSizeInMs) * bucketSizeInMs;
+    }
+
+    public static String formattedDateTime(final Instant time) {
+        return DATETIME_FORMATTER.format(time);
     }
 }
