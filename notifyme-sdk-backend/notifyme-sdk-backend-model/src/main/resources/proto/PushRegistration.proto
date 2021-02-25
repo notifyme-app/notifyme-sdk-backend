@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package ch.ubique.notifyme.sdk.backend.model;
+
+option java_package = "ch.ubique.notifyme.sdk.backend.model";
+
+enum PushType {
+  IOS = 0;
+  AND = 1;
+  IOD = 2;
+}
+
+message PushRegistration {
+  int32 version = 1;
+  string pushToken = 2;
+  PushType pushType = 3;
+  string deviceId = 4;
+}

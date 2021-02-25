@@ -13,13 +13,18 @@ package ch.ubique.notifyme.sdk.backend.ws.config;
 import ch.ubique.notifyme.sdk.backend.data.DiaryEntryDataService;
 import ch.ubique.notifyme.sdk.backend.data.JdbcDiaryEntryDataServiceImpl;
 import ch.ubique.notifyme.sdk.backend.data.JdbcNotifyMeDataServiceImpl;
+import ch.ubique.notifyme.sdk.backend.data.JdbcPushRegistrationDataServiceImpl;
 import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataService;
+import ch.ubique.notifyme.sdk.backend.data.PushRegistrationDataService;
+import ch.ubique.notifyme.sdk.backend.model.PushRegistrationOuterClass.PushType;
 import ch.ubique.notifyme.sdk.backend.ws.CryptoWrapper;
 import ch.ubique.notifyme.sdk.backend.ws.controller.ConfigController;
 import ch.ubique.notifyme.sdk.backend.ws.controller.DebugController;
 import ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeController;
 import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebController;
 import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebCriticalEventController;
+import ch.ubique.notifyme.sdk.backend.ws.service.PhoneBackgroundTaskTrigger;
+import ch.ubique.pushservice.pushconnector.PushConnectorServiceBuilder;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,6 +39,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
@@ -90,6 +96,21 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
     @Value("${git.commit.time}")
     private String commitTime;
+
+    @Value("${ws.push.authToken}")
+    private String pushAuthToken;
+
+    @Value("${ws.push.serverHost}")
+    private String pushServerHost;
+
+    @Value("${ws.push.applicationId.ios}")
+    private String pushApplicationIdIOS;
+
+    @Value("${ws.push.applicationId.iod}")
+    private String pushApplicationIdIOD;
+
+    @Value("${ws.push.applicationId.and}")
+    private String pushApplicationIdAND;
 
     @Bean
     public static PropertySourcesPlaceholderConfigurer placeholderConfigurer() {
@@ -148,10 +169,21 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
     }
 
     @Bean
+    public PushRegistrationDataService pushRegistrationDataService(final DataSource dataSource) {
+        return new JdbcPushRegistrationDataServiceImpl(dataSource);
+    }
+
+    @Bean
     public NotifyMeController notifyMeController(
-            NotifyMeDataService notifyMeDataService, String revision) {
+            final NotifyMeDataService notifyMeDataService,
+            final PushRegistrationDataService pushRegistrationDataService,
+            final String revision) {
         return new NotifyMeController(
-                notifyMeDataService, revision, bucketSizeInMs, traceKeysCacheControlInMs);
+                notifyMeDataService,
+                pushRegistrationDataService,
+                revision,
+                bucketSizeInMs,
+                traceKeysCacheControlInMs);
     }
 
     @Bean
@@ -160,12 +192,34 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
     }
 
     @Bean
+    public PhoneBackgroundTaskTrigger phoneBackgroundTaskTrigger() {
+        final var pushConnectorServiceBuilder =
+                new PushConnectorServiceBuilder(pushAuthToken, pushServerHost);
+
+        final var iod =
+                Map.entry(
+                        PushType.IOD,
+                        pushConnectorServiceBuilder.withApple(pushApplicationIdIOD).build());
+        final var ios =
+                Map.entry(
+                        PushType.IOS,
+                        pushConnectorServiceBuilder.withApple(pushApplicationIdIOS).build());
+        final var and =
+                Map.entry(
+                        PushType.AND,
+                        pushConnectorServiceBuilder.withApple(pushApplicationIdAND).build());
+
+        return new PhoneBackgroundTaskTrigger(Map.ofEntries(iod, ios, and));
+    }
+
+    @Bean
     public WebController webController() {
         return new WebController();
     }
 
     @Bean
-    public WebCriticalEventController webCriticalEventController(final DiaryEntryDataService diaryEntryDataService) {
+    public WebCriticalEventController webCriticalEventController(
+            final DiaryEntryDataService diaryEntryDataService) {
         return new WebCriticalEventController(diaryEntryDataService);
     }
 

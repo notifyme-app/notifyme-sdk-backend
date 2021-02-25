@@ -11,9 +11,11 @@
 package ch.ubique.notifyme.sdk.backend.ws.controller;
 
 import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataService;
+import ch.ubique.notifyme.sdk.backend.data.PushRegistrationDataService;
 import ch.ubique.notifyme.sdk.backend.model.ProblematicEventWrapperOuterClass.ProblematicEvent;
 import ch.ubique.notifyme.sdk.backend.model.ProblematicEventWrapperOuterClass.ProblematicEvent.Builder;
 import ch.ubique.notifyme.sdk.backend.model.ProblematicEventWrapperOuterClass.ProblematicEventWrapper;
+import ch.ubique.notifyme.sdk.backend.model.PushRegistrationOuterClass.PushRegistration;
 import ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey;
 import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
 import ch.ubique.openapi.docannotations.Documentation;
@@ -40,17 +42,20 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class NotifyMeController {
     private static final String HEADER_X_KEY_BUNDLE_TAG = "x-key-bundle-tag";
 
-    private final NotifyMeDataService dataService;
+    private final NotifyMeDataService notifyMeDataService;
+    private final PushRegistrationDataService pushRegistrationDataService;
     private final String revision;
     private final Long bucketSizeInMs;
     private final Long traceKeysCacheControlInMs;
 
     public NotifyMeController(
-            NotifyMeDataService dataService,
-            String revision,
-            Long bucketSizeInMs,
-            Long traceKeysCacheControlInMs) {
-        this.dataService = dataService;
+            final NotifyMeDataService notifyMeDataService,
+            final PushRegistrationDataService pushRegistrationDataService,
+            final String revision,
+            final Long bucketSizeInMs,
+            final Long traceKeysCacheControlInMs) {
+        this.notifyMeDataService = notifyMeDataService;
+        this.pushRegistrationDataService = pushRegistrationDataService;
         this.revision = revision;
         this.bucketSizeInMs = bucketSizeInMs;
         this.traceKeysCacheControlInMs = traceKeysCacheControlInMs;
@@ -79,7 +84,7 @@ public class NotifyMeController {
                 .header(
                         HEADER_X_KEY_BUNDLE_TAG,
                         Long.toString(DateUtil.getLastFullBucketEndEpochMilli(bucketSizeInMs)))
-                .body(dataService.findTraceKeys(DateUtil.toInstant(lastKeyBundleTag)));
+                .body(notifyMeDataService.findTraceKeys(DateUtil.toInstant(lastKeyBundleTag)));
     }
 
     private boolean isValidKeyBundleTag(Long lastKeyBundleTag) {
@@ -113,7 +118,8 @@ public class NotifyMeController {
                             CacheControl.maxAge(traceKeysCacheControlInMs, TimeUnit.MILLISECONDS))
                     .build();
         }
-        List<TraceKey> traceKeys = dataService.findTraceKeys(DateUtil.toInstant(lastKeyBundleTag));
+        List<TraceKey> traceKeys =
+                notifyMeDataService.findTraceKeys(DateUtil.toInstant(lastKeyBundleTag));
         ProblematicEventWrapper pew =
                 ProblematicEventWrapper.newBuilder()
                         .setVersion(1)
@@ -129,7 +135,8 @@ public class NotifyMeController {
     }
 
     private List<ProblematicEvent> mapToProblematicEvents(List<TraceKey> traceKeys) {
-        return traceKeys.stream().map(this::mapTraceKeyToProblematicEvent)
+        return traceKeys.stream()
+                .map(this::mapTraceKeyToProblematicEvent)
                 .collect(Collectors.toList());
     }
 
@@ -163,7 +170,19 @@ public class NotifyMeController {
                     @Documentation(
                             description = "JWT token that can be verified by the backend server")
                     Object principal) {
-        dataService.insertTraceKey(traceKey);
+        notifyMeDataService.insertTraceKey(traceKey);
         return ResponseEntity.ok().body("OK");
+    }
+
+    @PostMapping(
+            value = "/register",
+            produces = {"application/x-protobuf", "application/protobuf"})
+    @Documentation(
+            description = "Push registration",
+            responses = {"200 => success", "400 => Error"})
+    public @ResponseBody ResponseEntity<Void> registerPush(
+            @RequestBody final PushRegistration pushRegistration) {
+        pushRegistrationDataService.insertPushRegistration(pushRegistration);
+        return ResponseEntity.ok().build();
     }
 }
