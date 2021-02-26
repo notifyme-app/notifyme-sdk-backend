@@ -42,7 +42,7 @@ public class PhoneHeartbeatSilentPush {
                         .map(PushRegistration::getPushToken)
                         .collect(Collectors.toSet());
 
-        final var appleIodPushData = createAppleSilentPushData(iodPushTokens, true);
+        final var appleIodPushData = createAppleSilentPushDataSandbox(iodPushTokens);
         final var appleIosPushData = createAppleSilentPushData(iosPushTokens);
         final var androidPushData = createAndroidSilentPushData(androidPushTokens);
 
@@ -54,16 +54,16 @@ public class PhoneHeartbeatSilentPush {
                 .forEach(r -> logger.info("response: {}, code: {}", r.getErrorMsg(), r.getStatus()));
     }
 
-    private ApplePushData createAppleSilentPushData(final Set<String> applePushTokens) {
-        return createAppleSilentPushData(applePushTokens, false);
+    private ApplePushData createAppleSilentPushDataSandbox(final Set<String> applePushTokens) {
+        final var applePushData = createAppleSilentPushData(applePushTokens);
+        applePushData.setSandbox(true);
+        return applePushData;
     }
 
-    private ApplePushData createAppleSilentPushData(
-            final Set<String> applePushTokens, final boolean sandbox) {
+    private ApplePushData createAppleSilentPushData(final Set<String> applePushTokens) {
         final var applePushData = new ApplePushData();
         applePushData.setContentAvailable(1);
         applePushData.setPushToken(applePushTokens);
-        applePushData.setSandbox(sandbox);
         return applePushData;
     }
 
