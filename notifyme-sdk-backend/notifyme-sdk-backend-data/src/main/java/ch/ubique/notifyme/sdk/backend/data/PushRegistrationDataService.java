@@ -21,7 +21,7 @@ public interface PushRegistrationDataService {
      *
      * @param pushRegistration
      */
-    void insertPushRegistration(final PushRegistration pushRegistration);
+    void upsertPushRegistration(final PushRegistration pushRegistration);
 
     /**
      * retrieves all pushRegistrations for a given pushType

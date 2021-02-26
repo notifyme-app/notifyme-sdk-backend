@@ -182,7 +182,7 @@ public class NotifyMeController {
             responses = {"200 => success", "400 => Error"})
     public @ResponseBody ResponseEntity<Void> registerPush(
             @RequestBody final PushRegistration pushRegistration) {
-        pushRegistrationDataService.insertPushRegistration(pushRegistration);
+        pushRegistrationDataService.upsertPushRegistration(pushRegistration);
         return ResponseEntity.ok().build();
     }
 }

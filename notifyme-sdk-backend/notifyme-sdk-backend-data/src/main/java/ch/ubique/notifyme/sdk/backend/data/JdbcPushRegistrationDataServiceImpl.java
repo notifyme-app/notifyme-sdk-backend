@@ -22,8 +22,16 @@ public class JdbcPushRegistrationDataServiceImpl implements PushRegistrationData
     }
 
     @Override
-    public void insertPushRegistration(final PushRegistration pushRegistration) {
-        pushRegistrationInsert.execute(getPushRegistrationParams(pushRegistration));
+    public void upsertPushRegistration(final PushRegistration pushRegistration) {
+        final var pushRegistrationParams = getPushRegistrationParams(pushRegistration);
+        deleteDuplicates(pushRegistrationParams);
+        pushRegistrationInsert.execute(pushRegistrationParams);
+    }
+
+    private void deleteDuplicates(final MapSqlParameterSource pushRegistrationParams) {
+        final var sql =
+                "delete from t_push_registration where device_id = :device_id or push_token = :push_token";
+        jt.update(sql, pushRegistrationParams);
     }
 
     @Override
