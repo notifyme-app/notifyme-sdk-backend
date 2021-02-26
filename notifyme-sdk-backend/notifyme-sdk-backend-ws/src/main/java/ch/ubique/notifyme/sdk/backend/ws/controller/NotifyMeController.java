@@ -184,7 +184,7 @@ public class NotifyMeController {
     public @ResponseBody ResponseEntity<Void> registerPush(
             @RequestBody final PushRegistration pushRegistration) {
         if (Strings.isBlank(pushRegistration.getPushToken())) {
-            pushRegistrationDataService.deletePushRegistration(pushRegistration);
+            pushRegistrationDataService.deletePushRegistration(pushRegistration.getDeviceId());
         } else {
             pushRegistrationDataService.upsertPushRegistration(pushRegistration);
         }

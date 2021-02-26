@@ -7,6 +7,7 @@ import ch.ubique.pushservice.pushconnector.PushConnectorService;
 import ch.ubique.pushservice.shared.AndroidPushData;
 import ch.ubique.pushservice.shared.ApplePushData;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -31,14 +32,17 @@ public class PhoneHeartbeatSilentPush {
         final var iodPushTokens =
                 pushRegistrationDataService.getPushRegistrationByType(PushType.IOD).stream()
                         .map(PushRegistration::getPushToken)
+                        .peek(pt -> logger.info("{}: {}", PushType.IOD, pt))
                         .collect(Collectors.toSet());
         final var iosPushTokens =
                 pushRegistrationDataService.getPushRegistrationByType(PushType.IOS).stream()
                         .map(PushRegistration::getPushToken)
+                        .peek(pt -> logger.info("{}: {}", PushType.IOS, pt))
                         .collect(Collectors.toSet());
         final var androidPushTokens =
                 pushRegistrationDataService.getPushRegistrationByType(PushType.AND).stream()
                         .map(PushRegistration::getPushToken)
+                        .peek(pt -> logger.info("{}: {}", PushType.AND, pt))
                         .collect(Collectors.toSet());
 
         logger.info(
@@ -47,20 +51,34 @@ public class PhoneHeartbeatSilentPush {
                 iosPushTokens.size(),
                 androidPushTokens.size());
 
-        final var appleIodPushData = createAppleSilentPushData(iodPushTokens);
-        appleIodPushData.setSandbox(true);
-
+        final var appleIodPushData = createAppleSilentPushData(iodPushTokens, true);
         final var appleIosPushData = createAppleSilentPushData(iosPushTokens);
         final var androidPushData = createAndroidSilentPushData(androidPushTokens);
 
-        pushConnectorService.push(
-                Arrays.asList(appleIodPushData, appleIosPushData, androidPushData));
+        logger.info(
+                "Found {} iOD and {} iOS and {} android push tokens in pushData",
+                appleIodPushData.getPushToken().size(),
+                appleIosPushData.getPushToken().size(),
+                androidPushData.getPushToken().size());
+
+        // pushConnectorService.push(
+        //         Arrays.asList(appleIodPushData, appleIosPushData, androidPushData));
+        final var response = pushConnectorService.push(Collections.singletonList(appleIodPushData));
+        response.forEach(r -> {
+            logger.info("response: {}, code: {}", r.getErrorMsg(), r.getStatus());
+        });
     }
 
     private ApplePushData createAppleSilentPushData(final Set<String> applePushTokens) {
+        return createAppleSilentPushData(applePushTokens, false);
+    }
+
+    private ApplePushData createAppleSilentPushData(
+            final Set<String> applePushTokens, final boolean sandbox) {
         final var applePushData = new ApplePushData();
         applePushData.setContentAvailable(1);
         applePushData.setPushToken(applePushTokens);
+        applePushData.setSandbox(sandbox);
         return applePushData;
     }
 

@@ -27,9 +27,11 @@ import org.springframework.scheduling.support.CronTrigger;
 
 @Configuration
 @EnableScheduling
-public abstract class WSSchedulingConfig implements SchedulingConfigurer {
+public class WSSchedulingConfig implements SchedulingConfigurer {
 
     private static final Logger logger = LoggerFactory.getLogger(WSSchedulingConfig.class);
+    private final NotifyMeDataService notifyMeDataService;
+    private final PhoneHeartbeatSilentPush phoneHeartbeatSilentPush;
 
     @Value("${db.cleanCron:0 0 3 * * ?}")
     private String cleanCron;
@@ -37,16 +39,12 @@ public abstract class WSSchedulingConfig implements SchedulingConfigurer {
     @Value("${db.removeAfterDays:14}")
     private Integer removeAfterDays;
 
-    @Value("${ws.heartBeatSilentPushCron:0 1-23/2 * * *}")
+    @Value("${ws.heartBeatSilentPushCron}")
     private String heartBeatSilentPushCron;
-
-    private final NotifyMeDataService notifyMeDataService;
-    private final PhoneHeartbeatSilentPush phoneHeartbeatSilentPush;
 
     protected WSSchedulingConfig(
             final NotifyMeDataService notifyMeDataService,
-            final PhoneHeartbeatSilentPush phoneHeartbeatSilentPush
-    ) {
+            final PhoneHeartbeatSilentPush phoneHeartbeatSilentPush) {
         this.notifyMeDataService = notifyMeDataService;
         this.phoneHeartbeatSilentPush = phoneHeartbeatSilentPush;
     }
@@ -71,6 +69,9 @@ public abstract class WSSchedulingConfig implements SchedulingConfigurer {
                         },
                         new CronTrigger(cleanCron, TimeZone.getTimeZone("UTC"))));
 
-        taskRegistrar.addCronTask(phoneHeartbeatSilentPush::sendHeartbeats, heartBeatSilentPushCron);
+        taskRegistrar.addCronTask(
+                new CronTask(
+                        phoneHeartbeatSilentPush::sendHeartbeats,
+                        new CronTrigger(heartBeatSilentPushCron, TimeZone.getTimeZone("UTC"))));
     }
 }

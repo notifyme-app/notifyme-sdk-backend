@@ -36,17 +36,16 @@ public class JdbcPushRegistrationDataServiceImpl implements PushRegistrationData
 
     @Override
     public List<PushRegistration> getPushRegistrationByType(final PushType pushType) {
-        final String sql = "select * from t_push_registration where push_type = :pushType";
-        final var params = new MapSqlParameterSource();
+        final String sql = "select * from t_push_registration where push_type = :push_type";
+        final var params = new MapSqlParameterSource("push_type", pushType.name());
         return jt.query(sql, params, new PushRegistrationRowMapper());
     }
 
     @Override
-    public void deletePushRegistration(final PushRegistration pushRegistration) {
-        final var pushRegistrationParams = getPushRegistrationParams(pushRegistration);
+    public void deletePushRegistration(final String deviceId) {
         final var sql =
                 "delete from t_push_registration where device_id = :device_id";
-        jt.update(sql, pushRegistrationParams);
+        jt.update(sql, new MapSqlParameterSource("device_id", deviceId));
     }
 
     private MapSqlParameterSource getPushRegistrationParams(PushRegistration pushRegistration) {

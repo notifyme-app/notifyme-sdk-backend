@@ -30,5 +30,5 @@ public interface PushRegistrationDataService {
      */
     List<PushRegistration> getPushRegistrationByType(final PushType pushType);
 
-    void deletePushRegistration(final PushRegistration pushRegistration);
+    void deletePushRegistration(final String deviceId);
 }
