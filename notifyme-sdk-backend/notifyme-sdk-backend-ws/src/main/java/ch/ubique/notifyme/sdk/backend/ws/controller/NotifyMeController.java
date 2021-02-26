@@ -176,7 +176,7 @@ public class NotifyMeController {
 
     @PostMapping(
             value = "/register",
-            produces = {"application/x-protobuf", "application/protobuf"})
+            consumes = {"application/x-protobuf", "application/protobuf"})
     @Documentation(
             description = "Push registration",
             responses = {"200 => success", "400 => Error"})
