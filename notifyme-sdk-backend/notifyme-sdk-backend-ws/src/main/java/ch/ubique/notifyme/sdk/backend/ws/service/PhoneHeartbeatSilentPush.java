@@ -32,41 +32,26 @@ public class PhoneHeartbeatSilentPush {
         final var iodPushTokens =
                 pushRegistrationDataService.getPushRegistrationByType(PushType.IOD).stream()
                         .map(PushRegistration::getPushToken)
-                        .peek(pt -> logger.info("{}: {}", PushType.IOD, pt))
                         .collect(Collectors.toSet());
         final var iosPushTokens =
                 pushRegistrationDataService.getPushRegistrationByType(PushType.IOS).stream()
                         .map(PushRegistration::getPushToken)
-                        .peek(pt -> logger.info("{}: {}", PushType.IOS, pt))
                         .collect(Collectors.toSet());
         final var androidPushTokens =
                 pushRegistrationDataService.getPushRegistrationByType(PushType.AND).stream()
                         .map(PushRegistration::getPushToken)
-                        .peek(pt -> logger.info("{}: {}", PushType.AND, pt))
                         .collect(Collectors.toSet());
-
-        logger.info(
-                "Found {} iOD and {} iOS and {} android push tokens",
-                iodPushTokens.size(),
-                iosPushTokens.size(),
-                androidPushTokens.size());
 
         final var appleIodPushData = createAppleSilentPushData(iodPushTokens, true);
         final var appleIosPushData = createAppleSilentPushData(iosPushTokens);
         final var androidPushData = createAndroidSilentPushData(androidPushTokens);
 
-        logger.info(
-                "Found {} iOD and {} iOS and {} android push tokens in pushData",
-                appleIodPushData.getPushToken().size(),
-                appleIosPushData.getPushToken().size(),
-                androidPushData.getPushToken().size());
-
-        // pushConnectorService.push(
-        //         Arrays.asList(appleIodPushData, appleIosPushData, androidPushData));
+        pushConnectorService.push(
+                Arrays.asList(appleIodPushData, appleIosPushData, androidPushData));
         final var response = pushConnectorService.push(Collections.singletonList(appleIodPushData));
-        response.forEach(r -> {
-            logger.info("response: {}, code: {}", r.getErrorMsg(), r.getStatus());
-        });
+        response.stream()
+                .filter(r -> r.getErrorMsg() != null)
+                .forEach(r -> logger.info("response: {}, code: {}", r.getErrorMsg(), r.getStatus()));
     }
 
     private ApplePushData createAppleSilentPushData(final Set<String> applePushTokens) {
