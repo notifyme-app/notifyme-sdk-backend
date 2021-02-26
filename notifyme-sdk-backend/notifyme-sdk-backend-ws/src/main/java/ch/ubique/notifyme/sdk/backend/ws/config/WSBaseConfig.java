@@ -171,8 +171,8 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
     @Bean
     public PushConnectorService pushConnectorService() {
         return new PushConnectorServiceBuilder(pushAuthToken, pushServerHost)
-                .withAndroidGCM("ch.notifyme.app.android")
-                .withApple("ch.notifyme.app.ios")
+                .withAndroidGCM("ch.ubique.n2step.android")
+                .withApple("ch.ubique.n2step.ios")
                 .withAppleSandboxEnabled()
                 .build();
     }
