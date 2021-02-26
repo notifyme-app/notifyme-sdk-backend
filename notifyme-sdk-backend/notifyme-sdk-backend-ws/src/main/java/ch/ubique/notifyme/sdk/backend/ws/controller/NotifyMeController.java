@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -183,11 +182,7 @@ public class NotifyMeController {
             responses = {"200 => success", "400 => Error"})
     public @ResponseBody ResponseEntity<Void> registerPush(
             @RequestBody final PushRegistration pushRegistration) {
-        if (Strings.isBlank(pushRegistration.getPushToken())) {
-            pushRegistrationDataService.deletePushRegistration(pushRegistration.getDeviceId());
-        } else {
-            pushRegistrationDataService.upsertPushRegistration(pushRegistration);
-        }
+        pushRegistrationDataService.upsertPushRegistration(pushRegistration);
         return ResponseEntity.ok().build();
     }
 }
