@@ -29,4 +29,6 @@ public interface PushRegistrationDataService {
      * @param pushType
      */
     List<PushRegistration> getPushRegistrationByType(final PushType pushType);
+
+    void deletePushRegistration(final PushRegistration pushRegistration);
 }
