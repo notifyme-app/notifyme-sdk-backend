@@ -7,6 +7,7 @@ import javax.sql.DataSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.transaction.annotation.Transactional;
 
 public class JdbcPushRegistrationDataServiceImpl implements PushRegistrationDataService {
 
@@ -22,6 +23,7 @@ public class JdbcPushRegistrationDataServiceImpl implements PushRegistrationData
     }
 
     @Override
+    @Transactional
     public void upsertPushRegistration(final PushRegistration pushRegistration) {
         final var pushRegistrationParams = getPushRegistrationParams(pushRegistration);
         deleteDuplicates(pushRegistrationParams);
@@ -35,6 +37,7 @@ public class JdbcPushRegistrationDataServiceImpl implements PushRegistrationData
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<PushRegistration> getPushRegistrationByType(final PushType pushType) {
         final String sql = "select * from t_push_registration where push_type = :push_type";
         final var params = new MapSqlParameterSource("push_type", pushType.name());
@@ -42,6 +45,7 @@ public class JdbcPushRegistrationDataServiceImpl implements PushRegistrationData
     }
 
     @Override
+    @Transactional
     public void deletePushRegistration(final String deviceId) {
         final var sql =
                 "delete from t_push_registration where device_id = :device_id";
