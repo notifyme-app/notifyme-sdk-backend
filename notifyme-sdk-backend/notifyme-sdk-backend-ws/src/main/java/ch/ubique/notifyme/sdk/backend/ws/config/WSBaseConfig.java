@@ -20,6 +20,11 @@ import ch.ubique.notifyme.sdk.backend.ws.controller.DebugController;
 import ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeController;
 import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebController;
 import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebCriticalEventController;
+import net.javacrumbs.shedlock.core.LockProvider;
+import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider;
+import net.javacrumbs.shedlock.spring.annotation.EnableSchedulerLock;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,6 +32,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
+
+import static net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider.Configuration.builder;
+
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -34,8 +42,9 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.TimeZone;
 import javax.sql.DataSource;
+
+import org.apache.commons.lang3.StringUtils;
 import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,24 +58,20 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.protobuf.ProtobufHttpMessageConverter;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.SchedulingConfigurer;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.scheduling.config.CronTask;
-import org.springframework.scheduling.config.ScheduledTaskRegistrar;
-import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableScheduling
-public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfigurer {
+@EnableSchedulerLock(defaultLockAtMostFor = "PT30S")
+public abstract class WSBaseConfig implements WebMvcConfigurer {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
-
-    @Value("${db.cleanCron:0 0 3 * * ?}")
-    String cleanCron;
-
+    
     @Value("${db.removeAfterDays:14}")
     Integer removeAfterDays;
 
@@ -81,6 +86,9 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
 
     @Value("${traceKey.traceKeysCacheControlInMs}")
     Long traceKeysCacheControlInMs;
+    
+    @Value("${datasource.schema:}")
+    String dataSourceSchema;
 
     @Value("${git.commit.id}")
     private String commitId;
@@ -215,25 +223,33 @@ public abstract class WSBaseConfig implements SchedulingConfigurer, WebMvcConfig
         return new MappingJackson2HttpMessageConverter(mapper);
     }
 
-    @Override
-    public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-        // remove old trace keys
-        taskRegistrar.addCronTask(
-                new CronTask(
-                        () -> {
-                            try {
-                                Instant removeBefore =
-                                        Instant.now().minus(removeAfterDays, ChronoUnit.DAYS);
-                                logger.info(
-                                        "removing trace keys with end_time before: {}",
-                                        removeBefore);
-                                int removeCount =
-                                        notifyMeDataService().removeTraceKeys(removeBefore);
-                                logger.info("removed {} trace keys from db", removeCount);
-                            } catch (Exception e) {
-                                logger.error("Exception removing old trace keys", e);
-                            }
-                        },
-                        new CronTrigger(cleanCron, TimeZone.getTimeZone("UTC"))));
+    /**
+     * Creates a LockProvider for ShedLock.
+     *
+     * @param dataSource JPA datasource
+     * @return LockProvider
+     */
+    @Bean
+    public LockProvider lockProvider(DataSource dataSource) {
+      String tableName = StringUtils.isEmpty(dataSourceSchema) ? "shedlock" : dataSourceSchema + ".shedlock";
+      return new JdbcTemplateLockProvider(builder()
+                                                  .withTableName(tableName)
+                                                  .withJdbcTemplate(new JdbcTemplate(dataSource))
+                                                  .usingDbTime()
+                                                  .build()
+      );
+    }
+    
+    @Scheduled(cron = "${db.cleanCron:0 0 3 * * ?}")
+    @SchedulerLock(name = "cleanData", lockAtLeastFor = "PT0S", lockAtMostFor = "1800000")
+    public void scheduleCleanData() {
+      try {
+          Instant removeBefore = Instant.now().minus(removeAfterDays, ChronoUnit.DAYS);
+          logger.info("removing trace keys with end_time before: {}", removeBefore);
+          int removeCount = notifyMeDataService().removeTraceKeys(removeBefore);
+          logger.info("removed {} trace keys from db", removeCount);
+      } catch (Exception e) {
+          logger.error("Exception removing old trace keys", e);
+      }
     }
 }
