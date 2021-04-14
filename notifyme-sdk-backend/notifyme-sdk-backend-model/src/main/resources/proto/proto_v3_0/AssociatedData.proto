@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package ch.ubique.notifyme.sdk.backend.model;
+option java_package = "ch.ubique.notifyme.sdk.backend.model.v3";
+
+message AssociatedData {
+  int32 version = 1;
+  string message = 2;
+  bytes countryData = 3;
+}

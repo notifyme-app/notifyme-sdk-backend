@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package ch.ubique.notifyme.sdk.backend.model;
+option java_package = "ch.ubique.notifyme.sdk.backend.model.v3";
+
+import "VenueType.proto";
+
+message LocationData {
+  VenueType venueType = 1;
+}

@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package ch.ubique.notifyme.sdk.backend.model;
+option java_package = "ch.ubique.notifyme.sdk.backend.model.v3";
+
+message QrCodeContent {
+  uint32 version = 1;
+  TraceLocation locationData = 2;
+  CrowdNotifierData crowdNotifierData = 3;
+  bytes vendorData = 4;
+}
+
+message TraceLocation {
+  uint32 version = 1;
+  string description = 2;
+  string location = 3;
+  string room = 4;
+  // timestamp in seconds
+  uint64 validFrom = 5;
+  // timestamp in seconds
+  uint64 validTo = 6;
+}
+
+message CrowdNotifierData {
+  uint32 version = 1;
+  bytes masterPublicKey = 2;
+  bytes cryptographicSeed = 3;
+}
