@@ -55,7 +55,6 @@ public class JdbcNotifyMeDataServiceV3ImplTest extends BaseDataServiceTest {
   @Test
   public void t1_contextLoads() {
     assertNotNull(notifyMeDataServiceV3);
-    assertTrue(false);
   }
 
   @Test
