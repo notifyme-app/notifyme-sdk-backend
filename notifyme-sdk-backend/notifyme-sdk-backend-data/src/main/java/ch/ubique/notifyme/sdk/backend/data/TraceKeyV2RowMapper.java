@@ -15,9 +15,9 @@ import java.sql.SQLException;
 
 import org.springframework.jdbc.core.RowMapper;
 
-import ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey;
+import ch.ubique.notifyme.sdk.backend.model.tracekey.v2.TraceKey;
 
-public class TraceKeyRowMapper implements RowMapper<TraceKey> {
+public class TraceKeyV2RowMapper implements RowMapper<TraceKey> {
 
     @Override
     public TraceKey mapRow(ResultSet rs, int rowNum) throws SQLException {

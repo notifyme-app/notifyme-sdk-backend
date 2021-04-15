@@ -11,11 +11,11 @@
 package ch.ubique.notifyme.sdk.backend.ws.controller;
 
 import ch.ubique.notifyme.sdk.backend.data.DiaryEntryDataService;
-import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataService;
+import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV2;
 import ch.ubique.notifyme.sdk.backend.model.DiaryEntryWrapperOuterClass.DiaryEntryWrapper;
 import ch.ubique.notifyme.sdk.backend.model.PreTraceWithProofOuterClass.PreTraceWithProof;
 import ch.ubique.notifyme.sdk.backend.model.event.JavaDiaryEntry;
-import ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey;
+import ch.ubique.notifyme.sdk.backend.model.tracekey.v2.TraceKey;
 import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
 import ch.ubique.notifyme.sdk.backend.ws.CryptoWrapper;
 import ch.ubique.openapi.docannotations.Documentation;
@@ -48,15 +48,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class DebugController {
     private static final Logger logger = LoggerFactory.getLogger(DebugController.class);
 
-    private final NotifyMeDataService notifyMeDataService;
+    private final NotifyMeDataServiceV2 notifyMeDataServiceV2;
     private final DiaryEntryDataService diaryEntryDataService;
     private final CryptoWrapper cryptoWrapper;
 
     public DebugController(
-            final NotifyMeDataService notifyMeDataService,
+            final NotifyMeDataServiceV2 notifyMeDataServiceV2,
             final DiaryEntryDataService diaryEntryDataService,
             final CryptoWrapper cryptoWrapper) {
-        this.notifyMeDataService = notifyMeDataService;
+        this.notifyMeDataServiceV2 = notifyMeDataServiceV2;
         this.diaryEntryDataService = diaryEntryDataService;
         this.cryptoWrapper = cryptoWrapper;
     }
@@ -116,7 +116,7 @@ public class DebugController {
                 logger.error("unable to parse protobuf", e);
             }
         }
-        notifyMeDataService.insertTraceKey(traceKeysToInsert);
+        notifyMeDataServiceV2.insertTraceKey(traceKeysToInsert);
         return ResponseEntity.ok("OK");
     }
 

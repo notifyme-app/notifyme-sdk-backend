@@ -5,6 +5,8 @@ option java_package = "ch.ubique.notifyme.sdk.backend.model.v3";
 
 import "VenueType.proto";
 
-message LocationData {
-  VenueType venueType = 1;
+message NotifyMeLocationData {
+  uint32 version = 1;
+  VenueType type = 2;
+  string room = 3;
 }

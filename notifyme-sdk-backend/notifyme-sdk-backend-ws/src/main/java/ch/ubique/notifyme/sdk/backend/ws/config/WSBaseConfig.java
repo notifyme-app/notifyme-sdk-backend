@@ -12,6 +12,8 @@ package ch.ubique.notifyme.sdk.backend.ws.config;
 
 import ch.ubique.notifyme.sdk.backend.data.DiaryEntryDataService;
 import ch.ubique.notifyme.sdk.backend.data.JdbcDiaryEntryDataServiceImpl;
+import ch.ubique.notifyme.sdk.backend.data.JdbcNotifyMeDataServiceV2Impl;
+import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV2;
 import ch.ubique.notifyme.sdk.backend.data.JdbcNotifyMeDataServiceImpl;
 import ch.ubique.notifyme.sdk.backend.data.JdbcPushRegistrationDataServiceImpl;
 import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataService;
@@ -19,7 +21,7 @@ import ch.ubique.notifyme.sdk.backend.data.PushRegistrationDataService;
 import ch.ubique.notifyme.sdk.backend.ws.CryptoWrapper;
 import ch.ubique.notifyme.sdk.backend.ws.controller.ConfigController;
 import ch.ubique.notifyme.sdk.backend.ws.controller.DebugController;
-import ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeController;
+import ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeControllerV2;
 import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebController;
 import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebCriticalEventController;
 import ch.ubique.notifyme.sdk.backend.ws.service.PhoneHeartbeatSilentPush;
@@ -136,8 +138,8 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public NotifyMeDataService notifyMeDataService() {
-        return new JdbcNotifyMeDataServiceImpl(dataSource(), bucketSizeInMs);
+    public NotifyMeDataServiceV2 notifyMeDataService() {
+        return new JdbcNotifyMeDataServiceV2Impl(dataSource(), bucketSizeInMs);
     }
 
     @Bean
@@ -161,6 +163,10 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
                 revision,
                 bucketSizeInMs,
                 traceKeysCacheControlInMs);
+    public NotifyMeControllerV2 notifyMeController(
+            NotifyMeDataServiceV2 notifyMeDataServiceV2, String revision) {
+        return new NotifyMeControllerV2(
+                notifyMeDataServiceV2, revision, bucketSizeInMs, traceKeysCacheControlInMs);
     }
 
     @Bean
@@ -211,10 +217,10 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
     @Profile("enable-debug")
     @Bean
     public DebugController debugController(
-            final NotifyMeDataService notifyMeDataService,
+            final NotifyMeDataServiceV2 notifyMeDataServiceV2,
             final DiaryEntryDataService diaryEntryDataService,
             final CryptoWrapper cryptoWrapper) {
-        return new DebugController(notifyMeDataService, diaryEntryDataService, cryptoWrapper);
+        return new DebugController(notifyMeDataServiceV2, diaryEntryDataService, cryptoWrapper);
     }
 
     @Bean

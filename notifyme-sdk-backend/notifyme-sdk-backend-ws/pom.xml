@@ -202,7 +202,7 @@
                             <outFile>swagger.yaml</outFile>
                             <controllers>
                                 <controller>ch.ubique.notifyme.sdk.backend.ws.controller.ConfigController</controller>
-                                <controller>ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeController</controller>
+                                <controller>ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeControllerV2</controller>
                                 <controller>ch.ubique.notifyme.sdk.backend.ws.controller.DebugController</controller>
                             </controllers>
                             <title>NotifyMe API</title>

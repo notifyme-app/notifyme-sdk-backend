@@ -19,5 +19,9 @@ message TraceProof {
 message PreTraceWithProof {
   PreTrace preTrace = 1;
   TraceProof proof = 2;
-  bytes info = 3;
+  bytes qrCodePayload = 3;
+  int64 startTime = 4;
+  int64 endTime = 5;
+  // Old: int32 counter = 6;
+  int64 startOfInterval = 6;
 }

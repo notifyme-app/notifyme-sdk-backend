@@ -3,7 +3,7 @@ syntax = "proto3";
 package ch.ubique.notifyme.sdk.backend.model;
 option java_package = "ch.ubique.notifyme.sdk.backend.model.v3";
 
-message NMAssociatedData {
+message NotifyMeAssociatedData {
   int32 version = 1;
   EventCriticality criticality = 2;
 }

@@ -10,7 +10,7 @@
 
 package ch.ubique.notifyme.sdk.backend.data;
 
-import ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey;
+import ch.ubique.notifyme.sdk.backend.model.tracekey.v2.TraceKey;
 import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -23,13 +23,13 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.transaction.annotation.Transactional;
 
-public class JdbcNotifyMeDataServiceImpl implements NotifyMeDataService {
+public class JdbcNotifyMeDataServiceV2Impl implements NotifyMeDataServiceV2 {
 
     private final Long bucketSizeInMs;
     private final NamedParameterJdbcTemplate jt;
     private final SimpleJdbcInsert traceKeyInsert;
 
-    public JdbcNotifyMeDataServiceImpl(DataSource dataSource, Long bucketSizeInMs) {
+    public JdbcNotifyMeDataServiceV2Impl(DataSource dataSource, Long bucketSizeInMs) {
         this.bucketSizeInMs = bucketSizeInMs;
         this.jt = new NamedParameterJdbcTemplate(dataSource);
         this.traceKeyInsert =
@@ -56,7 +56,7 @@ public class JdbcNotifyMeDataServiceImpl implements NotifyMeDataService {
             sql += " and created_at >= :after";
             params.addValue("after", DateUtil.toDate(after));
         }
-        return jt.query(sql, params, new TraceKeyRowMapper());
+        return jt.query(sql, params, new TraceKeyV2RowMapper());
     }
 
     @Override

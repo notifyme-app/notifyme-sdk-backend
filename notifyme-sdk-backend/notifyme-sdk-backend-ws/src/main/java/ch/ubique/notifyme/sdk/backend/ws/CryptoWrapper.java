@@ -26,7 +26,7 @@ import ch.ubique.notifyme.sdk.backend.model.PreTraceWithProofOuterClass.PreTrace
 import ch.ubique.notifyme.sdk.backend.model.PreTraceWithProofOuterClass.PreTraceWithProof;
 import ch.ubique.notifyme.sdk.backend.model.PreTraceWithProofOuterClass.TraceProof;
 import ch.ubique.notifyme.sdk.backend.model.QrCodeContentOuterClass.QrCodeContent;
-import ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey;
+import ch.ubique.notifyme.sdk.backend.model.tracekey.v2.TraceKey;
 
 public class CryptoWrapper {
 
