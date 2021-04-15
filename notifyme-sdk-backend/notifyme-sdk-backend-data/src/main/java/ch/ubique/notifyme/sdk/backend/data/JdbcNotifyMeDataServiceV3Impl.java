@@ -12,6 +12,8 @@ package ch.ubique.notifyme.sdk.backend.data;
 
 import ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey;
 import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -83,13 +85,16 @@ public class JdbcNotifyMeDataServiceV3Impl implements NotifyMeDataServiceV3 {
 
     private MapSqlParameterSource getTraceKeyParams(TraceKey traceKey) {
         MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("pk_trace_key_id", traceKey.getId());
         params.addValue("version", traceKey.getVersion());
         params.addValue("identity", traceKey.getIdentity());
         params.addValue("secret_key_for_identity", traceKey.getSecretKeyForIdentity());
         params.addValue("start_time", DateUtil.toDate(traceKey.getStartTime()));
         params.addValue("end_time", DateUtil.toDate(traceKey.getEndTime()));
-        params.addValue("created_at", new Date());
+        if(traceKey.getCreatedAt() != null) {
+            params.addValue("created_at", DateUtil.toDate(traceKey.getCreatedAt()));
+        } else {
+            params.addValue("created_at", new Date());
+        }
         params.addValue("encrypted_associated_data", traceKey.getEncryptedAssociatedData());
         params.addValue("cipher_text_nonce", traceKey.getCipherTextNonce());
         return params;
