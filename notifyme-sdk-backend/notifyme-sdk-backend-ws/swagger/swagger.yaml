@@ -104,7 +104,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey'
+              $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.tracekey.v2.TraceKey'
         description: Trace key to upload as JSON
   /v1/register:
     post:
@@ -309,7 +309,7 @@ components:
           description: Blocks the app and shows a link to the app-store. The user
             can only continue once the app is updated
           example: ''
-    ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey:
+    ch.ubique.notifyme.sdk.backend.model.tracekey.v2.TraceKey:
       type: object
       required:
       - identity
