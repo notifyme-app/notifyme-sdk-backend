@@ -5,7 +5,7 @@ servers:
 - url: https://app-prod-ws.notify-me.ch
   description: ''
 info:
-  version: 1.0.0
+  version: 1.1.0
   description: NotifyMe API
   title: NotifyMe API
 paths:
@@ -106,17 +106,67 @@ paths:
             schema:
               $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.tracekey.v2.TraceKey'
         description: Trace key to upload as JSON
-  /v1/register:
-    post:
-      summary: registerPush
-      description: Push registration
+  /v3/:
+    get:
+      summary: hello
+      description: Hello return
       responses:
         '200':
-          description: success
+          description: server live
           headers: {
             }
-        '400':
-          description: Error
+          content:
+            application/json:
+              schema:
+                type: string
+  /v3/traceKeys:
+    get:
+      summary: getTraceKeysJson
+      description: getTraceKeysJson
+      responses:
+        '200':
+          description: protobuf/json of all keys in that interval. response header
+            _x-key-bundle-tag_ contains _lastKeyBundleTag_ for next request
+          headers:
+            x-key-bundle-tag:
+              description: _lastKeyBundleTag_ to send with next request
+              schema:
+                type: string
+          content:
+            application/x-protobuf:
+              schema:
+                $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEventWrapper'
+        '404':
+          description: Invalid _lastKeyBundleTag_
+          headers:
+            x-key-bundle-tag:
+              description: _lastKeyBundleTag_ to send with next request
+              schema:
+                type: string
+      parameters:
+      - name: lastKeyBundleTag
+        in: query
+        description: in millis since epoch. must be aligned to a full hour, and <
+          now()
+        example: ''
+        required: false
+        schema:
+          type: integer
+          format: long
+    post:
+      summary: uploadTraceKeys
+      description: Endpoint used to upload trace keys to the backend
+      responses:
+        '200':
+          description: The trace keys have been stored in the database
+          headers: {
+            }
+          content:
+            application/json:
+              schema:
+                type: string
+        '403':
+          description: Authentication failed
           headers: {
             }
       requestBody:
@@ -124,8 +174,8 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.PushRegistrationOuterClass.PushRegistration'
-        description: N/A
+              $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey'
+        description: Trace key to upload as JSON
   /v1/debug/:
     get:
       summary: hello
@@ -328,3 +378,59 @@ components:
         createdAt:
           allOf:
           - $ref: '#/components/schemas/java.time.Instant'
+    ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey:
+      type: object
+      required:
+      - version
+      - identity
+      - secretKeyForIdentity
+      - startTime
+      - endTime
+      properties:
+        id:
+          type: integer
+        version:
+          type: integer
+        startTime:
+          allOf:
+          - $ref: '#/components/schemas/java.time.Instant'
+        endTime:
+          allOf:
+          - $ref: '#/components/schemas/java.time.Instant'
+        createdAt:
+          allOf:
+          - $ref: '#/components/schemas/java.time.Instant'
+    ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEvent:
+      type: object
+      properties:
+        version_:
+          type: integer
+        startTime_:
+          type: integer
+          format: long
+        endTime_:
+          type: integer
+          format: long
+        memoizedIsInitialized:
+          allOf:
+          - $ref: '#/components/schemas/byte'
+        memoizedSize:
+          type: integer
+        memoizedHashCode:
+          type: integer
+    ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEventWrapper:
+      type: object
+      properties:
+        version_:
+          type: integer
+        events_:
+          type: array
+          items:
+            $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEvent'
+        memoizedIsInitialized:
+          allOf:
+          - $ref: '#/components/schemas/byte'
+        memoizedSize:
+          type: integer
+        memoizedHashCode:
+          type: integer
