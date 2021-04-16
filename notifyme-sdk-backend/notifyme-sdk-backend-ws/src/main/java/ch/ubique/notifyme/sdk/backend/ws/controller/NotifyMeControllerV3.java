@@ -109,7 +109,7 @@ public class NotifyMeControllerV3 {
     List<TraceKey> traceKeys = dataService.findTraceKeys(DateUtil.toInstant(lastKeyBundleTag));
     ProblematicEventWrapper pew =
         ProblematicEventWrapper.newBuilder()
-            .setVersion(1)
+            .setVersion(3)
             .addAllEvents(mapToProblematicEvents(traceKeys))
             .build();
     return ResponseEntity.ok()

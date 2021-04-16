@@ -10,18 +10,12 @@
 
 package ch.ubique.notifyme.sdk.backend.ws.config;
 
-import ch.ubique.notifyme.sdk.backend.data.DiaryEntryDataService;
-import ch.ubique.notifyme.sdk.backend.data.JdbcDiaryEntryDataServiceImpl;
-import ch.ubique.notifyme.sdk.backend.data.JdbcNotifyMeDataServiceV2Impl;
-import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV2;
-import ch.ubique.notifyme.sdk.backend.data.JdbcNotifyMeDataServiceImpl;
-import ch.ubique.notifyme.sdk.backend.data.JdbcPushRegistrationDataServiceImpl;
-import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataService;
-import ch.ubique.notifyme.sdk.backend.data.PushRegistrationDataService;
+import ch.ubique.notifyme.sdk.backend.data.*;
 import ch.ubique.notifyme.sdk.backend.ws.CryptoWrapper;
 import ch.ubique.notifyme.sdk.backend.ws.controller.ConfigController;
 import ch.ubique.notifyme.sdk.backend.ws.controller.DebugController;
 import ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeControllerV2;
+import ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeControllerV3;
 import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebController;
 import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebCriticalEventController;
 import ch.ubique.notifyme.sdk.backend.ws.service.PhoneHeartbeatSilentPush;
@@ -138,8 +132,13 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public NotifyMeDataServiceV2 notifyMeDataService() {
+    public NotifyMeDataServiceV2 notifyMeDataServiceV2() {
         return new JdbcNotifyMeDataServiceV2Impl(dataSource(), bucketSizeInMs);
+    }
+
+    @Bean
+    public NotifyMeDataServiceV3 notifyMeDataServiceV3() {
+        return new JdbcNotifyMeDataServiceV3Impl(dataSource(), bucketSizeInMs);
     }
 
     @Bean
@@ -148,6 +147,7 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
     }
 
     @Bean
+    public NotifyMeControllerV2 notifyMeControllerV2(
     public PushRegistrationDataService pushRegistrationDataService(final DataSource dataSource) {
         return new JdbcPushRegistrationDataServiceImpl(dataSource);
     }
@@ -167,6 +167,13 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
             NotifyMeDataServiceV2 notifyMeDataServiceV2, String revision) {
         return new NotifyMeControllerV2(
                 notifyMeDataServiceV2, revision, bucketSizeInMs, traceKeysCacheControlInMs);
+    }
+
+    @Bean
+    public NotifyMeControllerV3 notifyMeControllerV3(
+            NotifyMeDataServiceV3 notifyMeDataServiceV3, String revision) {
+        return new NotifyMeControllerV3(
+                notifyMeDataServiceV3, revision, bucketSizeInMs, traceKeysCacheControlInMs);
     }
 
     @Bean
@@ -245,5 +252,44 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
                         .enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                         .disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
         return new MappingJackson2HttpMessageConverter(mapper);
+    }
+
+    @Override
+    public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
+        // remove old trace keys
+        taskRegistrar.addCronTask(
+                new CronTask(
+                        () -> {
+                            try {
+                                Instant removeBefore =
+                                        Instant.now().minus(removeAfterDays, ChronoUnit.DAYS);
+                                logger.info(
+                                        "removing trace keys v2 with end_time before: {}",
+                                        removeBefore);
+                                int removeCount =
+                                        notifyMeDataServiceV2().removeTraceKeys(removeBefore);
+                                logger.info("removed {} trace keys v2 from db", removeCount);
+                            } catch (Exception e) {
+                                logger.error("Exception removing old trace keys v2", e);
+                            }
+                        },
+                        new CronTrigger(cleanCron, TimeZone.getTimeZone("UTC"))));
+        taskRegistrar.addCronTask(
+                new CronTask(
+                        () -> {
+                            try {
+                                Instant removeBefore =
+                                        Instant.now().minus(removeAfterDays, ChronoUnit.DAYS);
+                                logger.info(
+                                        "removing trace keys v3 with end_time before: {}",
+                                        removeBefore);
+                                int removeCount =
+                                        notifyMeDataServiceV3().removeTraceKeys(removeBefore);
+                                logger.info("removed {} trace keys v3 from db", removeCount);
+                            } catch (Exception e) {
+                                logger.error("Exception removing old trace keys v3", e);
+                            }
+                        },
+                        new CronTrigger(cleanCron, TimeZone.getTimeZone("UTC"))));
     }
 }
