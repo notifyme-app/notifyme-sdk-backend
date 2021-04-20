@@ -106,6 +106,26 @@ paths:
             schema:
               $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey'
         description: Trace key to upload as JSON
+  /v1/register:
+    post:
+      summary: registerPush
+      description: Push registration
+      responses:
+        '200':
+          description: success
+          headers: {
+            }
+        '400':
+          description: Error
+          headers: {
+            }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.PushRegistrationOuterClass.PushRegistration'
+        description: N/A
   /v1/debug/:
     get:
       summary: hello
@@ -256,6 +276,24 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.ProblematicEventWrapperOuterClass.ProblematicEvent'
+        memoizedIsInitialized:
+          allOf:
+          - $ref: '#/components/schemas/byte'
+        memoizedSize:
+          type: integer
+        memoizedHashCode:
+          type: integer
+    ch.ubique.notifyme.sdk.backend.model.PushRegistrationOuterClass.PushRegistration:
+      type: object
+      properties:
+        version_:
+          type: integer
+        pushToken_:
+          type: object
+        pushType_:
+          type: integer
+        deviceId_:
+          type: object
         memoizedIsInitialized:
           allOf:
           - $ref: '#/components/schemas/byte'
