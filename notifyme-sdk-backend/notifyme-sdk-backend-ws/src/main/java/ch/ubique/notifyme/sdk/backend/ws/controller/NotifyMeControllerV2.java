@@ -11,8 +11,10 @@
 package ch.ubique.notifyme.sdk.backend.ws.controller;
 
 import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV2;
+import ch.ubique.notifyme.sdk.backend.data.PushRegistrationDataService;
 import ch.ubique.notifyme.sdk.backend.model.ProblematicEventWrapperOuterClass.ProblematicEvent;
 import ch.ubique.notifyme.sdk.backend.model.ProblematicEventWrapperOuterClass.ProblematicEvent.Builder;
+import ch.ubique.notifyme.sdk.backend.model.PushRegistrationOuterClass.PushRegistration;
 import ch.ubique.notifyme.sdk.backend.model.ProblematicEventWrapperOuterClass.ProblematicEventWrapper;
 import ch.ubique.notifyme.sdk.backend.model.tracekey.v2.TraceKey;
 import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
@@ -41,16 +43,20 @@ public class NotifyMeControllerV2 {
     private static final String HEADER_X_KEY_BUNDLE_TAG = "x-key-bundle-tag";
 
     private final NotifyMeDataServiceV2 dataService;
+    private final PushRegistrationDataService pushRegistrationDataService;
+
     private final String revision;
     private final Long bucketSizeInMs;
     private final Long traceKeysCacheControlInMs;
 
     public NotifyMeControllerV2(
             NotifyMeDataServiceV2 dataService,
+            PushRegistrationDataService pushRegistrationDataService,
             String revision,
             Long bucketSizeInMs,
             Long traceKeysCacheControlInMs) {
         this.dataService = dataService;
+        this.pushRegistrationDataService = pushRegistrationDataService;
         this.revision = revision;
         this.bucketSizeInMs = bucketSizeInMs;
         this.traceKeysCacheControlInMs = traceKeysCacheControlInMs;
@@ -165,5 +171,12 @@ public class NotifyMeControllerV2 {
                     Object principal) {
         dataService.insertTraceKey(traceKey);
         return ResponseEntity.ok().body("OK");
+    }
+    
+    @PostMapping(value = "/register", consumes = {"application/x-protobuf", "application/protobuf"})
+    @Documentation(description = "Push registration", responses = {"200 => success", "400 => Error"})
+    public @ResponseBody ResponseEntity<Void> registerPush(@RequestBody final PushRegistration pushRegistration) {
+        pushRegistrationDataService.upsertPushRegistration(pushRegistration);
+        return ResponseEntity.ok().build();
     }
 }

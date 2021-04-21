@@ -10,30 +10,14 @@
 
 package ch.ubique.notifyme.sdk.backend.ws.config;
 
-import ch.ubique.notifyme.sdk.backend.data.*;
-import ch.ubique.notifyme.sdk.backend.ws.CryptoWrapper;
-import ch.ubique.notifyme.sdk.backend.ws.controller.ConfigController;
-import ch.ubique.notifyme.sdk.backend.ws.controller.DebugController;
-import ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeControllerV2;
-import ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeControllerV3;
-import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebController;
-import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebCriticalEventController;
-import ch.ubique.notifyme.sdk.backend.ws.service.PhoneHeartbeatSilentPush;
-import ch.ubique.pushservice.pushconnector.PushConnectorService;
-import ch.ubique.pushservice.pushconnector.PushConnectorServiceBuilder;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+
 import javax.sql.DataSource;
+
 import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +35,33 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
+
+import ch.ubique.notifyme.sdk.backend.data.DiaryEntryDataService;
+import ch.ubique.notifyme.sdk.backend.data.JdbcDiaryEntryDataServiceImpl;
+import ch.ubique.notifyme.sdk.backend.data.JdbcNotifyMeDataServiceV2Impl;
+import ch.ubique.notifyme.sdk.backend.data.JdbcNotifyMeDataServiceV3Impl;
+import ch.ubique.notifyme.sdk.backend.data.JdbcPushRegistrationDataServiceImpl;
+import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV2;
+import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV3;
+import ch.ubique.notifyme.sdk.backend.data.PushRegistrationDataService;
+import ch.ubique.notifyme.sdk.backend.ws.CryptoWrapper;
+import ch.ubique.notifyme.sdk.backend.ws.controller.ConfigController;
+import ch.ubique.notifyme.sdk.backend.ws.controller.DebugController;
+import ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeControllerV2;
+import ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeControllerV3;
+import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebController;
+import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebCriticalEventController;
+import ch.ubique.notifyme.sdk.backend.ws.service.PhoneHeartbeatSilentPush;
+import ch.ubique.pushservice.pushconnector.PushConnectorService;
+import ch.ubique.pushservice.pushconnector.PushConnectorServiceBuilder;
 
 @Configuration
 @EnableScheduling
@@ -148,25 +159,15 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
 
     @Bean
     public NotifyMeControllerV2 notifyMeControllerV2(
-    public PushRegistrationDataService pushRegistrationDataService(final DataSource dataSource) {
-        return new JdbcPushRegistrationDataServiceImpl(dataSource);
-    }
-
-    @Bean
-    public NotifyMeController notifyMeController(
-            final NotifyMeDataService notifyMeDataService,
+            final NotifyMeDataServiceV2 notifyMeDataService,
             final PushRegistrationDataService pushRegistrationDataService,
             final String revision) {
-        return new NotifyMeController(
+        return new NotifyMeControllerV2(
                 notifyMeDataService,
                 pushRegistrationDataService,
                 revision,
                 bucketSizeInMs,
                 traceKeysCacheControlInMs);
-    public NotifyMeControllerV2 notifyMeController(
-            NotifyMeDataServiceV2 notifyMeDataServiceV2, String revision) {
-        return new NotifyMeControllerV2(
-                notifyMeDataServiceV2, revision, bucketSizeInMs, traceKeysCacheControlInMs);
     }
 
     @Bean
@@ -188,6 +189,11 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
                 .withApple("ch.ubique.n2step.ios")
                 .withAppleSandboxEnabled()
                 .build();
+    }
+    
+    @Bean
+    public PushRegistrationDataService pushRegistrationDataService(final DataSource dataSource) {
+        return new JdbcPushRegistrationDataServiceImpl(dataSource);
     }
 
     @Bean
@@ -252,44 +258,5 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
                         .enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                         .disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
         return new MappingJackson2HttpMessageConverter(mapper);
-    }
-
-    @Override
-    public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-        // remove old trace keys
-        taskRegistrar.addCronTask(
-                new CronTask(
-                        () -> {
-                            try {
-                                Instant removeBefore =
-                                        Instant.now().minus(removeAfterDays, ChronoUnit.DAYS);
-                                logger.info(
-                                        "removing trace keys v2 with end_time before: {}",
-                                        removeBefore);
-                                int removeCount =
-                                        notifyMeDataServiceV2().removeTraceKeys(removeBefore);
-                                logger.info("removed {} trace keys v2 from db", removeCount);
-                            } catch (Exception e) {
-                                logger.error("Exception removing old trace keys v2", e);
-                            }
-                        },
-                        new CronTrigger(cleanCron, TimeZone.getTimeZone("UTC"))));
-        taskRegistrar.addCronTask(
-                new CronTask(
-                        () -> {
-                            try {
-                                Instant removeBefore =
-                                        Instant.now().minus(removeAfterDays, ChronoUnit.DAYS);
-                                logger.info(
-                                        "removing trace keys v3 with end_time before: {}",
-                                        removeBefore);
-                                int removeCount =
-                                        notifyMeDataServiceV3().removeTraceKeys(removeBefore);
-                                logger.info("removed {} trace keys v3 from db", removeCount);
-                            } catch (Exception e) {
-                                logger.error("Exception removing old trace keys v3", e);
-                            }
-                        },
-                        new CronTrigger(cleanCron, TimeZone.getTimeZone("UTC"))));
     }
 }
