@@ -172,9 +172,9 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
 
     @Bean
     public NotifyMeControllerV3 notifyMeControllerV3(
-            NotifyMeDataServiceV3 notifyMeDataServiceV3, String revision) {
+            NotifyMeDataServiceV3 notifyMeDataServiceV3, PushRegistrationDataService pushRegistrationDataService, String revision) {
         return new NotifyMeControllerV3(
-                notifyMeDataServiceV3, revision, bucketSizeInMs, traceKeysCacheControlInMs);
+                notifyMeDataServiceV3, pushRegistrationDataService, revision, bucketSizeInMs, traceKeysCacheControlInMs);
     }
 
     @Bean
