@@ -76,7 +76,7 @@ public class JdbcNotifyMeDataServiceV2Impl implements NotifyMeDataServiceV2 {
             for (TraceKey tk : traceKeysToInsert) {
                 batchParams.add(getTraceKeyParams(tk));
             }
-            traceKeyInsert.executeBatch(batchParams.toArray(new SqlParameterSource[0]));
+            traceKeyInsert.executeBatch(batchParams.toArray(new SqlParameterSource[batchParams.size()]));
         }
     }
 
