@@ -368,7 +368,7 @@ public class CryptoWrapper {
         }
     }
 
-    private byte[] encryptAssociatedData(byte[] secretKey, String message, byte[] countryData, byte[] nonce) {
+    public byte[] encryptAssociatedData(byte[] secretKey, String message, byte[] countryData, byte[] nonce) {
         AssociatedData associatedData = AssociatedData.newBuilder().setMessage(message)
                         .setCountryData(ByteString.copyFrom(countryData)).setVersion(QR_CODE_VERSION_3).build();
 
