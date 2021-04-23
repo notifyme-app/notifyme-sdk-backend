@@ -46,6 +46,7 @@ public class CryptoWrapper {
     private static final Logger logger = LoggerFactory.getLogger(CryptoWrapper.class);
 
     private static final int HASH_BYTES = 32;
+    private static final int NONCE_BYTES = 32;
     private static final int QR_CODE_VERSION_3 = 3;
 
     public final byte[] sk;
@@ -192,6 +193,7 @@ public class CryptoWrapper {
         traceKey.setEndTime(Instant.ofEpochMilli(preTraceWithProof.getEndTime()));
         traceKey.setCipherTextNonce(nonce);
         traceKey.setEncryptedAssociatedData(encryptedAssociatedData);
+        traceKey.setSecretKeyForIdentity(secretKeyForIdentity.serialize());
         return traceKey;
     }
 
@@ -284,7 +286,7 @@ public class CryptoWrapper {
 
     public IBECiphertext encryptInternal(G2 masterPublicKey, byte[] identity, byte[] message) {
 
-        byte[] x = createNonceForMessageEncytion();
+        byte[] x = randomBytesBuf32();
 
         Fr r = new Fr();
         r.setHashOf(concatenate(x, identity, message));
@@ -309,6 +311,12 @@ public class CryptoWrapper {
         byte[] c3 = cryptoSecretboxEasy(cryptoHashSHA256(x), message, nonce);
 
         return new IBECiphertext(c1.serialize(), c2, c3, nonce);
+    }
+    
+    private byte[] randomBytesBuf32() {
+        byte[] nonce = new byte[NONCE_BYTES];
+        sodium.randombytes_buf(nonce, NONCE_BYTES);
+        return nonce;
     }
 
     public byte[] decryptInternal(IBECiphertext ibeCiphertext, G1 secretKeyForIdentity, byte[] identity) {
