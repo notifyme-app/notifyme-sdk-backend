@@ -70,11 +70,11 @@ public class DebugControllerV3 {
     @PostMapping("/traceKey")
     public ResponseEntity<String> uploadTraceKey(
             @RequestParam @Documentation(description = "list of url base64 encoded pre trace keys")
-                    List<String> preTraces, @RequestParam String message, @RequestParam String criticality) {
+                    List<String> preTraces, @RequestParam String message, @RequestParam Integer criticality) {
 
         List<TraceKey> traceKeysToInsert = new ArrayList<>();
         
-        NotifyMeAssociatedData countryData = NotifyMeAssociatedData.newBuilder().setCriticality(EventCriticality.valueOf(criticality)).setVersion(1).build();
+        NotifyMeAssociatedData countryData = NotifyMeAssociatedData.newBuilder().setCriticality(EventCriticality.forNumber(criticality)).setVersion(1).build();
         
         for (int i = 0; i < preTraces.size(); i++) {
             String preTraceKeyBase64 = preTraces.get(i);
