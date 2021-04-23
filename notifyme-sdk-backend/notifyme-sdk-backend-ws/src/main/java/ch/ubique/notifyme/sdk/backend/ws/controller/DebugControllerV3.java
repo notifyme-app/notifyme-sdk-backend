@@ -84,7 +84,7 @@ public class DebugControllerV3 {
                                 .decode(preTraceKeyBase64.getBytes(StandardCharsets.UTF_8));
                 PreTraceWithProof preTraceWithProofProto =
                         PreTraceWithProof.parseFrom(preTraceKeyBytes);
-                TraceKey traceKey = cryptoWrapper.createTraceV(preTraceWithProofProto, message, countryData.toByteArray());
+                TraceKey traceKey = cryptoWrapper.createTraceV3(preTraceWithProofProto, message, countryData.toByteArray());
                 traceKeysToInsert.add(traceKey);
             } catch (InvalidProtocolBufferException e) {
                 logger.error("unable to parse protobuf", e);

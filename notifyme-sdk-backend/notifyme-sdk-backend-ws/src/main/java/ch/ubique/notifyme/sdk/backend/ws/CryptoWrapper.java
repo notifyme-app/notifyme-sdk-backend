@@ -137,7 +137,7 @@ public class CryptoWrapper {
         return traceKey;
     }
 
-    public ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey createTraceV(
+    public ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey createTraceV3(
                     ch.ubique.notifyme.sdk.backend.model.v3.PreTraceWithProofOuterClass.PreTraceWithProof preTraceWithProof,
                     String message, byte[] countryData) throws InvalidProtocolBufferException {
 
@@ -178,8 +178,9 @@ public class CryptoWrapper {
         masterPublicKey.deserialize(proof.getMasterPublicKey().toByteArray());
         IBECiphertext ibeCiphertext = encryptInternal(masterPublicKey, identity, msg_orig);
         byte[] msg_dec = decryptInternal(ibeCiphertext, secretKeyForIdentity, identity);
-        if (msg_dec == null)
+        if (msg_dec == null) {
             throw new RuntimeException("Health Authority could not verify Trace");
+        }
 
         byte[] nonce = getRandomValue(Box.NONCEBYTES);
         byte[] encryptedAssociatedData = encryptAssociatedData(
@@ -189,8 +190,8 @@ public class CryptoWrapper {
         ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey traceKey = new ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey();
         traceKey.setIdentity(preTrace.getIdentity().toByteArray());
         traceKey.setCipherTextNonce(nonce);
-        traceKey.setStartTime(Instant.ofEpochMilli(preTraceWithProof.getStartTime()));
-        traceKey.setEndTime(Instant.ofEpochMilli(preTraceWithProof.getEndTime()));
+        traceKey.setStartTime(Instant.ofEpochSecond(preTraceWithProof.getStartTime()));
+        traceKey.setEndTime(Instant.ofEpochSecond(preTraceWithProof.getEndTime()));
         traceKey.setCipherTextNonce(nonce);
         traceKey.setEncryptedAssociatedData(encryptedAssociatedData);
         traceKey.setSecretKeyForIdentity(secretKeyForIdentity.serialize());
