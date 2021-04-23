@@ -64,7 +64,7 @@ public class DebugControllerV3 {
     public ResponseEntity<String> hello() {
         return ResponseEntity.ok()
                 .header("X-HELLO", "notifyme")
-                .body("Hello from NotifyMe Debug WS v1");
+                .body("Hello from NotifyMe Debug WS v3");
     }
 
     @PostMapping("/traceKey")

@@ -227,22 +227,22 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
                         .format(prettyFormatter);
         return "Rev: " + commitId + "\n" + prettyTime;
     }
+   
+    @Profile("enable-debug")
+    @Bean
+    public DebugControllerV3 debugControllerV3(
+            final NotifyMeDataServiceV3 notifyMeDataServiceV3,
+            final CryptoWrapper cryptoWrapper) {
+        return new DebugControllerV3(notifyMeDataServiceV3, cryptoWrapper);
+    }
 
     @Profile("enable-debug")
     @Bean
-    public DebugControllerV2 debugController(
+    public DebugControllerV2 debugControllerV2(
             final NotifyMeDataServiceV2 notifyMeDataServiceV2,
             final DiaryEntryDataService diaryEntryDataService,
             final CryptoWrapper cryptoWrapper) {
         return new DebugControllerV2(notifyMeDataServiceV2, diaryEntryDataService, cryptoWrapper);
-    }
-    
-    @Profile("enable-debug")
-    @Bean
-    public DebugControllerV3 debugController(
-            final NotifyMeDataServiceV3 notifyMeDataServiceV3,
-            final CryptoWrapper cryptoWrapper) {
-        return new DebugControllerV3(notifyMeDataServiceV3, cryptoWrapper);
     }
 
     @Bean
