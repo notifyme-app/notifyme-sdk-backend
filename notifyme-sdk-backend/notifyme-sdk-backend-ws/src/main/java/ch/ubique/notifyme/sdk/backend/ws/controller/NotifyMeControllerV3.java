@@ -16,6 +16,7 @@ import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass
 import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEvent.Builder;
 import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEventWrapper;
 import ch.ubique.notifyme.sdk.backend.model.PushRegistrationOuterClass.PushRegistration;
+import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload;
 import ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey;
 import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
 import ch.ubique.openapi.docannotations.Documentation;
@@ -170,5 +171,20 @@ public class NotifyMeControllerV3 {
   public @ResponseBody ResponseEntity<Void> registerPush(@RequestBody final PushRegistration pushRegistration) {
       pushRegistrationDataService.upsertPushRegistration(pushRegistration);
       return ResponseEntity.ok().build();
+  }
+
+  /**
+   * Upload of stored identities if user tested positive and wishes to notify other visitors:
+   *  - Sanity check on stored (e.g. no overlapping timestamps)
+   *  - Generate traceKey = secretKey_ID using an identity and the master secretkey
+   *  - Store tracekey such that other user can poll for possible exposure events
+   * @param userUploadPayload
+   * @return
+   */
+  @PostMapping(value = "/userupload", consumes = {"application/x-protobuf", "application/protobuf"})
+  @Documentation(description = "User upload of stored identities", responses = {"200 => success", "400 => Error"})
+  public @ResponseBody ResponseEntity<Void> userUpload(@RequestBody final UserUploadPayload userUploadPayload) {
+    // TODO: Implement
+    return ResponseEntity.ok().build();
   }
 }

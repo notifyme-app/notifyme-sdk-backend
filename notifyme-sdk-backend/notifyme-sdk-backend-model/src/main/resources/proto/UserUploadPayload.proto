@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package ch.ubique.notifyme.sdk.backend.model;
+
+option java_package = "ch.ubique.notifyme.sdk.backend.model";
+
+message UserUploadPayload {
+  uint32 version = 1;
+  repeated bytes identities = 2;
+}
