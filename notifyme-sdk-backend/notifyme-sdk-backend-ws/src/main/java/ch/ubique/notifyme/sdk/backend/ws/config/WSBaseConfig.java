@@ -10,34 +10,14 @@
 
 package ch.ubique.notifyme.sdk.backend.ws.config;
 
-import ch.ubique.notifyme.sdk.backend.data.DiaryEntryDataService;
-import ch.ubique.notifyme.sdk.backend.data.JdbcDiaryEntryDataServiceImpl;
-import ch.ubique.notifyme.sdk.backend.data.JdbcNotifyMeDataServiceImpl;
-import ch.ubique.notifyme.sdk.backend.data.JdbcPushRegistrationDataServiceImpl;
-import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataService;
-import ch.ubique.notifyme.sdk.backend.data.PushRegistrationDataService;
-import ch.ubique.notifyme.sdk.backend.ws.CryptoWrapper;
-import ch.ubique.notifyme.sdk.backend.ws.controller.ConfigController;
-import ch.ubique.notifyme.sdk.backend.ws.controller.DebugController;
-import ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeController;
-import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebController;
-import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebCriticalEventController;
-import ch.ubique.notifyme.sdk.backend.ws.service.PhoneHeartbeatSilentPush;
-import ch.ubique.pushservice.pushconnector.PushConnectorService;
-import ch.ubique.pushservice.pushconnector.PushConnectorServiceBuilder;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+
 import javax.sql.DataSource;
+
 import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +35,34 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
+
+import ch.ubique.notifyme.sdk.backend.data.DiaryEntryDataService;
+import ch.ubique.notifyme.sdk.backend.data.JdbcDiaryEntryDataServiceImpl;
+import ch.ubique.notifyme.sdk.backend.data.JdbcNotifyMeDataServiceV2Impl;
+import ch.ubique.notifyme.sdk.backend.data.JdbcNotifyMeDataServiceV3Impl;
+import ch.ubique.notifyme.sdk.backend.data.JdbcPushRegistrationDataServiceImpl;
+import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV2;
+import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV3;
+import ch.ubique.notifyme.sdk.backend.data.PushRegistrationDataService;
+import ch.ubique.notifyme.sdk.backend.ws.CryptoWrapper;
+import ch.ubique.notifyme.sdk.backend.ws.controller.ConfigController;
+import ch.ubique.notifyme.sdk.backend.ws.controller.DebugControllerV2;
+import ch.ubique.notifyme.sdk.backend.ws.controller.DebugControllerV3;
+import ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeControllerV2;
+import ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeControllerV3;
+import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebController;
+import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebCriticalEventController;
+import ch.ubique.notifyme.sdk.backend.ws.service.PhoneHeartbeatSilentPush;
+import ch.ubique.pushservice.pushconnector.PushConnectorService;
+import ch.ubique.pushservice.pushconnector.PushConnectorServiceBuilder;
 
 @Configuration
 @EnableScheduling
@@ -91,8 +99,7 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
 
     @Bean
     public static PropertySourcesPlaceholderConfigurer placeholderConfigurer() {
-        PropertySourcesPlaceholderConfigurer propsConfig =
-                new PropertySourcesPlaceholderConfigurer();
+        PropertySourcesPlaceholderConfigurer propsConfig = new PropertySourcesPlaceholderConfigurer();
         propsConfig.setLocation(new ClassPathResource("git.properties"));
         propsConfig.setIgnoreResourceNotFound(true);
         propsConfig.setIgnoreUnresolvablePlaceholders(true);
@@ -107,9 +114,7 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
 
     @Bean
     public MappingJackson2HttpMessageConverter converter() {
-        ObjectMapper mapper =
-                new ObjectMapper()
-                        .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+        ObjectMapper mapper = new ObjectMapper().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
                         .setSerializationInclusion(JsonInclude.Include.NON_ABSENT)
                         .registerModules(new ProtobufModule(), new Jdk8Module());
         return new MappingJackson2HttpMessageConverter(mapper);
@@ -136,8 +141,13 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public NotifyMeDataService notifyMeDataService() {
-        return new JdbcNotifyMeDataServiceImpl(dataSource(), bucketSizeInMs);
+    public NotifyMeDataServiceV2 notifyMeDataServiceV2() {
+        return new JdbcNotifyMeDataServiceV2Impl(dataSource(), bucketSizeInMs);
+    }
+
+    @Bean
+    public NotifyMeDataServiceV3 notifyMeDataServiceV3() {
+        return new JdbcNotifyMeDataServiceV3Impl(dataSource(), bucketSizeInMs);
     }
 
     @Bean
@@ -146,21 +156,17 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public PushRegistrationDataService pushRegistrationDataService(final DataSource dataSource) {
-        return new JdbcPushRegistrationDataServiceImpl(dataSource);
+    public NotifyMeControllerV2 notifyMeControllerV2(final NotifyMeDataServiceV2 notifyMeDataService,
+                    final PushRegistrationDataService pushRegistrationDataService, final String revision) {
+        return new NotifyMeControllerV2(notifyMeDataService, pushRegistrationDataService, revision, bucketSizeInMs,
+                        traceKeysCacheControlInMs);
     }
 
     @Bean
-    public NotifyMeController notifyMeController(
-            final NotifyMeDataService notifyMeDataService,
-            final PushRegistrationDataService pushRegistrationDataService,
-            final String revision) {
-        return new NotifyMeController(
-                notifyMeDataService,
-                pushRegistrationDataService,
-                revision,
-                bucketSizeInMs,
-                traceKeysCacheControlInMs);
+    public NotifyMeControllerV3 notifyMeControllerV3(NotifyMeDataServiceV3 notifyMeDataServiceV3,
+                    PushRegistrationDataService pushRegistrationDataService, String revision) {
+        return new NotifyMeControllerV3(notifyMeDataServiceV3, pushRegistrationDataService, revision, bucketSizeInMs,
+                        traceKeysCacheControlInMs);
     }
 
     @Bean
@@ -170,17 +176,18 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
 
     @Bean
     public PushConnectorService pushConnectorService() {
-        return new PushConnectorServiceBuilder(pushAuthToken, pushServerHost)
-                .withAndroidGCM("ch.ubique.n2step.android")
-                .withApple("ch.ubique.n2step.ios")
-                .withAppleSandboxEnabled()
-                .build();
+        return new PushConnectorServiceBuilder(pushAuthToken, pushServerHost).withAndroidGCM("ch.ubique.n2step.android")
+                        .withApple("ch.ubique.n2step.ios").withAppleSandboxEnabled().build();
     }
 
     @Bean
-    public PhoneHeartbeatSilentPush phoneHeartbeatSilentPush(
-            final PushConnectorService pushConnectorService,
-            final PushRegistrationDataService pushRegistrationDataService) {
+    public PushRegistrationDataService pushRegistrationDataService(final DataSource dataSource) {
+        return new JdbcPushRegistrationDataServiceImpl(dataSource);
+    }
+
+    @Bean
+    public PhoneHeartbeatSilentPush phoneHeartbeatSilentPush(final PushConnectorService pushConnectorService,
+                    final PushRegistrationDataService pushRegistrationDataService) {
         return new PhoneHeartbeatSilentPush(pushConnectorService, pushRegistrationDataService);
     }
 
@@ -190,31 +197,33 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public WebCriticalEventController webCriticalEventController(
-            final DiaryEntryDataService diaryEntryDataService) {
+    public WebCriticalEventController webCriticalEventController(final DiaryEntryDataService diaryEntryDataService) {
         return new WebCriticalEventController(diaryEntryDataService);
     }
 
     @Bean
     public String revision() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-        ZonedDateTime zonedDateTime =
-                LocalDateTime.parse(commitTime, formatter).atZone(ZoneId.of("UTC"));
+        ZonedDateTime zonedDateTime = LocalDateTime.parse(commitTime, formatter).atZone(ZoneId.of("UTC"));
         DateTimeFormatter prettyFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
-        String prettyTime =
-                zonedDateTime
-                        .withZoneSameInstant(ZoneId.of("Europe/Zurich"))
-                        .format(prettyFormatter);
+        String prettyTime = zonedDateTime.withZoneSameInstant(ZoneId.of("Europe/Zurich")).format(prettyFormatter);
         return "Rev: " + commitId + "\n" + prettyTime;
     }
 
     @Profile("enable-debug")
     @Bean
-    public DebugController debugController(
-            final NotifyMeDataService notifyMeDataService,
-            final DiaryEntryDataService diaryEntryDataService,
-            final CryptoWrapper cryptoWrapper) {
-        return new DebugController(notifyMeDataService, diaryEntryDataService, cryptoWrapper);
+    public DebugControllerV3 debugControllerV3(final NotifyMeDataServiceV3 notifyMeDataServiceV3,
+                    final CryptoWrapper cryptoWrapper) {
+        return new DebugControllerV3(notifyMeDataServiceV3, cryptoWrapper);
+    }
+
+    @Profile("enable-debug")
+    @Bean
+    public DebugControllerV2 debugControllerV2(final NotifyMeDataServiceV2 notifyMeDataServiceV2,
+                    final NotifyMeDataServiceV3 notifyMeDataServiceV3,
+                    final DiaryEntryDataService diaryEntryDataService, final CryptoWrapper cryptoWrapper) {
+        return new DebugControllerV2(notifyMeDataServiceV2, notifyMeDataServiceV3, diaryEntryDataService,
+                        cryptoWrapper);
     }
 
     @Bean
@@ -230,11 +239,8 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
 
     @Bean
     public MappingJackson2HttpMessageConverter customJacksonJsonConverter() {
-        ObjectMapper mapper =
-                new ObjectMapper()
-                        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                        .setSerializationInclusion(JsonInclude.Include.NON_ABSENT)
-                        .registerModule(new JavaTimeModule())
+        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                        .setSerializationInclusion(JsonInclude.Include.NON_ABSENT).registerModule(new JavaTimeModule())
                         .disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)
                         .enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                         .disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);

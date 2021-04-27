@@ -10,11 +10,10 @@
 
 package ch.ubique.notifyme.sdk.backend.ws.config;
 
-import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataService;
-import ch.ubique.notifyme.sdk.backend.ws.service.PhoneHeartbeatSilentPush;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.TimeZone;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,12 +24,18 @@ import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.CronTrigger;
 
+import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV2;
+import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV3;
+import ch.ubique.notifyme.sdk.backend.ws.service.PhoneHeartbeatSilentPush;
+
 @Configuration
 @EnableScheduling
 public class WSSchedulingConfig implements SchedulingConfigurer {
 
     private static final Logger logger = LoggerFactory.getLogger(WSSchedulingConfig.class);
-    private final NotifyMeDataService notifyMeDataService;
+    
+    private final NotifyMeDataServiceV2 notifyMeDataServiceV2;
+    private final NotifyMeDataServiceV3 notifyMeDataServiceV3;
     private final PhoneHeartbeatSilentPush phoneHeartbeatSilentPush;
 
     @Value("${db.cleanCron:0 0 3 * * ?}")
@@ -43,9 +48,11 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
     private String heartBeatSilentPushCron;
 
     protected WSSchedulingConfig(
-            final NotifyMeDataService notifyMeDataService,
+            final NotifyMeDataServiceV2 notifyMeDataServiceV2,
+            final NotifyMeDataServiceV3 notifyMeDataServiceV3,
             final PhoneHeartbeatSilentPush phoneHeartbeatSilentPush) {
-        this.notifyMeDataService = notifyMeDataService;
+        this.notifyMeDataServiceV2 = notifyMeDataServiceV2;
+        this.notifyMeDataServiceV3 = notifyMeDataServiceV3;
         this.phoneHeartbeatSilentPush = phoneHeartbeatSilentPush;
     }
 
@@ -59,19 +66,39 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
                                 Instant removeBefore =
                                         Instant.now().minus(removeAfterDays, ChronoUnit.DAYS);
                                 logger.info(
-                                        "removing trace keys with end_time before: {}",
+                                        "removing trace keys v2 with end_time before: {}",
                                         removeBefore);
-                                int removeCount = notifyMeDataService.removeTraceKeys(removeBefore);
+                                int removeCount = notifyMeDataServiceV2.removeTraceKeys(removeBefore);
                                 logger.info("removed {} trace keys from db", removeCount);
                             } catch (Exception e) {
                                 logger.error("Exception removing old trace keys", e);
                             }
                         },
                         new CronTrigger(cleanCron, TimeZone.getTimeZone("UTC"))));
+        
+        taskRegistrar.addCronTask(
+                        new CronTask(
+                                () -> {
+                                    try {
+                                        Instant removeBefore =
+                                                Instant.now().minus(removeAfterDays, ChronoUnit.DAYS);
+                                        logger.info(
+                                                "removing trace keys v3 with end_time before: {}",
+                                                removeBefore);
+                                        int removeCount =
+                                                notifyMeDataServiceV3.removeTraceKeys(removeBefore);
+                                        logger.info("removed {} trace keys v3 from db", removeCount);
+                                    } catch (Exception e) {
+                                        logger.error("Exception removing old trace keys v3", e);
+                                    }
+                                },
+                                new CronTrigger(cleanCron, TimeZone.getTimeZone("UTC"))));
 
         taskRegistrar.addCronTask(
                 new CronTask(
                         phoneHeartbeatSilentPush::sendHeartbeats,
                         new CronTrigger(heartBeatSilentPushCron, TimeZone.getTimeZone("UTC"))));
+        
+
     }
 }

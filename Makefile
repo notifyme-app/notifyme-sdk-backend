@@ -34,7 +34,7 @@ updatedoc:
 	cp $(WS_MODULE_DIR)/generated/swagger/swagger.yaml documentation/yaml/sdk.yaml
 
 swagger:
-	cd documentation; $(RUSTY_SWAGGER) --file ../$(WS_MODULE_DIR)/generated/swagger/swagger.yaml
+	cd documentation; $(RUSTY_SWAGGER) --file ../$(WS_MODULE_DIR)/swagger/swagger.yaml
 
 la:
 	cd documentation;$(LATEX) $(FILE_NAME)

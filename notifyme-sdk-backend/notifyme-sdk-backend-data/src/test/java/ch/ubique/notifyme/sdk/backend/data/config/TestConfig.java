@@ -3,6 +3,9 @@ package ch.ubique.notifyme.sdk.backend.data.config;
 import ch.ubique.notifyme.sdk.backend.data.DiaryEntryDataService;
 import ch.ubique.notifyme.sdk.backend.data.JdbcDiaryEntryDataServiceImpl;
 import javax.sql.DataSource;
+
+import ch.ubique.notifyme.sdk.backend.data.JdbcNotifyMeDataServiceV3Impl;
+import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV3;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,5 +26,10 @@ public class TestConfig {
     @Bean
     public DiaryEntryDataService diaryEntryDataService() {
         return new JdbcDiaryEntryDataServiceImpl(dataSource);
+    }
+
+    @Bean
+    public NotifyMeDataServiceV3 notifyMeDataServiceV3() {
+        return new JdbcNotifyMeDataServiceV3Impl(dataSource, 60000L);
     }
 }
