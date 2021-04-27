@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-package ch.ubique.notifyme.sdk.backend.ws;
+package ch.ubique.notifyme.sdk.backend.ws.crypto;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
