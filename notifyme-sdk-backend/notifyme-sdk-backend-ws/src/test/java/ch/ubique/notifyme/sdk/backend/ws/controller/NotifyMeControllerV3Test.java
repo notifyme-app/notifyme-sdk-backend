@@ -3,6 +3,7 @@ package ch.ubique.notifyme.sdk.backend.ws.controller;
 import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV3;
 import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass;
 import ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey;
+import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,9 +16,13 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+
+import com.google.protobuf.ByteString;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -120,4 +125,14 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
     assertEquals(associatedData, event.getEncryptedAssociatedData().toString(charset));
     assertEquals(cipherTextNonce, event.getCipherTextNonce().toString(charset));
   }
+
+  @Test
+  public void testUserUpload() throws Exception {
+    // TODO: Add more sensible identities once specified
+    final var payload = UserUploadPayload.newBuilder().setVersion(3).addIdentities(ByteString.copyFromUtf8("hello")).build();
+    final byte[] bytes = payload.toByteArray();
+    mockMvc.perform(post("/v3/userupload").contentType("application/x-protobuf").content(bytes)).andExpect(status().isOk());
+  }
+
 }
+

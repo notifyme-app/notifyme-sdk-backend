@@ -12,8 +12,10 @@ package ch.ubique.notifyme.sdk.backend.ws;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Base64;
 
+import com.goterl.lazycode.lazysodium.utils.KeyPair;
 import org.junit.Test;
 
 import com.goterl.lazycode.lazysodium.LazySodiumJava;
@@ -21,7 +23,21 @@ import com.goterl.lazycode.lazysodium.SodiumJava;
 import com.goterl.lazycode.lazysodium.exceptions.SodiumException;
 import com.goterl.lazycode.lazysodium.interfaces.PwHash;
 
+import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class CryptoTest {
+
+    String healthAuthoritySkHex = "36b3b80a1cd2cc98d84b4ed2c109b74e7026f00c0d40a0b12a936b1814aa5e39";
+    String healthAuthorityPkHex = "e4d2e06641730ce7c9986b1e7e91bf41bb3b8cc1d76d249fa99d0d8925e87a5c";
+    String useruploadMpkHex = "4EA4588A04CCE9854EEFF50942EBB7D7DF6646A8F47124E9E035C2165C5BCFD52A0CBAC04ABD3B0BD1C955662D974F15EF118419249759B41245F46DFDBAAA0CAD074101A767F5566714E8A3CF2DC6D810D628FBA582706811C01869DD2C808B";
+    String useruploadMskHex = "764F7BCC026EE4C2129B3FF488280FE96B62951FA9B9C34AC2E4B84D5B33121F";
+
+    CryptoWrapper cryptoWrapper = new CryptoWrapper(healthAuthoritySkHex, healthAuthorityPkHex, useruploadMskHex, useruploadMpkHex);
+
+
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Test
     public void testDependency() throws SodiumException {
@@ -42,5 +58,19 @@ public class CryptoTest {
     
     private byte[] fromBase64(String base64) throws UnsupportedEncodingException {
         return Base64.getUrlDecoder().decode(base64.getBytes("UTF-8"));
+    }
+
+    @Test
+    public void testGenKeyPair() {
+        final KeyPair kp = cryptoWrapper.keyGen();
+    logger.info(
+            String.format("Generated keypair as hex:\n {\n\t%s,\n\t %s\n}",
+                    kp.getPublicKey().getAsHexString(), kp.getSecretKey().getAsHexString()));
+    logger.info(
+            String.format("Generated keypair as base64:\n {\n\t%s,\n\t %s\n}",
+                    new String(Base64.getEncoder().encode(kp.getPublicKey().getAsBytes())), new String(Base64.getEncoder().encode(kp.getSecretKey().getAsBytes()))));
+    logger.info(
+            String.format("Generated keypair as bytes:\n {\n\t%s,\n\t %s\n}",
+                    Arrays.toString(kp.getPublicKey().getAsBytes()), Arrays.toString(kp.getSecretKey().getAsBytes())));
     }
 }

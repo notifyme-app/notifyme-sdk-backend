@@ -13,15 +13,17 @@ import com.google.protobuf.InvalidProtocolBufferException;
 
 import ch.ubique.notifyme.sdk.backend.model.PreTraceWithProofOuterClass.PreTraceWithProof;
 import ch.ubique.notifyme.sdk.backend.model.tracekey.v2.TraceKey;
-import ch.ubique.notifyme.sdk.backend.ws.CryptoWrapper;
+import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper;
 
 public class SodiumWrapperTest {
 
     @Test
     public void test() throws UnsupportedEncodingException, InvalidProtocolBufferException {
         CryptoWrapper cryptoWrapper = new CryptoWrapper(
-                        "36b3b80a1cd2cc98d84b4ed2c109b74e7026f00c0d40a0b12a936b1814aa5e39",
-                        "e4d2e06641730ce7c9986b1e7e91bf41bb3b8cc1d76d249fa99d0d8925e87a5c");
+                "36b3b80a1cd2cc98d84b4ed2c109b74e7026f00c0d40a0b12a936b1814aa5e39",
+                "e4d2e06641730ce7c9986b1e7e91bf41bb3b8cc1d76d249fa99d0d8925e87a5c",
+                "4EA4588A04CCE9854EEFF50942EBB7D7DF6646A8F47124E9E035C2165C5BCFD52A0CBAC04ABD3B0BD1C955662D974F15EF118419249759B41245F46DFDBAAA0CAD074101A767F5566714E8A3CF2DC6D810D628FBA582706811C01869DD2C808B",
+                "764F7BCC026EE4C2129B3FF488280FE96B62951FA9B9C34AC2E4B84D5B33121F");
 
         String message = "This is the secret message";
         List<Integer> affectedHours = List.of(447347, 447348, 447349, 447350);
@@ -40,7 +42,7 @@ public class SodiumWrapperTest {
             byte[] preTraceKeyBytes = Base64.getUrlDecoder().decode(preTraceKeyBase64.getBytes("UTF-8"));
             PreTraceWithProof preTraceWithProofProto = PreTraceWithProof.parseFrom(preTraceKeyBytes);
 
-            cryptoWrapper.calculateSecretKeyForIdentityAndIdentity(preTraceWithProofProto, affectedHour, traceKey);
+            cryptoWrapper.getCryptoUtilV2().calculateSecretKeyForIdentityAndIdentity(preTraceWithProofProto, affectedHour, traceKey);
 
             assertNotNull(traceKey.getIdentity());
             assertNotNull(traceKey.getSecretKeyForIdentity());
@@ -48,8 +50,8 @@ public class SodiumWrapperTest {
             byte[] notificationKey = preTraceWithProofProto.getPreTrace().getNotificationKey().toByteArray();
             assertTrue(notificationKey.length > 0);
 
-            byte[] nonce = cryptoWrapper.createNonceForMessageEncytion();
-            byte[] encryptedMessage = cryptoWrapper.encryptMessage(notificationKey, nonce, message);
+            byte[] nonce = cryptoWrapper.createNonce();
+            byte[] encryptedMessage = cryptoWrapper.getCryptoUtilV2().encryptMessage(notificationKey, nonce, message);
             traceKey.setMessage(encryptedMessage);
             traceKey.setNonce(nonce);
 
@@ -59,8 +61,10 @@ public class SodiumWrapperTest {
     @Test
     public void testWithVenueTypeOther() throws UnsupportedEncodingException, InvalidProtocolBufferException {
         CryptoWrapper cryptoWrapper = new CryptoWrapper(
-                        "36b3b80a1cd2cc98d84b4ed2c109b74e7026f00c0d40a0b12a936b1814aa5e39",
-                        "e4d2e06641730ce7c9986b1e7e91bf41bb3b8cc1d76d249fa99d0d8925e87a5c");
+                "36b3b80a1cd2cc98d84b4ed2c109b74e7026f00c0d40a0b12a936b1814aa5e39",
+                "e4d2e06641730ce7c9986b1e7e91bf41bb3b8cc1d76d249fa99d0d8925e87a5c",
+                "4EA4588A04CCE9854EEFF50942EBB7D7DF6646A8F47124E9E035C2165C5BCFD52A0CBAC04ABD3B0BD1C955662D974F15EF118419249759B41245F46DFDBAAA0CAD074101A767F5566714E8A3CF2DC6D810D628FBA582706811C01869DD2C808B",
+                "764F7BCC026EE4C2129B3FF488280FE96B62951FA9B9C34AC2E4B84D5B33121F");
 
         String message = "This is the secret message";
         List<Integer> affectedHours = List.of(447343, 447344, 447345, 447346, 447347);
@@ -80,7 +84,7 @@ public class SodiumWrapperTest {
             byte[] preTraceKeyBytes = Base64.getUrlDecoder().decode(preTraceKeyBase64.getBytes("UTF-8"));
             PreTraceWithProof preTraceWithProofProto = PreTraceWithProof.parseFrom(preTraceKeyBytes);
 
-            cryptoWrapper.calculateSecretKeyForIdentityAndIdentity(preTraceWithProofProto, affectedHour, traceKey);
+            cryptoWrapper.getCryptoUtilV2().calculateSecretKeyForIdentityAndIdentity(preTraceWithProofProto, affectedHour, traceKey);
 
             assertNotNull(traceKey.getIdentity());
             assertNotNull(traceKey.getSecretKeyForIdentity());
@@ -88,8 +92,8 @@ public class SodiumWrapperTest {
             byte[] notificationKey = preTraceWithProofProto.getPreTrace().getNotificationKey().toByteArray();
             assertTrue(notificationKey.length > 0);
 
-            byte[] nonce = cryptoWrapper.createNonceForMessageEncytion();
-            byte[] encryptedMessage = cryptoWrapper.encryptMessage(notificationKey, nonce, message);
+            byte[] nonce = cryptoWrapper.createNonce();
+            byte[] encryptedMessage = cryptoWrapper.getCryptoUtilV2().encryptMessage(notificationKey, nonce, message);
             traceKey.setMessage(encryptedMessage);
             traceKey.setNonce(nonce);
 

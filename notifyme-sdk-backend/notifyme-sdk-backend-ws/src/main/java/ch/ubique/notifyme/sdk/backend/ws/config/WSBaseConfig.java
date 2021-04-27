@@ -52,7 +52,7 @@ import ch.ubique.notifyme.sdk.backend.data.JdbcPushRegistrationDataServiceImpl;
 import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV2;
 import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV3;
 import ch.ubique.notifyme.sdk.backend.data.PushRegistrationDataService;
-import ch.ubique.notifyme.sdk.backend.ws.CryptoWrapper;
+import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper;
 import ch.ubique.notifyme.sdk.backend.ws.controller.ConfigController;
 import ch.ubique.notifyme.sdk.backend.ws.controller.DebugControllerV2;
 import ch.ubique.notifyme.sdk.backend.ws.controller.DebugControllerV3;
@@ -75,6 +75,12 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
 
     @Value("${healthAuthority.pkHex}")
     String healthAuthorityPkHex;
+
+    @Value("${userupload.mpkHex}")
+    String useruploadMpkHex;
+
+    @Value("${userupload.mskHex}")
+    String useruploadMskHex;
 
     @Value("${traceKey.bucketSizeInMs}")
     Long bucketSizeInMs;
@@ -228,7 +234,7 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
 
     @Bean
     CryptoWrapper cryptoWrapper() {
-        return new CryptoWrapper(healthAuthoritySkHex, healthAuthorityPkHex);
+        return new CryptoWrapper(healthAuthoritySkHex, healthAuthorityPkHex, useruploadMskHex, useruploadMpkHex);
     }
 
     @Override

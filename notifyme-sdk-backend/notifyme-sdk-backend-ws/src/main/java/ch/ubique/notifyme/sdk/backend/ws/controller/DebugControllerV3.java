@@ -32,7 +32,7 @@ import ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey;
 import ch.ubique.notifyme.sdk.backend.model.v3.NotifyMeAssociatedDataOuterClass.EventCriticality;
 import ch.ubique.notifyme.sdk.backend.model.v3.NotifyMeAssociatedDataOuterClass.NotifyMeAssociatedData;
 import ch.ubique.notifyme.sdk.backend.model.v3.PreTraceWithProofOuterClass.PreTraceWithProof;
-import ch.ubique.notifyme.sdk.backend.ws.CryptoWrapper;
+import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper;
 import ch.ubique.openapi.docannotations.Documentation;
 
 @RestController
@@ -84,7 +84,7 @@ public class DebugControllerV3 {
                                 .decode(preTraceKeyBase64.getBytes(StandardCharsets.UTF_8));
                 PreTraceWithProof preTraceWithProofProto =
                         PreTraceWithProof.parseFrom(preTraceKeyBytes);
-                TraceKey traceKey = cryptoWrapper.createTraceV3(preTraceWithProofProto, message, countryData.toByteArray());
+                TraceKey traceKey = cryptoWrapper.getCryptoUtilV3().createTraceV3(preTraceWithProofProto, message, countryData.toByteArray());
                 traceKeysToInsert.add(traceKey);
             } catch (InvalidProtocolBufferException e) {
                 logger.error("unable to parse protobuf", e);

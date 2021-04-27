@@ -20,7 +20,7 @@ import ch.ubique.notifyme.sdk.backend.model.tracekey.v2.TraceKey;
 import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
 import ch.ubique.notifyme.sdk.backend.model.v3.NotifyMeAssociatedDataOuterClass.EventCriticality;
 import ch.ubique.notifyme.sdk.backend.model.v3.NotifyMeAssociatedDataOuterClass.NotifyMeAssociatedData;
-import ch.ubique.notifyme.sdk.backend.ws.CryptoWrapper;
+import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper;
 import ch.ubique.openapi.docannotations.Documentation;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.nio.charset.StandardCharsets;
@@ -86,10 +86,10 @@ public class DebugControllerV2 {
                                 .decode(preTraceKeyBase64.getBytes(StandardCharsets.UTF_8));
                 PreTraceWithProof preTraceWithProofProto = PreTraceWithProof.parseFrom(preTraceKeyBytes);
 
-                cryptoWrapper.calculateSecretKeyForIdentityAndIdentity(preTraceWithProofProto, affectedHour, traceKey);
+                cryptoWrapper.getCryptoUtilV2().calculateSecretKeyForIdentityAndIdentity(preTraceWithProofProto, affectedHour, traceKey);
 
-                byte[] nonce = cryptoWrapper.createNonceForMessageEncytion();
-                byte[] encryptedMessage = cryptoWrapper.encryptMessage(
+                byte[] nonce = cryptoWrapper.createNonce();
+                byte[] encryptedMessage = cryptoWrapper.getCryptoUtilV2().encryptMessage(
                                 preTraceWithProofProto.getPreTrace().getNotificationKey().toByteArray(), nonce,
                                 message);
                 traceKey.setMessage(encryptedMessage);
@@ -99,7 +99,7 @@ public class DebugControllerV2 {
                 // insert v2 into v3
                 NotifyMeAssociatedData countryData = NotifyMeAssociatedData.newBuilder()
                                 .setCriticality(EventCriticality.forNumber(criticality)).setVersion(1).build();
-                byte[] encryptedAssociatedData = cryptoWrapper.encryptAssociatedData(
+                byte[] encryptedAssociatedData = cryptoWrapper.getCryptoUtilV3().encryptAssociatedData(
                                 preTraceWithProofProto.getPreTrace().getNotificationKey().toByteArray(), message,
                                 countryData.toByteArray(), nonce);
                 var traceKeyV3 = new ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey();
