@@ -196,7 +196,6 @@ public class CryptoWrapper {
 
   /**
    * Generate a pair of public and private keys.
-   *
    * @return a tuple containing the master public key and the master secret key
    */
   public KeyPair keyGen() {
@@ -218,10 +217,12 @@ public class CryptoWrapper {
     return nonce;
   }
 
+  /** Contains all CrowdNotifier V3 related methods */
   public CryptoUtilV3 getCryptoUtilV3() {
     return cryptoUtilV3;
   }
 
+  /** Contains all CrowdNotifier V2 related methods */
   public CryptoUtilV2 getCryptoUtilV2() {
     return cryptoUtilV2;
   }

@@ -1,13 +1,13 @@
 package ch.ubique.notifyme.sdk.backend.ws.controller;
 
 import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV3;
-import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass;
-import ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey;
 import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload;
+import ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey;
+import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass;
+import com.google.protobuf.ByteString;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import static org.junit.Assert.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,31 +16,23 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.net.URL;
-import java.net.URLConnection;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
-import com.google.protobuf.ByteString;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles({"dev", "enable-nmControllerV3"})
 public class NotifyMeControllerV3Test extends BaseControllerTest {
 
-  @Autowired NotifyMeControllerV3 notifyMeControllerV3;
-  @Autowired NotifyMeDataServiceV3 notifyMeDataServiceV3;
-
-  @Value("${traceKey.traceKeysCacheControlInMs}")
-  Long traceKeysCacheControlInMs;
-
   private static boolean setUpIsDone = false;
-
   private final Charset charset = StandardCharsets.UTF_8;
   private final String identityString = "identity";
   private final String secretKey = "secret";
@@ -48,6 +40,10 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
   private final String cipherTextNonce = "nonce";
   private final Instant end = Instant.now();
   private final Instant start = end.minusSeconds(60 * 60);
+  @Autowired NotifyMeControllerV3 notifyMeControllerV3;
+  @Autowired NotifyMeDataServiceV3 notifyMeDataServiceV3;
+  @Value("${traceKey.traceKeysCacheControlInMs}")
+  Long traceKeysCacheControlInMs;
 
   private TraceKey getTraceKey() {
     TraceKey traceKey = new TraceKey();
@@ -129,10 +125,14 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
   @Test
   public void testUserUpload() throws Exception {
     // TODO: Add more sensible identities once specified
-    final var payload = UserUploadPayload.newBuilder().setVersion(3).addIdentities(ByteString.copyFromUtf8("hello")).build();
+    final var payload =
+        UserUploadPayload.newBuilder()
+            .setVersion(3)
+            .addIdentities(ByteString.copyFromUtf8("hello"))
+            .build();
     final byte[] bytes = payload.toByteArray();
-    mockMvc.perform(post("/v3/userupload").contentType("application/x-protobuf").content(bytes)).andExpect(status().isOk());
+    mockMvc
+        .perform(post("/v3/userupload").contentType("application/x-protobuf").content(bytes))
+        .andExpect(status().isOk());
   }
-
 }
-

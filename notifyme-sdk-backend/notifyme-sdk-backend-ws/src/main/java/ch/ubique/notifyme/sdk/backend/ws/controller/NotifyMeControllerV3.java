@@ -178,8 +178,8 @@ public class NotifyMeControllerV3 {
    *  - Sanity check on stored (e.g. no overlapping timestamps)
    *  - Generate traceKey = secretKey_ID using an identity and the master secretkey
    *  - Store tracekey such that other user can poll for possible exposure events
-   * @param userUploadPayload
-   * @return
+   * @param userUploadPayload Protobuf containing the identities stored locally in the app and a version number
+   * @return Status ok if sanity check passed and tracekeys successfuly uploaded
    */
   @PostMapping(value = "/userupload", consumes = {"application/x-protobuf", "application/protobuf"})
   @Documentation(description = "User upload of stored identities", responses = {"200 => success", "400 => Error"})
