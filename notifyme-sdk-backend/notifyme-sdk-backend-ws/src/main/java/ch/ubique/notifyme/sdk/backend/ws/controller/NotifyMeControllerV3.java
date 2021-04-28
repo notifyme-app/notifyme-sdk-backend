@@ -12,15 +12,19 @@ package ch.ubique.notifyme.sdk.backend.ws.controller;
 
 import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV3;
 import ch.ubique.notifyme.sdk.backend.data.PushRegistrationDataService;
-import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEvent;
-import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEvent.Builder;
-import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEventWrapper;
+import ch.ubique.notifyme.sdk.backend.data.UUIDDataService;
 import ch.ubique.notifyme.sdk.backend.model.PushRegistrationOuterClass.PushRegistration;
 import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload;
 import ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey;
 import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
+import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEvent;
+import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEvent.Builder;
+import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEventWrapper;
+import ch.ubique.notifyme.sdk.backend.ws.util.DateTimeUtil;
 import ch.ubique.openapi.docannotations.Documentation;
 import com.google.protobuf.ByteString;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -28,7 +32,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -37,25 +44,30 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = {"https://notify-me.c4dt.org", "https://notify-me-dev.c4dt.org"})
 public class NotifyMeControllerV3 {
   private static final String HEADER_X_KEY_BUNDLE_TAG = "x-key-bundle-tag";
+  private static final Logger logger = LoggerFactory.getLogger(NotifyMeControllerV3.class);
 
   private final NotifyMeDataServiceV3 dataService;
   private final PushRegistrationDataService pushRegistrationDataService;
+  private final UUIDDataService uuidDataService;
 
   private final String revision;
   private final Long bucketSizeInMs;
   private final Long traceKeysCacheControlInMs;
+  private final Duration requestTime;
 
   public NotifyMeControllerV3(
-      NotifyMeDataServiceV3 dataService,
-      PushRegistrationDataService pushRegistrationDataService,
-      String revision,
-      Long bucketSizeInMs,
-      Long traceKeysCacheControlInMs) {
+          NotifyMeDataServiceV3 dataService,
+          PushRegistrationDataService pushRegistrationDataService,
+          UUIDDataService uuidDataService, String revision,
+          Long bucketSizeInMs,
+          Long traceKeysCacheControlInMs, Duration requestTime) {
     this.dataService = dataService;
     this.pushRegistrationDataService = pushRegistrationDataService;
+    this.uuidDataService = uuidDataService;
     this.revision = revision;
     this.bucketSizeInMs = bucketSizeInMs;
     this.traceKeysCacheControlInMs = traceKeysCacheControlInMs;
+    this.requestTime = requestTime;
   }
 
   @GetMapping(value = "")
@@ -135,9 +147,9 @@ public class NotifyMeControllerV3 {
   private ProblematicEvent mapTraceKeyToProblematicEvent(TraceKey t) {
     Builder b =
         ProblematicEvent.newBuilder()
-                .setVersion(t.getVersion())
-                .setIdentity(ByteString.copyFrom(t.getIdentity()))
-                .setSecretKeyForIdentity(ByteString.copyFrom(t.getSecretKeyForIdentity()))
+            .setVersion(t.getVersion())
+            .setIdentity(ByteString.copyFrom(t.getIdentity()))
+            .setSecretKeyForIdentity(ByteString.copyFrom(t.getSecretKeyForIdentity()))
             .setStartTime(DateUtil.toEpochMilli(t.getStartTime()))
             .setEndTime(DateUtil.toEpochMilli(t.getEndTime()));
     if (t.getEncryptedAssociatedData() != null) {
@@ -165,26 +177,49 @@ public class NotifyMeControllerV3 {
     dataService.insertTraceKey(traceKey);
     return ResponseEntity.ok().body("OK");
   }
-  
-  @PostMapping(value = "/register", consumes = {"application/x-protobuf", "application/protobuf"})
-  @Documentation(description = "Push registration", responses = {"200 => success", "400 => Error"})
-  public @ResponseBody ResponseEntity<Void> registerPush(@RequestBody final PushRegistration pushRegistration) {
-      pushRegistrationDataService.upsertPushRegistration(pushRegistration);
-      return ResponseEntity.ok().build();
+
+  @PostMapping(
+      value = "/register",
+      consumes = {"application/x-protobuf", "application/protobuf"})
+  @Documentation(
+      description = "Push registration",
+      responses = {"200 => success", "400 => Error"})
+  public @ResponseBody ResponseEntity<Void> registerPush(
+      @RequestBody final PushRegistration pushRegistration) {
+    pushRegistrationDataService.upsertPushRegistration(pushRegistration);
+    return ResponseEntity.ok().build();
   }
 
   /**
    * Upload of stored identities if user tested positive and wishes to notify other visitors:
-   *  - Sanity check on stored (e.g. no overlapping timestamps)
-   *  - Generate traceKey = secretKey_ID using an identity and the master secretkey
-   *  - Store tracekey such that other user can poll for possible exposure events
-   * @param userUploadPayload Protobuf containing the identities stored locally in the app and a version number
+   * - Sanity check on stored (e.g. no overlapping timestamps)
+   * - Generate traceKey = secretKey_I using an identity and the master secretkey
+   * - Store tracekey such that other user can poll for possible exposure events
+   *
+   * @param userUploadPayload Protobuf containing the identities stored locally in the app and a
+   *     version number
    * @return Status ok if sanity check passed and tracekeys successfuly uploaded
    */
-  @PostMapping(value = "/userupload", consumes = {"application/x-protobuf", "application/protobuf"})
-  @Documentation(description = "User upload of stored identities", responses = {"200 => success", "400 => Error"})
-  public @ResponseBody ResponseEntity<Void> userUpload(@RequestBody final UserUploadPayload userUploadPayload) {
+  @PostMapping(
+      value = "/userupload",
+      consumes = {"application/x-protobuf", "application/protobuf"})
+  @Documentation(
+      description = "User upload of stored identities",
+      responses = {"200 => success", "400 => Error"})
+  public @ResponseBody Callable<ResponseEntity<String>> userUpload(
+      @Documentation(description = "Identities to upload as protobuf") @Valid @RequestBody final UserUploadPayload userUploadPayload,
+      @AuthenticationPrincipal
+          @Documentation(description = "JWT token that can be verified by the backend server")
+          Object principal) {
+    final var now = LocalDateTime.now();
     // TODO: Implement
-    return ResponseEntity.ok().build();
+    return () -> {
+      try {
+        DateTimeUtil.normalizeDuration(now, requestTime);
+      } catch(DateTimeUtil.DurationExpiredException e) {
+        logger.error("Total time spent in endpoint is longer than requestTime");
+      }
+      return ResponseEntity.ok().build();
+    };
   }
 }

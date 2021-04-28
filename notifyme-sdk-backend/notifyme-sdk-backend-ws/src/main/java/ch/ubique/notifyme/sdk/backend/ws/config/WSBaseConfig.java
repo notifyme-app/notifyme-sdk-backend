@@ -10,14 +10,21 @@
 
 package ch.ubique.notifyme.sdk.backend.ws.config;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-
-import javax.sql.DataSource;
-
+import ch.ubique.notifyme.sdk.backend.data.*;
+import ch.ubique.notifyme.sdk.backend.ws.controller.*;
+import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebController;
+import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebCriticalEventController;
+import ch.ubique.notifyme.sdk.backend.ws.service.PhoneHeartbeatSilentPush;
+import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper;
+import ch.ubique.pushservice.pushconnector.PushConnectorService;
+import ch.ubique.pushservice.pushconnector.PushConnectorServiceBuilder;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
 import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,220 +43,238 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
-
-import ch.ubique.notifyme.sdk.backend.data.DiaryEntryDataService;
-import ch.ubique.notifyme.sdk.backend.data.JdbcDiaryEntryDataServiceImpl;
-import ch.ubique.notifyme.sdk.backend.data.JdbcNotifyMeDataServiceV2Impl;
-import ch.ubique.notifyme.sdk.backend.data.JdbcNotifyMeDataServiceV3Impl;
-import ch.ubique.notifyme.sdk.backend.data.JdbcPushRegistrationDataServiceImpl;
-import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV2;
-import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV3;
-import ch.ubique.notifyme.sdk.backend.data.PushRegistrationDataService;
-import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper;
-import ch.ubique.notifyme.sdk.backend.ws.controller.ConfigController;
-import ch.ubique.notifyme.sdk.backend.ws.controller.DebugControllerV2;
-import ch.ubique.notifyme.sdk.backend.ws.controller.DebugControllerV3;
-import ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeControllerV2;
-import ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeControllerV3;
-import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebController;
-import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebCriticalEventController;
-import ch.ubique.notifyme.sdk.backend.ws.service.PhoneHeartbeatSilentPush;
-import ch.ubique.pushservice.pushconnector.PushConnectorService;
-import ch.ubique.pushservice.pushconnector.PushConnectorServiceBuilder;
+import javax.sql.DataSource;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Configuration
 @EnableScheduling
 public abstract class WSBaseConfig implements WebMvcConfigurer {
 
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
+  protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Value("${healthAuthority.skHex}")
-    String healthAuthoritySkHex;
+  @Value("${healthAuthority.skHex}")
+  String healthAuthoritySkHex;
 
-    @Value("${healthAuthority.pkHex}")
-    String healthAuthorityPkHex;
+  @Value("${healthAuthority.pkHex}")
+  String healthAuthorityPkHex;
 
-    @Value("${userupload.mpkHex}")
-    String useruploadMpkHex;
+  @Value("${userupload.mpkHex}")
+  String useruploadMpkHex;
 
-    @Value("${userupload.mskHex}")
-    String useruploadMskHex;
+  @Value("${userupload.mskHex}")
+  String useruploadMskHex;
 
-    @Value("${traceKey.bucketSizeInMs}")
-    Long bucketSizeInMs;
+  @Value("${traceKey.bucketSizeInMs}")
+  Long bucketSizeInMs;
 
-    @Value("${traceKey.traceKeysCacheControlInMs}")
-    Long traceKeysCacheControlInMs;
+  @Value("${userupload.requestTime}")
+  Long requestTime;
 
-    @Value("${git.commit.id}")
-    private String commitId;
+  @Value("${traceKey.traceKeysCacheControlInMs}")
+  Long traceKeysCacheControlInMs;
 
-    @Value("${git.commit.id.abbrev}")
-    private String commitIdAbbrev;
+  @Value("${git.commit.id}")
+  private String commitId;
 
-    @Value("${git.commit.time}")
-    private String commitTime;
+  @Value("${git.commit.id.abbrev}")
+  private String commitIdAbbrev;
 
-    @Value("${ws.push.authToken}")
-    private String pushAuthToken;
+  @Value("${git.commit.time}")
+  private String commitTime;
 
-    @Value("${ws.push.serverHost}")
-    private String pushServerHost;
+  @Value("${ws.push.authToken}")
+  private String pushAuthToken;
 
-    @Bean
-    public static PropertySourcesPlaceholderConfigurer placeholderConfigurer() {
-        PropertySourcesPlaceholderConfigurer propsConfig = new PropertySourcesPlaceholderConfigurer();
-        propsConfig.setLocation(new ClassPathResource("git.properties"));
-        propsConfig.setIgnoreResourceNotFound(true);
-        propsConfig.setIgnoreUnresolvablePlaceholders(true);
-        return propsConfig;
-    }
+  @Value("${ws.push.serverHost}")
+  private String pushServerHost;
 
-    public abstract DataSource dataSource();
+  @Bean
+  public static PropertySourcesPlaceholderConfigurer placeholderConfigurer() {
+    PropertySourcesPlaceholderConfigurer propsConfig = new PropertySourcesPlaceholderConfigurer();
+    propsConfig.setLocation(new ClassPathResource("git.properties"));
+    propsConfig.setIgnoreResourceNotFound(true);
+    propsConfig.setIgnoreUnresolvablePlaceholders(true);
+    return propsConfig;
+  }
 
-    public abstract Flyway flyway();
+  public abstract DataSource dataSource();
 
-    public abstract String getDbType();
+  public abstract Flyway flyway();
 
-    @Bean
-    public MappingJackson2HttpMessageConverter converter() {
-        ObjectMapper mapper = new ObjectMapper().configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
-                        .setSerializationInclusion(JsonInclude.Include.NON_ABSENT)
-                        .registerModules(new ProtobufModule(), new Jdk8Module());
-        return new MappingJackson2HttpMessageConverter(mapper);
-    }
+  public abstract String getDbType();
 
-    @Override
-    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-        converters.add(new ProtobufHttpMessageConverter());
-        WebMvcConfigurer.super.extendMessageConverters(converters);
-    }
+  @Bean
+  public MappingJackson2HttpMessageConverter converter() {
+    ObjectMapper mapper =
+        new ObjectMapper()
+            .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+            .setSerializationInclusion(JsonInclude.Include.NON_ABSENT)
+            .registerModules(new ProtobufModule(), new Jdk8Module());
+    return new MappingJackson2HttpMessageConverter(mapper);
+  }
 
-    @Override
-    public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
-        configurer.setTaskExecutor(mvcTaskExecutor());
-        configurer.setDefaultTimeout(5_000);
-    }
+  @Override
+  public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+    converters.add(new ProtobufHttpMessageConverter());
+    WebMvcConfigurer.super.extendMessageConverters(converters);
+  }
 
-    @Bean
-    public ThreadPoolTaskExecutor mvcTaskExecutor() {
-        ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-        taskExecutor.setThreadNamePrefix("mvc-task-");
-        taskExecutor.setMaxPoolSize(1000);
-        return taskExecutor;
-    }
+  @Override
+  public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
+    configurer.setTaskExecutor(mvcTaskExecutor());
+    configurer.setDefaultTimeout(5_000);
+  }
 
-    @Bean
-    public NotifyMeDataServiceV2 notifyMeDataServiceV2() {
-        return new JdbcNotifyMeDataServiceV2Impl(dataSource(), bucketSizeInMs);
-    }
+  @Bean
+  public ThreadPoolTaskExecutor mvcTaskExecutor() {
+    ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+    taskExecutor.setThreadNamePrefix("mvc-task-");
+    taskExecutor.setMaxPoolSize(1000);
+    return taskExecutor;
+  }
 
-    @Bean
-    public NotifyMeDataServiceV3 notifyMeDataServiceV3() {
-        return new JdbcNotifyMeDataServiceV3Impl(dataSource(), bucketSizeInMs);
-    }
+  @Bean
+  public NotifyMeDataServiceV2 notifyMeDataServiceV2() {
+    return new JdbcNotifyMeDataServiceV2Impl(dataSource(), bucketSizeInMs);
+  }
 
-    @Bean
-    public DiaryEntryDataService diaryEntryDataService(final DataSource dataSource) {
-        return new JdbcDiaryEntryDataServiceImpl(dataSource);
-    }
+  @Bean
+  public NotifyMeDataServiceV3 notifyMeDataServiceV3() {
+    return new JdbcNotifyMeDataServiceV3Impl(dataSource(), bucketSizeInMs);
+  }
 
-    @Bean
-    public NotifyMeControllerV2 notifyMeControllerV2(final NotifyMeDataServiceV2 notifyMeDataService,
-                    final PushRegistrationDataService pushRegistrationDataService, final String revision) {
-        return new NotifyMeControllerV2(notifyMeDataService, pushRegistrationDataService, revision, bucketSizeInMs,
-                        traceKeysCacheControlInMs);
-    }
+  @Bean
+  public DiaryEntryDataService diaryEntryDataService() {
+    return new JdbcDiaryEntryDataServiceImpl(dataSource());
+  }
 
-    @Bean
-    public NotifyMeControllerV3 notifyMeControllerV3(NotifyMeDataServiceV3 notifyMeDataServiceV3,
-                    PushRegistrationDataService pushRegistrationDataService, String revision) {
-        return new NotifyMeControllerV3(notifyMeDataServiceV3, pushRegistrationDataService, revision, bucketSizeInMs,
-                        traceKeysCacheControlInMs);
-    }
+  @Bean
+  public UUIDDataService uuidDataService() {
+    return new UUIDDataServiceImpl(dataSource());
+  }
 
-    @Bean
-    public ConfigController configController() {
-        return new ConfigController();
-    }
+  @Bean
+  public NotifyMeControllerV2 notifyMeControllerV2(
+      final NotifyMeDataServiceV2 notifyMeDataService,
+      final PushRegistrationDataService pushRegistrationDataService,
+      final String revision) {
+    return new NotifyMeControllerV2(
+        notifyMeDataService,
+        pushRegistrationDataService,
+        revision,
+        bucketSizeInMs,
+        traceKeysCacheControlInMs);
+  }
 
-    @Bean
-    public PushConnectorService pushConnectorService() {
-        return new PushConnectorServiceBuilder(pushAuthToken, pushServerHost).withAndroidGCM("ch.ubique.n2step.android")
-                        .withApple("ch.ubique.n2step.ios").withAppleSandboxEnabled().build();
-    }
+  @Bean
+  public NotifyMeControllerV3 notifyMeControllerV3(
+      NotifyMeDataServiceV3 notifyMeDataServiceV3,
+      PushRegistrationDataService pushRegistrationDataService,
+      UUIDDataService uuidDataService,
+      String revision) {
+    return new NotifyMeControllerV3(
+        notifyMeDataServiceV3,
+        pushRegistrationDataService,
+        uuidDataService,
+        revision,
+        bucketSizeInMs,
+        traceKeysCacheControlInMs,
+        Duration.ofMillis(requestTime));
+  }
 
-    @Bean
-    public PushRegistrationDataService pushRegistrationDataService(final DataSource dataSource) {
-        return new JdbcPushRegistrationDataServiceImpl(dataSource);
-    }
+  @Bean
+  public ConfigController configController() {
+    return new ConfigController();
+  }
 
-    @Bean
-    public PhoneHeartbeatSilentPush phoneHeartbeatSilentPush(final PushConnectorService pushConnectorService,
-                    final PushRegistrationDataService pushRegistrationDataService) {
-        return new PhoneHeartbeatSilentPush(pushConnectorService, pushRegistrationDataService);
-    }
+  @Bean
+  public PushConnectorService pushConnectorService() {
+    return new PushConnectorServiceBuilder(pushAuthToken, pushServerHost)
+        .withAndroidGCM("ch.ubique.n2step.android")
+        .withApple("ch.ubique.n2step.ios")
+        .withAppleSandboxEnabled()
+        .build();
+  }
 
-    @Bean
-    public WebController webController() {
-        return new WebController();
-    }
+  @Bean
+  public PushRegistrationDataService pushRegistrationDataService(final DataSource dataSource) {
+    return new JdbcPushRegistrationDataServiceImpl(dataSource);
+  }
 
-    @Bean
-    public WebCriticalEventController webCriticalEventController(final DiaryEntryDataService diaryEntryDataService) {
-        return new WebCriticalEventController(diaryEntryDataService);
-    }
+  @Bean
+  public PhoneHeartbeatSilentPush phoneHeartbeatSilentPush(
+      final PushConnectorService pushConnectorService,
+      final PushRegistrationDataService pushRegistrationDataService) {
+    return new PhoneHeartbeatSilentPush(pushConnectorService, pushRegistrationDataService);
+  }
 
-    @Bean
-    public String revision() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-        ZonedDateTime zonedDateTime = LocalDateTime.parse(commitTime, formatter).atZone(ZoneId.of("UTC"));
-        DateTimeFormatter prettyFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
-        String prettyTime = zonedDateTime.withZoneSameInstant(ZoneId.of("Europe/Zurich")).format(prettyFormatter);
-        return "Rev: " + commitId + "\n" + prettyTime;
-    }
+  @Bean
+  public WebController webController() {
+    return new WebController();
+  }
 
-    @Profile("enable-debug")
-    @Bean
-    public DebugControllerV3 debugControllerV3(final NotifyMeDataServiceV3 notifyMeDataServiceV3,
-                    final CryptoWrapper cryptoWrapper) {
-        return new DebugControllerV3(notifyMeDataServiceV3, cryptoWrapper);
-    }
+  @Bean
+  public WebCriticalEventController webCriticalEventController(
+      final DiaryEntryDataService diaryEntryDataService) {
+    return new WebCriticalEventController(diaryEntryDataService);
+  }
 
-    @Profile("enable-debug")
-    @Bean
-    public DebugControllerV2 debugControllerV2(final NotifyMeDataServiceV2 notifyMeDataServiceV2,
-                    final NotifyMeDataServiceV3 notifyMeDataServiceV3,
-                    final DiaryEntryDataService diaryEntryDataService, final CryptoWrapper cryptoWrapper) {
-        return new DebugControllerV2(notifyMeDataServiceV2, notifyMeDataServiceV3, diaryEntryDataService,
-                        cryptoWrapper);
-    }
+  @Bean
+  public String revision() {
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+    ZonedDateTime zonedDateTime =
+        LocalDateTime.parse(commitTime, formatter).atZone(ZoneId.of("UTC"));
+    DateTimeFormatter prettyFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
+    String prettyTime =
+        zonedDateTime.withZoneSameInstant(ZoneId.of("Europe/Zurich")).format(prettyFormatter);
+    return "Rev: " + commitId + "\n" + prettyTime;
+  }
 
-    @Bean
-    CryptoWrapper cryptoWrapper() {
-        return new CryptoWrapper(healthAuthoritySkHex, healthAuthorityPkHex, useruploadMskHex, useruploadMpkHex);
-    }
+  @Profile("enable-debug")
+  @Bean
+  public DebugControllerV3 debugControllerV3(
+      final NotifyMeDataServiceV3 notifyMeDataServiceV3, final CryptoWrapper cryptoWrapper) {
+    return new DebugControllerV3(notifyMeDataServiceV3, cryptoWrapper);
+  }
 
-    @Override
-    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-        converters.add(customJacksonJsonConverter());
-        converters.add(new StringHttpMessageConverter());
-    }
+  @Profile("enable-debug")
+  @Bean
+  public DebugControllerV2 debugControllerV2(
+      final NotifyMeDataServiceV2 notifyMeDataServiceV2,
+      final NotifyMeDataServiceV3 notifyMeDataServiceV3,
+      final DiaryEntryDataService diaryEntryDataService,
+      final CryptoWrapper cryptoWrapper) {
+    return new DebugControllerV2(
+        notifyMeDataServiceV2, notifyMeDataServiceV3, diaryEntryDataService, cryptoWrapper);
+  }
 
-    @Bean
-    public MappingJackson2HttpMessageConverter customJacksonJsonConverter() {
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                        .setSerializationInclusion(JsonInclude.Include.NON_ABSENT).registerModule(new JavaTimeModule())
-                        .disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)
-                        .enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                        .disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
-        return new MappingJackson2HttpMessageConverter(mapper);
-    }
+  @Bean
+  CryptoWrapper cryptoWrapper() {
+    return new CryptoWrapper(
+        healthAuthoritySkHex, healthAuthorityPkHex, useruploadMskHex, useruploadMpkHex);
+  }
+
+  @Override
+  public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+    converters.add(customJacksonJsonConverter());
+    converters.add(new StringHttpMessageConverter());
+  }
+
+  @Bean
+  public MappingJackson2HttpMessageConverter customJacksonJsonConverter() {
+    ObjectMapper mapper =
+        new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .setSerializationInclusion(JsonInclude.Include.NON_ABSENT)
+            .registerModule(new JavaTimeModule())
+            .disable(DeserializationFeature.READ_DATE_TIMESTAMPS_AS_NANOSECONDS)
+            .enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
+    return new MappingJackson2HttpMessageConverter(mapper);
+  }
 }
