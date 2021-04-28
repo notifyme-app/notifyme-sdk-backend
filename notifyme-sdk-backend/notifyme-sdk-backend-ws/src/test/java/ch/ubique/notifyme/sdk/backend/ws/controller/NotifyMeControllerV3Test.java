@@ -15,17 +15,18 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -44,6 +45,7 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
   @Autowired NotifyMeDataServiceV3 notifyMeDataServiceV3;
   @Value("${traceKey.traceKeysCacheControlInMs}")
   Long traceKeysCacheControlInMs;
+  @Value("${userupload.requestTime}") Long requestTime;
 
   private TraceKey getTraceKey() {
     TraceKey traceKey = new TraceKey();
@@ -131,8 +133,13 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
             .addIdentities(ByteString.copyFromUtf8("hello"))
             .build();
     final byte[] bytes = payload.toByteArray();
-    mockMvc
-        .perform(post("/v3/userupload").contentType("application/x-protobuf").content(bytes))
-        .andExpect(status().isOk());
+    final var start = LocalDateTime.now();
+    final var mvcResult = mockMvc
+            .perform(post("/v3/userupload").contentType("application/x-protobuf").content(bytes))
+            .andExpect(request().asyncStarted())
+            .andReturn();
+    mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isOk());
+    final var duration = start.until(LocalDateTime.now(), ChronoUnit.MILLIS);
+    assertTrue(requestTime <= duration);
   }
 }
