@@ -19,7 +19,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 
-public class NotifyMeJwtDecoder implements JwtDecoder {
+public class NotifyMeJwtDecoder implements org.springframework.security.oauth2.jwt.JwtDecoder {
     private final JwtParser parser;
     private OAuth2TokenValidator<Jwt> validator;
 

@@ -4,6 +4,7 @@ import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV3;
 import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload;
 import ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey;
 import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass;
+import ch.ubique.notifyme.sdk.backend.ws.util.TokenHelper;
 import com.google.protobuf.ByteString;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,24 +14,29 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MvcResult;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles({"dev", "enable-nmControllerV3"})
+@ActiveProfiles({"dev", "jwt"})
+@TestPropertySource(properties = {"ws.app.jwt.publickey=classpath://generated_public_test.pem"})
 public class NotifyMeControllerV3Test extends BaseControllerTest {
 
   private static boolean setUpIsDone = false;
@@ -43,9 +49,14 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
   private final Instant start = end.minusSeconds(60 * 60);
   @Autowired NotifyMeControllerV3 notifyMeControllerV3;
   @Autowired NotifyMeDataServiceV3 notifyMeDataServiceV3;
+
   @Value("${traceKey.traceKeysCacheControlInMs}")
   Long traceKeysCacheControlInMs;
-  @Value("${userupload.requestTime}") Long requestTime;
+
+  @Value("${userupload.requestTime}")
+  Long requestTime;
+
+  private static TokenHelper tokenHelper;
 
   private TraceKey getTraceKey() {
     TraceKey traceKey = new TraceKey();
@@ -62,7 +73,8 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
   }
 
   @Before
-  public void setUp() {
+  public void setUp() throws Exception {
+    tokenHelper = new TokenHelper();
     if (!setUpIsDone) {
       final TraceKey traceKey = getTraceKey();
       notifyMeDataServiceV3.insertTraceKey(traceKey);
@@ -125,21 +137,80 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
   }
 
   @Test
-  public void testUserUpload() throws Exception {
-    // TODO: Add more sensible identities once specified
+  public void testUserUploadDuration() throws Exception {
     final var payload =
         UserUploadPayload.newBuilder()
             .setVersion(3)
             .addIdentities(ByteString.copyFromUtf8("hello"))
             .build();
-    final byte[] bytes = payload.toByteArray();
+    final byte[] payloadBytes = payload.toByteArray();
+    final var expiry = LocalDateTime.now().plusMinutes(5).toInstant(ZoneOffset.UTC);
+    final var token =
+        tokenHelper.createToken("2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), true);
+
     final var start = LocalDateTime.now();
-    final var mvcResult = mockMvc
-            .perform(post("/v3/userupload").contentType("application/x-protobuf").content(bytes))
+    final var mvcResult =
+        mockMvc
+            .perform(
+                post("/v3/userupload")
+                    .contentType("application/x-protobuf")
+                    .header("Authorization", "Bearer " + token)
+                    .content(payloadBytes))
             .andExpect(request().asyncStarted())
             .andReturn();
     mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isOk());
     final var duration = start.until(LocalDateTime.now(), ChronoUnit.MILLIS);
+
     assertTrue(requestTime <= duration);
+  }
+
+  @Test
+  public void testUserUploadValidToken() throws Exception {
+    final var payload =
+        UserUploadPayload.newBuilder()
+            .setVersion(3)
+            .addIdentities(ByteString.copyFromUtf8("hello"))
+            .build();
+    final byte[] payloadBytes = payload.toByteArray();
+    final var expiry = LocalDateTime.now().plusMinutes(5).toInstant(ZoneOffset.UTC);
+    final var token =
+        tokenHelper.createToken("2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), true);
+
+    final var mvcResult =
+        mockMvc
+            .perform(
+                post("/v3/userupload")
+                    .contentType("application/x-protobuf")
+                    .header("Authorization", "Bearer " + token)
+                    .content(payloadBytes))
+            .andExpect(request().asyncStarted())
+            .andReturn();
+    mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isOk());
+  }
+
+  @Test
+  public void testUserUploadInvalidToken() throws Exception {
+    final var payload =
+        UserUploadPayload.newBuilder()
+            .setVersion(3)
+            .addIdentities(ByteString.copyFromUtf8("hello"))
+            .build();
+    final byte[] payloadBytes = payload.toByteArray();
+    final var expiry = LocalDateTime.now().plusMinutes(120).toInstant(ZoneOffset.UTC);
+    final var token =
+        tokenHelper.createToken("2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), false);
+
+    final var result =
+        mockMvc
+            .perform(
+                post("/v3/userupload")
+                    .contentType("application/x-protobuf")
+                    .header("Authorization", "Bearer " + token)
+                    .content(payloadBytes))
+                    .andExpect(request().asyncNotStarted())
+                    .andExpect(status().is(401))
+            .andReturn();
+    String authenticationError = result.getResponse().getHeader("www-authenticate");
+    assertTrue(authenticationError.contains("Bearer"));
   }
 }

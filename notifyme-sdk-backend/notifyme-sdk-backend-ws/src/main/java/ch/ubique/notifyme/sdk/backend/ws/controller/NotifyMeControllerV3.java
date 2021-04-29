@@ -20,6 +20,8 @@ import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
 import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEvent;
 import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEvent.Builder;
 import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEventWrapper;
+import ch.ubique.notifyme.sdk.backend.ws.security.RequestValidator;
+import ch.ubique.notifyme.sdk.backend.ws.security.RequestValidator.*;
 import ch.ubique.notifyme.sdk.backend.ws.util.DateTimeUtil;
 import ch.ubique.openapi.docannotations.Documentation;
 import com.google.protobuf.ByteString;
@@ -28,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,6 +52,7 @@ public class NotifyMeControllerV3 {
   private final NotifyMeDataServiceV3 dataService;
   private final PushRegistrationDataService pushRegistrationDataService;
   private final UUIDDataService uuidDataService;
+  private final RequestValidator requestValidator;
 
   private final String revision;
   private final Long bucketSizeInMs;
@@ -56,14 +60,18 @@ public class NotifyMeControllerV3 {
   private final Duration requestTime;
 
   public NotifyMeControllerV3(
-          NotifyMeDataServiceV3 dataService,
-          PushRegistrationDataService pushRegistrationDataService,
-          UUIDDataService uuidDataService, String revision,
-          Long bucketSizeInMs,
-          Long traceKeysCacheControlInMs, Duration requestTime) {
+      NotifyMeDataServiceV3 dataService,
+      PushRegistrationDataService pushRegistrationDataService,
+      UUIDDataService uuidDataService,
+      RequestValidator requestValidator,
+      String revision,
+      Long bucketSizeInMs,
+      Long traceKeysCacheControlInMs,
+      Duration requestTime) {
     this.dataService = dataService;
     this.pushRegistrationDataService = pushRegistrationDataService;
     this.uuidDataService = uuidDataService;
+    this.requestValidator = requestValidator;
     this.revision = revision;
     this.bucketSizeInMs = bucketSizeInMs;
     this.traceKeysCacheControlInMs = traceKeysCacheControlInMs;
@@ -210,9 +218,14 @@ public class NotifyMeControllerV3 {
       @Documentation(description = "Identities to upload as protobuf") @Valid @RequestBody final UserUploadPayload userUploadPayload,
       @AuthenticationPrincipal
           @Documentation(description = "JWT token that can be verified by the backend server")
-          Object principal) {
+              Object principal)
+      throws WrongScopeException, WrongAudienceException, NotAJwtException {
     final var now = LocalDateTime.now();
-    // TODO: Implement
+
+    requestValidator.isValid(principal);
+
+    // TODO: Process upload payload
+
     return () -> {
       try {
         DateTimeUtil.normalizeDuration(now, requestTime);

@@ -27,6 +27,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import javax.servlet.Filter;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles({"postgres", "test-config", "dev"})
@@ -41,9 +43,12 @@ public abstract class BaseControllerTest {
 
     @Autowired private WebApplicationContext webApplicationContext;
 
+    // !!!!! IMPORTANT: Must be added to filter-chain of mockMvc, otherwise security configs are ignored !!!!!
+    @Autowired private Filter springSecurityFilterChain;
+
     @Before
     public void setup() throws Exception {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).addFilters(springSecurityFilterChain).build();
         this.objectMapper = new ObjectMapper(new JsonFactory());
         this.objectMapper.registerModule(new JavaTimeModule());
         // this makes sure, that the objectmapper does not fail, when no filter is provided.

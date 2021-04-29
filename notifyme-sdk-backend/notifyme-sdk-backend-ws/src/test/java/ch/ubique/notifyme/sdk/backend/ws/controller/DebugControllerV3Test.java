@@ -50,10 +50,4 @@ public class DebugControllerV3Test extends BaseControllerTest {
                         .getContentAsString();
         assertTrue(hello.contains("Hello from NotifyMe Debug WS v3"));
     }
-
-    @Test
-    @Ignore("Not implemented")
-    public void uploadTraceKeyTest() throws Exception {
-        // TODO: Create pretrace keys and upload (use cryptoWrapper)
-    }
 }

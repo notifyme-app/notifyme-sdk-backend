@@ -41,6 +41,10 @@ public class KeyVault {
     private static final List<Method> externalPublicProviders = new ArrayList<>();
     private static final List<Method> externalPrivateProviders = new ArrayList<>();
 
+    static {
+        registerDefaultProviders();
+    }
+
     public static boolean registerNewPublicEncodingProvider(Class<?> clazz, String functionName) {
         try {
             var method = clazz.getDeclaredMethod(functionName, String.class, String.class);

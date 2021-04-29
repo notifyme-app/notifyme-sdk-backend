@@ -10,38 +10,43 @@
 
 package ch.ubique.notifyme.sdk.backend.ws.security;
 
-import java.time.Duration;
+import ch.ubique.notifyme.sdk.backend.data.UUIDDataService;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
 import org.springframework.security.oauth2.jwt.Jwt;
 
+import java.time.Duration;
+
 public class NotifyMeJwtValidator implements OAuth2TokenValidator<Jwt> {
 
-    private static final String SCOPE = "scope";
+  public static final String UUID_CLAIM = "jti";
 
-    private final String validScope;
-    private final Duration maxJwtValidity;
+  private final UUIDDataService uuidDataService;
+  private final Duration maxJwtValidity;
 
-    public NotifyMeJwtValidator(String validScope, Duration maxJwtValidity) {
-        this.validScope = validScope;
-        this.maxJwtValidity = maxJwtValidity;
+  public NotifyMeJwtValidator(UUIDDataService uuidDataService, Duration maxJwtValidity) {
+    this.uuidDataService = uuidDataService;
+    this.maxJwtValidity = maxJwtValidity;
+  }
+
+  @Override
+  public OAuth2TokenValidatorResult validate(Jwt token) {
+    if (token.containsClaim("fake") && token.getClaimAsString("fake").equals("1")) {
+      // it is a fake token, but we still assume it is valid
+      return OAuth2TokenValidatorResult.success();
     }
-
-    @Override
-    public OAuth2TokenValidatorResult validate(Jwt token) {
-        // make sure the token has an expiration date AND is not valid for more than maxJwtValidity
-        if (token.getExpiresAt() == null
-                || token.getIssuedAt().plus(maxJwtValidity).isBefore(token.getExpiresAt())) {
-            return OAuth2TokenValidatorResult.failure(
-                    new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST));
-        }
-        // validate scope
-        if (Boolean.TRUE.equals(token.containsClaim(SCOPE))
-                && token.getClaim(SCOPE).equals(validScope)) {
-            return OAuth2TokenValidatorResult.success();
-        }
-        return OAuth2TokenValidatorResult.failure(new OAuth2Error(OAuth2ErrorCodes.INVALID_SCOPE));
+    // make sure the token has an expiration date AND is not valid for more than maxJwtValidity
+    if (token.getExpiresAt() == null
+        || token.getIssuedAt().plus(maxJwtValidity).isBefore(token.getExpiresAt())) {
+      return OAuth2TokenValidatorResult.failure(new OAuth2Error(OAuth2ErrorCodes.INVALID_REQUEST));
     }
+    // Ensure UUID is unique
+    if (token.containsClaim(UUID_CLAIM)
+        && uuidDataService.checkAndInsertPublishUUID(token.getClaim(UUID_CLAIM))) {
+      return OAuth2TokenValidatorResult.success();
+    }
+    return OAuth2TokenValidatorResult.failure(new OAuth2Error(OAuth2ErrorCodes.INVALID_SCOPE));
+  }
 }

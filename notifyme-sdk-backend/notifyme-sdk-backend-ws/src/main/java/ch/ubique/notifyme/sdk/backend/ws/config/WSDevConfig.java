@@ -22,6 +22,7 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 @Profile("dev")
 public class WSDevConfig extends WSBaseConfig {
 
+
     @Bean
     @Override
     public DataSource dataSource() {

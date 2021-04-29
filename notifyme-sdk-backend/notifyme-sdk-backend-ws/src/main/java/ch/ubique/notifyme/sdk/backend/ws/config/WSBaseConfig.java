@@ -14,6 +14,8 @@ import ch.ubique.notifyme.sdk.backend.data.*;
 import ch.ubique.notifyme.sdk.backend.ws.controller.*;
 import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebController;
 import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebCriticalEventController;
+import ch.ubique.notifyme.sdk.backend.ws.security.NotifyMeJwtRequestValidator;
+import ch.ubique.notifyme.sdk.backend.ws.security.RequestValidator;
 import ch.ubique.notifyme.sdk.backend.ws.service.PhoneHeartbeatSilentPush;
 import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper;
 import ch.ubique.pushservice.pushconnector.PushConnectorService;
@@ -176,11 +178,13 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
       NotifyMeDataServiceV3 notifyMeDataServiceV3,
       PushRegistrationDataService pushRegistrationDataService,
       UUIDDataService uuidDataService,
+      RequestValidator requestValidator,
       String revision) {
     return new NotifyMeControllerV3(
         notifyMeDataServiceV3,
         pushRegistrationDataService,
         uuidDataService,
+        requestValidator,
         revision,
         bucketSizeInMs,
         traceKeysCacheControlInMs,
@@ -257,6 +261,11 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
   CryptoWrapper cryptoWrapper() {
     return new CryptoWrapper(
         healthAuthoritySkHex, healthAuthorityPkHex, useruploadMskHex, useruploadMpkHex);
+  }
+
+  @Bean
+  public RequestValidator requestValidator() {
+    return new NotifyMeJwtRequestValidator();
   }
 
   @Override
