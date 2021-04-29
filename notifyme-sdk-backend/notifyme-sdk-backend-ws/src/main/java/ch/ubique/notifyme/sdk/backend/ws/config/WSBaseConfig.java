@@ -213,11 +213,13 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
     return new PhoneHeartbeatSilentPush(pushConnectorService, pushRegistrationDataService);
   }
 
+  @Profile("enable-debug")
   @Bean
   public WebController webController() {
     return new WebController();
   }
 
+  @Profile("enable-debug")
   @Bean
   public WebCriticalEventController webCriticalEventController(
       final DiaryEntryDataService diaryEntryDataService) {
