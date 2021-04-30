@@ -218,11 +218,17 @@ public class CryptoWrapper {
 
     private byte[] generateIdentityV3(byte[] qrCodePayload, long startOfInterval) {
         NoncesAndNotificationKey cryptoData = getNoncesAndNotificationKey(qrCodePayload);
+        
+        int intervalLenght = 3600; // 1 hour
+        
         byte[] preid = cryptoHashSHA256(
-                        concatenate("CN-PREID".getBytes(StandardCharsets.US_ASCII), qrCodePayload, cryptoData.nonce1));
+                        concatenate("CN-PREID".getBytes(StandardCharsets.US_ASCII), qrCodePayload, cryptoData.noncePreId));
 
-        return cryptoHashSHA256(concatenate("CN-ID".getBytes(StandardCharsets.US_ASCII), preid, intToBytes(3600),
-                        longToBytes(startOfInterval), cryptoData.nonce2));
+        byte[] timeKey = cryptoHashSHA256(concatenate("CN-TIMEKEY".getBytes(StandardCharsets.US_ASCII),
+                        intToBytes(intervalLenght), longToBytes(startOfInterval), cryptoData.nonceTimekey));
+
+        return cryptoHashSHA256(concatenate("CN-ID".getBytes(StandardCharsets.US_ASCII), preid, intToBytes(intervalLenght),
+                        longToBytes(startOfInterval), timeKey));
     }
 
     private byte[] cryptoHashSHA256(byte[] in) {
@@ -242,10 +248,10 @@ public class CryptoWrapper {
         try {
             byte[] hkdfOutput = Hkdf.computeHkdf("HMACSHA256", qrCodePayload, new byte[0],
                             "CrowdNotifier_v3".getBytes(StandardCharsets.US_ASCII), 96);
-            byte[] nonce1 = Arrays.copyOfRange(hkdfOutput, 0, 32);
-            byte[] nonce2 = Arrays.copyOfRange(hkdfOutput, 32, 64);
+            byte[] noncePreId = Arrays.copyOfRange(hkdfOutput, 0, 32);
+            byte[] nonceTimekey = Arrays.copyOfRange(hkdfOutput, 32, 64);
             byte[] notificationKey = Arrays.copyOfRange(hkdfOutput, 64, 96);
-            return new NoncesAndNotificationKey(nonce1, nonce2, notificationKey);
+            return new NoncesAndNotificationKey(noncePreId, nonceTimekey, notificationKey);
         } catch (GeneralSecurityException e) {
             throw new RuntimeException("HKDF threw GeneralSecurityException");
         }
@@ -480,13 +486,13 @@ public class CryptoWrapper {
     }
 
     public class NoncesAndNotificationKey {
-        public final byte[] nonce1;
-        public final byte[] nonce2;
+        public final byte[] noncePreId;
+        public final byte[] nonceTimekey;
         public final byte[] notificationKey;
 
-        public NoncesAndNotificationKey(byte[] nonce1, byte[] nonce2, byte[] notificationKey) {
-            this.nonce1 = nonce1;
-            this.nonce2 = nonce2;
+        public NoncesAndNotificationKey(byte[] noncePreId, byte[] nonceTimekey, byte[] notificationKey) {
+            this.noncePreId = noncePreId;
+            this.nonceTimekey = nonceTimekey;
             this.notificationKey = notificationKey;
         }
     }
