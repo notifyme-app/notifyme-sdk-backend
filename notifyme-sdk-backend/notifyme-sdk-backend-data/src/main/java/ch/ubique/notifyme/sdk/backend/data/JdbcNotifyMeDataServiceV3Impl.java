@@ -85,6 +85,7 @@ public class JdbcNotifyMeDataServiceV3Impl implements NotifyMeDataServiceV3 {
 
     private MapSqlParameterSource getTraceKeyParams(TraceKey traceKey) {
         MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("version", traceKey.getVersion());
         params.addValue("identity", traceKey.getIdentity());
         params.addValue("secret_key_for_identity", traceKey.getSecretKeyForIdentity());
         params.addValue("start_time", DateUtil.toDate(traceKey.getStartTime()));

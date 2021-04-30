@@ -321,6 +321,7 @@ public class CryptoWrapper {
       traceKey.setCipherTextNonce(nonce);
       traceKey.setEncryptedAssociatedData(encryptedAssociatedData);
       traceKey.setSecretKeyForIdentity(secretKeyForIdentity.serialize());
+      traceKey.setVersion(3);
       return traceKey;
     }
 
