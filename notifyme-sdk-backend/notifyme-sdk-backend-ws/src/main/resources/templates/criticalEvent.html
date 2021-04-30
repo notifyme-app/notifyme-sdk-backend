@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NotifyMe | Critical Events</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+</head>
+<body>
+<div th:replace="fragments/header :: header(criticalevent)"></div>
+<div class="container">
+
+    <h2 class="mt-5" th:text="'Critical Events'"></h2>
+
+    <div class="accordion accordion-flush mt-5" id="accordionExample">
+        <div class="accordion-item" th:each="criticalEvent, iter : ${criticalEvents}">
+            <h2 class="accordion-header" id="headingOne">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                        th:data-bs-target="${'#collapse' + iter.index}"
+                        aria-expanded="true" th:aria-controls="${'collapse' + iter.index}">
+                    <div class="row">
+                        <div class="col-md-auto" th:text="${'Event '+ iter.index + ': '}"></div>
+                        <div class="col" th:text="${criticalEvent.getName()}"></div>
+                        <div class="col" th:text="${criticalEvent.getLocation()}"></div>
+                        <div class="col" th:text="${criticalEvent.getRoom()}"></div>
+                        <div class="col" th:text="${criticalEvent.getVenueType()}"></div>
+                    </div>
+                </button>
+            </h2>
+            <div th:id="${'collapse' + iter.index}" class="accordion-collapse collapse show"
+                 aria-labelledby="headingOne">
+                <div class="accordion-body">
+                    <table class="table table-striped" aria-label="all relevant diary entries for he given event">
+                        <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Location</th>
+                            <th scope="col">Room</th>
+                            <th scope="col">Venue Type</th>
+                            <th scope="col">Checkin</th>
+                            <th scope="col">Checkout</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="webDiaryEntry, iter : ${criticalEvent.getWebDiaryEntries()}">
+                            <th scope="row" th:text="${iter.index}"></th>
+                            <td th:text="${webDiaryEntry.getName()}"></td>
+                            <td th:text="${webDiaryEntry.getLocation()}"></td>
+                            <td th:text="${webDiaryEntry.getRoom()}"></td>
+                            <td th:text="${webDiaryEntry.getVenueType()}"></td>
+                            <td th:text="${webDiaryEntry.getCheckinTime()}"></td>
+                            <td th:text="${webDiaryEntry.getCheckoutTime()}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW"
+        crossorigin="anonymous"></script>
+</body>
+</html>

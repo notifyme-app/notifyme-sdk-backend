@@ -11,7 +11,6 @@
 package ch.ubique.notifyme.sdk.backend.model.util;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import java.io.IOException;
@@ -23,13 +22,13 @@ public class UrlBase64StringSerializer extends StdSerializer<byte[]> {
         this(null);
     }
 
-    public UrlBase64StringSerializer(Class t) {
+    public UrlBase64StringSerializer(Class<byte[]> t) {
         super(t);
     }
 
     @Override
     public void serialize(byte[] value, JsonGenerator gen, SerializerProvider arg2)
-            throws IOException, JsonProcessingException {
+            throws IOException {
         gen.writeString(new String(Base64.getUrlEncoder().encode(value)));
     }
 }

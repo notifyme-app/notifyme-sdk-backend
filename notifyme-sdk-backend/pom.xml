@@ -30,9 +30,9 @@
         <jsonwebtoken-version>0.11.2</jsonwebtoken-version>
         <protobuf-java-version>3.12.1</protobuf-java-version>
         <spring-boot-version>2.4.0</spring-boot-version>
-        <testcontainers-version>1.15.0-rc2</testcontainers-version>
+        <testcontainers-version>1.15.1</testcontainers-version>
 
-        <itCoverageAgent></itCoverageAgent>
+        <itCoverageAgent/>
 
         <build-helper-maven-plugin.version>3.2.0</build-helper-maven-plugin.version>
 
@@ -41,9 +41,6 @@
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.organization>${env.SONAR_ORGANIZATION}</sonar.organization>
         <sonar.login>${env.SONAR_TOKEN}</sonar.login>
-        <sonar.coverage.jacoco.xmlReportPaths>
-            ${project.basedir}/../notifyme-sdk-backend-report/target/site/jacoco-aggregate/jacoco.xml
-        </sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <modules>
@@ -63,6 +60,16 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+            <exclusions>
+            	<exclusion>
+            		<groupId>org.junit.jupiter</groupId>
+            		<artifactId>junit-jupiter</artifactId>
+            	</exclusion>
+            	<exclusion>
+            		<groupId>org.mockito</groupId>
+            		<artifactId>mockito-junit-jupiter</artifactId>
+            	</exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -80,6 +87,7 @@
             <artifactId>commons-io</artifactId>
         </dependency>
 
+        <!-- Testing-->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -309,65 +317,6 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <executions>
-                    <!-- set arg line property for surefire -->
-                    <execution>
-                        <id>prepare-agent</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                        <configuration>
-                            <propertyName>surefireArgLine</propertyName>
-                        </configuration>
-                    </execution>
-                    <!-- set arg line property for failsafe -->
-                    <execution>
-                        <id>prepare-agent-integration</id>
-                        <goals>
-                            <goal>prepare-agent-integration</goal>
-                        </goals>
-                        <configuration>
-                            <propertyName>failsafeArgLine</propertyName>
-                        </configuration>
-                    </execution>
-
-                    <!-- METHOD 1 -->
-                    <!--<execution>-->
-                    <!--<id>prepare-agent</id>-->
-                    <!--<goals>-->
-                    <!--<goal>prepare-agent</goal>-->
-                    <!--</goals>-->
-                    <!--</execution>-->
-                    <!-- prepare agent for measuring unit tests -->
-
-                    <!-- METHOD 2 -->
-                    <execution>
-                        <id>prepare-unit-tests</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                        <!--<configuration>-->
-                        <!--<destFile>${sonar.jacoco.reportPath}</destFile>-->
-                        <!--</configuration>-->
-                    </execution>
-
-                    <!-- prepare agent for measuring integration tests -->
-                    <execution>
-                        <id>prepare-agent-coverage</id>
-                        <goals>
-                            <goal>prepare-agent</goal>
-                        </goals>
-                        <phase>pre-integration-test</phase>
-                        <configuration>
-                            <!--<destFile>${sonar.jacoco.itReportPath}</destFile>-->
-                            <propertyName>itCoverageAgent</propertyName>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
@@ -472,19 +421,9 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>ch.ubique.openapi</groupId>
-                    <artifactId>springboot-swagger-3</artifactId>
-                    <version>1.3.2</version>
-                </plugin>
-                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.8.1</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.jacoco</groupId>
-                    <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.8.5</version>
                 </plugin>
                 <plugin>
                     <groupId>org.sonarsource.scanner.maven</groupId>

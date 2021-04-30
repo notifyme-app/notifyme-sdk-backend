@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-package ch.ubique.notifyme.sdk.backend.model.tracekey;
+package ch.ubique.notifyme.sdk.backend.model.tracekey.v2;
 
 import java.time.Instant;
 

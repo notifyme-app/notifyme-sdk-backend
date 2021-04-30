@@ -32,6 +32,7 @@ The full set of documents for CrowdNotifier is at https://github.com/CrowdNotifi
 For development purposes a hsqldb can be used to run the webservice locally. For production systems, it is recommended to connect to a PostgreSQL dabatase (cluster if possible). There is a table for storing submitted trace keys. The schema is the following:
 
 ![](documentation/img/t_trace_key.png)
+![](documentation/img/t_trace_key_v3.png)
 
 ## Environments
 To control different behaviors, SpringBoot profiles are used. The idea is to provide an abstract base class, which defines everything needed. Such properties can be defined as abstract, and their implementation can be provided in an extended class.

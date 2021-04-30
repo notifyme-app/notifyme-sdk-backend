@@ -12,7 +12,7 @@ import org.junit.Test;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import ch.ubique.notifyme.sdk.backend.model.PreTraceWithProofOuterClass.PreTraceWithProof;
-import ch.ubique.notifyme.sdk.backend.model.tracekey.TraceKey;
+import ch.ubique.notifyme.sdk.backend.model.tracekey.v2.TraceKey;
 import ch.ubique.notifyme.sdk.backend.ws.CryptoWrapper;
 
 public class SodiumWrapperTest {
