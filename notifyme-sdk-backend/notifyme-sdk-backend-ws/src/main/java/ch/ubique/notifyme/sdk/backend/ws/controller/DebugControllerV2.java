@@ -70,7 +70,7 @@ public class DebugControllerV2 {
     public ResponseEntity<String> uploadTraceKey(@RequestParam Long startTime, @RequestParam Long endTime,
                     @RequestParam @Documentation(description = "list of url base64 encoded pre trace keys") List<String> preTraces,
                     @RequestParam @Documentation(description = "list of the affected hours for the trace keys") List<Integer> affectedHours,
-                    @RequestParam String message, @RequestParam Integer criticality) {
+                    @RequestParam String message, @RequestParam(required = false, defaultValue = "0") Integer criticality) {
 
         List<TraceKey> traceKeysToInsert = new ArrayList<>();
         List<ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey> traceKeysV3ToInsert = new ArrayList<>();
