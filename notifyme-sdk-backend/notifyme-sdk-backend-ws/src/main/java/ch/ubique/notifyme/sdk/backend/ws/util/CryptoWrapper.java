@@ -3,6 +3,8 @@ package ch.ubique.notifyme.sdk.backend.ws.util;
 import ch.ubique.notifyme.sdk.backend.model.PreTraceWithProofOuterClass.PreTraceWithProof;
 import ch.ubique.notifyme.sdk.backend.model.PreTraceWithProofOuterClass.TraceProof;
 import ch.ubique.notifyme.sdk.backend.model.QrCodeContentOuterClass.QrCodeContent;
+import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
+import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload;
 import ch.ubique.notifyme.sdk.backend.model.tracekey.v2.TraceKey;
 import ch.ubique.notifyme.sdk.backend.model.v3.AssociatedDataOuterClass.AssociatedData;
 import ch.ubique.notifyme.sdk.backend.model.v3.QrCodePayload.QRCodePayload;
@@ -34,7 +36,9 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.security.GeneralSecurityException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class CryptoWrapper {
 
@@ -266,6 +270,22 @@ public class CryptoWrapper {
         logger.error("unable to parse pk hexstring", e);
         throw new RuntimeException(e);
       }
+    }
+    
+    public List<ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey> createTraceV3ForUserUpload(UserUploadPayload userUpload) {
+        var traceKeys = new ArrayList<ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey>();
+        for (UploadVenueInfo venueInfo: userUpload.getVenueInfosList()) {
+            if (!venueInfo.getFake()) {
+                byte[] identity = cryptoHashSHA256(concatenate("CN-ID".getBytes(StandardCharsets.US_ASCII),
+                                    venueInfo.getPreId().toByteArray(),
+                                    intToBytes(3600),
+                                    longToBytes(venueInfo.getCheckinFrom()),
+                                    venueInfo.getTimeKey().toByteArray()));
+                
+            }
+        }
+        
+        return traceKeys;
     }
 
     public ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey createTraceV3(

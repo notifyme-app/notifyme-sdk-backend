@@ -24,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -45,10 +46,20 @@ public abstract class BaseControllerTest {
 
     // !!!!! IMPORTANT: Must be added to filter-chain of mockMvc, otherwise security configs are ignored !!!!!
     @Autowired private Filter springSecurityFilterChain;
+    
+    private final boolean enableSecurity;
+    
+    public BaseControllerTest(boolean enableSecurity) {
+        this.enableSecurity = enableSecurity;
+    }
 
     @Before
     public void setup() throws Exception {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).addFilters(springSecurityFilterChain).build();
+        DefaultMockMvcBuilder builder = MockMvcBuilders.webAppContextSetup(webApplicationContext);
+        if (enableSecurity) {
+            builder.addFilters(springSecurityFilterChain);
+        }
+        this.mockMvc = builder.build();
         this.objectMapper = new ObjectMapper(new JsonFactory());
         this.objectMapper.registerModule(new JavaTimeModule());
         // this makes sure, that the objectmapper does not fail, when no filter is provided.

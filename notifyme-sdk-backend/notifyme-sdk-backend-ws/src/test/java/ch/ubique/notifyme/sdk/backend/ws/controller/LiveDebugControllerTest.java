@@ -32,8 +32,13 @@ import org.springframework.web.client.RestTemplate;
 @ActiveProfiles({"dev", "enable-debug"})
 @Ignore("run manually with server running locally on #port")
 public class LiveDebugControllerTest extends BaseControllerTest {
+
     private String liveDiaryEntriesEndPoint;
 
+    public LiveDebugControllerTest() {
+        super(false);
+    }
+    
     @Before
     public void setUp() {
         final String liveDebugControllerEndPoint = "http://localhost:" + 8080 + "/v1/debug";

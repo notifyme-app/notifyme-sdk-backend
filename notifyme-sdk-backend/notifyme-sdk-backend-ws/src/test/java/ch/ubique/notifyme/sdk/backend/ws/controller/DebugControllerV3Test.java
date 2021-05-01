@@ -10,9 +10,11 @@
 
 package ch.ubique.notifyme.sdk.backend.ws.controller;
 
-import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV3;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,19 +22,20 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV3;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles({"dev", "enable-debug"})
 public class DebugControllerV3Test extends BaseControllerTest {
+
     private String traceKeysEndpoint;
     @Autowired private NotifyMeDataServiceV3 notifyMeDataServiceV3;
 
+    public DebugControllerV3Test() {
+        super(false);
+    }
+    
     @Before
     public void setUp() {
         final String debugControllerEndPoint = "/v3/debug";

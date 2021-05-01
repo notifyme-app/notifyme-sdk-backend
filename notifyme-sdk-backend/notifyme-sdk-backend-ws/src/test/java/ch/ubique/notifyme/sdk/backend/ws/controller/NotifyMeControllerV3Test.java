@@ -1,6 +1,7 @@
 package ch.ubique.notifyme.sdk.backend.ws.controller;
 
 import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV3;
+import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
 import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload;
 import ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey;
 import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass;
@@ -14,13 +15,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -57,6 +58,10 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
   Long requestTime;
 
   private static TokenHelper tokenHelper;
+  
+  public NotifyMeControllerV3Test() {
+      super(true);
+  }
 
   private TraceKey getTraceKey() {
     TraceKey traceKey = new TraceKey();
@@ -138,11 +143,7 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
 
   @Test
   public void testUserUploadDuration() throws Exception {
-    final var payload =
-        UserUploadPayload.newBuilder()
-            .setVersion(3)
-            .addIdentities(ByteString.copyFromUtf8("hello"))
-            .build();
+    final var payload = createUserUploadPayload();
     final byte[] payloadBytes = payload.toByteArray();
     final var expiry = LocalDateTime.now().plusMinutes(5).toInstant(ZoneOffset.UTC);
     final var token =
@@ -166,11 +167,7 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
 
   @Test
   public void testUserUploadValidToken() throws Exception {
-    final var payload =
-        UserUploadPayload.newBuilder()
-            .setVersion(3)
-            .addIdentities(ByteString.copyFromUtf8("hello"))
-            .build();
+    final var payload = createUserUploadPayload();
     final byte[] payloadBytes = payload.toByteArray();
     final var expiry = LocalDateTime.now().plusMinutes(5).toInstant(ZoneOffset.UTC);
     final var token =
@@ -190,11 +187,7 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
 
   @Test
   public void testUserUploadInvalidToken() throws Exception {
-    final var payload =
-        UserUploadPayload.newBuilder()
-            .setVersion(3)
-            .addIdentities(ByteString.copyFromUtf8("hello"))
-            .build();
+    final var payload = createUserUploadPayload();
     final byte[] payloadBytes = payload.toByteArray();
     final var expiry = LocalDateTime.now().plusMinutes(120).toInstant(ZoneOffset.UTC);
     final var token =
@@ -212,5 +205,27 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
             .andReturn();
     String authenticationError = result.getResponse().getHeader("www-authenticate");
     assertTrue(authenticationError.contains("Bearer"));
+  }
+  
+  /**
+   * Creates simple user upload payload with one venue info
+   * @return
+   */
+  private UserUploadPayload createUserUploadPayload() {
+      final var to = LocalDateTime.now().toInstant(ZoneOffset.UTC);
+      final var from = to.minus(Duration.ofHours(1));
+      var venueInfo = UploadVenueInfo.newBuilder()
+                      .setFake(false)
+                      .setPreId(ByteString.copyFromUtf8("preId"))
+                      .setNotificationKey(ByteString.copyFromUtf8("notificationKey"))
+                      .setTimeKey(ByteString.copyFromUtf8("timeKey"))
+                      .setCheckinFrom(from.toEpochMilli())
+                      .setCheckinTo(to.toEpochMilli()).build();
+      
+      final var userUpload = UserUploadPayload.newBuilder()
+                      .setVersion(3)
+                      .addVenueInfos(venueInfo).build();
+      
+      return userUpload;
   }
 }

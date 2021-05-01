@@ -25,8 +25,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles({"dev", "enable-debug"})
 public class DebugControllerV2Test extends BaseControllerTest {
+
     private String diaryEntriesEndPoint;
 
+    public DebugControllerV2Test() {
+        super(false);
+    }
+    
     @Before
     public void setUp() {
         final String debugControllerEndPoint = "/v1/debug";

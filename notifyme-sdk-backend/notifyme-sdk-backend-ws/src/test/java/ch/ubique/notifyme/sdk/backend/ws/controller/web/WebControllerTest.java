@@ -9,9 +9,15 @@ import ch.ubique.notifyme.sdk.backend.ws.controller.DebugControllerTestHelper;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.test.context.ActiveProfiles;
 
+@ActiveProfiles({"dev", "enable-debug"})
 public class WebControllerTest extends BaseControllerTest {
     private String webEndPoint;
+    
+    public WebControllerTest() {
+        super(false);
+    }
 
     @Before
     public void setUp() {
