@@ -9,7 +9,7 @@ public class NotifyMeJwtRequestValidator implements RequestValidator {
         if(authObject instanceof Jwt) {
             Jwt token = (Jwt) authObject;
             if (Boolean.TRUE.equals(token.containsClaim("scope")) && token.getClaim("scope").equals("userupload")) {
-                if(token.getAudience().contains("notifyMe")) {
+                if(token.getAudience().contains("checkin")) {
                     return true;
                 } else {
                     throw new WrongAudienceException();

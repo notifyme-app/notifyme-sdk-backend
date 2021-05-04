@@ -22,6 +22,7 @@ import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass
 import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEventWrapper;
 import ch.ubique.notifyme.sdk.backend.ws.security.RequestValidator;
 import ch.ubique.notifyme.sdk.backend.ws.security.RequestValidator.*;
+import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper;
 import ch.ubique.notifyme.sdk.backend.ws.util.DateTimeUtil;
 import ch.ubique.openapi.docannotations.Documentation;
 import com.google.protobuf.ByteString;
@@ -53,6 +54,7 @@ public class NotifyMeControllerV3 {
   private final PushRegistrationDataService pushRegistrationDataService;
   private final UUIDDataService uuidDataService;
   private final RequestValidator requestValidator;
+  private final CryptoWrapper cryptoWrapper;
 
   private final String revision;
   private final Long bucketSizeInMs;
@@ -64,6 +66,7 @@ public class NotifyMeControllerV3 {
       PushRegistrationDataService pushRegistrationDataService,
       UUIDDataService uuidDataService,
       RequestValidator requestValidator,
+      CryptoWrapper cryptoWrapper,
       String revision,
       Long bucketSizeInMs,
       Long traceKeysCacheControlInMs,
@@ -76,6 +79,7 @@ public class NotifyMeControllerV3 {
     this.bucketSizeInMs = bucketSizeInMs;
     this.traceKeysCacheControlInMs = traceKeysCacheControlInMs;
     this.requestTime = requestTime;
+    this.cryptoWrapper = cryptoWrapper;
   }
 
   @GetMapping(value = "")
@@ -222,9 +226,10 @@ public class NotifyMeControllerV3 {
       throws WrongScopeException, WrongAudienceException, NotAJwtException {
     final var now = LocalDateTime.now();
 
-    requestValidator.isValid(principal);
-
-    // TODO: Process upload payload
+    //requestValidator.isValid(principal);
+   
+    var traceKeys = cryptoWrapper.getCryptoUtilV3().createTraceV3ForUserUpload(userUploadPayload);
+    dataService.insertTraceKey(traceKeys); 
 
     return () -> {
       try {

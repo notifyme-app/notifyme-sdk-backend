@@ -295,10 +295,10 @@ components:
     ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo:
       type: object
       properties:
-        checkinFrom_:
+        intervalStartMs_:
           type: integer
           format: long
-        checkinTo_:
+        intervalEndMs_:
           type: integer
           format: long
         fake_:

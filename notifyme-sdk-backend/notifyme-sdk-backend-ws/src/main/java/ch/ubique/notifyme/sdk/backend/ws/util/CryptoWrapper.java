@@ -7,6 +7,8 @@ import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UploadVe
 import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload;
 import ch.ubique.notifyme.sdk.backend.model.tracekey.v2.TraceKey;
 import ch.ubique.notifyme.sdk.backend.model.v3.AssociatedDataOuterClass.AssociatedData;
+import ch.ubique.notifyme.sdk.backend.model.v3.NotifyMeAssociatedDataOuterClass.EventCriticality;
+import ch.ubique.notifyme.sdk.backend.model.v3.NotifyMeAssociatedDataOuterClass.NotifyMeAssociatedData;
 import ch.ubique.notifyme.sdk.backend.model.v3.QrCodePayload.QRCodePayload;
 import com.google.crypto.tink.subtle.Hkdf;
 import com.google.protobuf.ByteString;
@@ -67,8 +69,6 @@ public class CryptoWrapper {
       logger.error("unable to parse pk hexstring", e);
       throw new RuntimeException(e);
     }
-    cryptoUtilV3 = new CryptoUtilV3(mskHex, mpkHex);
-    cryptoUtilV2 = new CryptoUtilV2();
 
     // Do custom loading for the libsodium lib, as it does not work out of the box
     // with spring boot bundled jars. To get a path to the full file, we copy
@@ -102,6 +102,9 @@ public class CryptoWrapper {
       logger.error("unable to load libmcl", e);
       throw new RuntimeException(e);
     }
+    
+    cryptoUtilV3 = new CryptoUtilV3(mskHex, mpkHex);
+    cryptoUtilV2 = new CryptoUtilV2();
   }
 
   /**
@@ -256,10 +259,14 @@ public class CryptoWrapper {
 
     private final byte[] msk;
     private final byte[] mpk;
+    
+    private final Fr mskFr;
 
     public CryptoUtilV3(String mskHex, String mpkHex) {
       try {
         this.msk = Hex.decodeHex(mskHex);
+        this.mskFr = new Fr();
+        this.mskFr.deserialize(this.msk);
       } catch (DecoderException e) {
         logger.error("unable to parse sk hexstring", e);
         throw new RuntimeException(e);
@@ -279,9 +286,27 @@ public class CryptoWrapper {
                 byte[] identity = cryptoHashSHA256(concatenate("CN-ID".getBytes(StandardCharsets.US_ASCII),
                                     venueInfo.getPreId().toByteArray(),
                                     intToBytes(3600),
-                                    longToBytes(venueInfo.getCheckinFrom()),
+                                    longToBytes(venueInfo.getIntervalStartMs()),
                                     venueInfo.getTimeKey().toByteArray()));
                 
+                G1 secretKeyForIdentity = keyDer(this.mskFr, identity);
+                
+                byte[] nonce = createNonce();
+                NotifyMeAssociatedData countryData = NotifyMeAssociatedData.newBuilder()
+                                .setCriticality(EventCriticality.LOW).setVersion(1).build();
+                byte[] encryptedAssociatedData = this.encryptAssociatedData(
+                                venueInfo.getNotificationKey().toByteArray(), "",
+                                countryData.toByteArray(), nonce);
+                
+                var traceKeyV3 = new ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey();
+                traceKeyV3.setVersion(3);
+                traceKeyV3.setCipherTextNonce(nonce);
+                traceKeyV3.setEncryptedAssociatedData(encryptedAssociatedData);
+                traceKeyV3.setEndTime(Instant.ofEpochMilli(venueInfo.getIntervalStartMs()));
+                traceKeyV3.setStartTime(Instant.ofEpochMilli(venueInfo.getIntervalEndMs()));
+                traceKeyV3.setIdentity(identity);
+                traceKeyV3.setSecretKeyForIdentity(secretKeyForIdentity.serialize());
+                traceKeys.add(traceKeyV3);
             }
         }
         

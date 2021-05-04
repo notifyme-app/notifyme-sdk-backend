@@ -178,13 +178,15 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
       NotifyMeDataServiceV3 notifyMeDataServiceV3,
       PushRegistrationDataService pushRegistrationDataService,
       UUIDDataService uuidDataService,
-      RequestValidator requestValidator,
+      RequestValidator requestValidator, 
+      CryptoWrapper cryptoWrapper,
       String revision) {
     return new NotifyMeControllerV3(
         notifyMeDataServiceV3,
         pushRegistrationDataService,
         uuidDataService,
         requestValidator,
+        cryptoWrapper,
         revision,
         bucketSizeInMs,
         traceKeysCacheControlInMs,
