@@ -39,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles({"dev", "jwt"})
-@TestPropertySource(properties = {"ws.app.jwt.publickey=classpath://generated_public_test.pem"})
+@TestPropertySource(properties = {"ws.app.jwt.publickey=classpath://generated_public_test.pem", "traceKey.bucketSizeInMs=1"})
 public class NotifyMeControllerV3Test extends BaseControllerTest {
 
   private static boolean setUpIsDone = false;
