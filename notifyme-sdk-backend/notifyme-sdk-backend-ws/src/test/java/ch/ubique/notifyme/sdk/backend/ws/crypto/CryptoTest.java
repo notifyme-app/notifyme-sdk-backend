@@ -15,13 +15,11 @@ import com.goterl.lazycode.lazysodium.LazySodiumJava;
 import com.goterl.lazycode.lazysodium.SodiumJava;
 import com.goterl.lazycode.lazysodium.exceptions.SodiumException;
 import com.goterl.lazycode.lazysodium.interfaces.PwHash;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 public class CryptoTest {
 
@@ -29,8 +27,8 @@ public class CryptoTest {
   String healthAuthoritySkHex = "36b3b80a1cd2cc98d84b4ed2c109b74e7026f00c0d40a0b12a936b1814aa5e39";
   String healthAuthorityPkHex = "e4d2e06641730ce7c9986b1e7e91bf41bb3b8cc1d76d249fa99d0d8925e87a5c";
   String useruploadMpkHex =
-      "4EA4588A04CCE9854EEFF50942EBB7D7DF6646A8F47124E9E035C2165C5BCFD52A0CBAC04ABD3B0BD1C955662D974F15EF118419249759B41245F46DFDBAAA0CAD074101A767F5566714E8A3CF2DC6D810D628FBA582706811C01869DD2C808B";
-  String useruploadMskHex = "764F7BCC026EE4C2129B3FF488280FE96B62951FA9B9C34AC2E4B84D5B33121F";
+      "956e6fa1345547e8e060c8962ddd38863bf2c85406ed03b204bc340fb5db01296a960d00be240caa08db001664f4f7028a9dbbb33aea172bffd58b4a644f1ecb3b7bbed378a8a7c9756ac8b4b47346d8dbf37a62377703b7fc8da3bb22a21415";
+  String useruploadMskHex = "ce23ca6a3fd0d1307d3d0b2578784750b3f0e20b64e0c24e4cafb35561a0af35";
   CryptoWrapper cryptoWrapper =
       new CryptoWrapper(
           healthAuthoritySkHex, healthAuthorityPkHex, useruploadMskHex, useruploadMpkHex);
@@ -54,7 +52,13 @@ public class CryptoTest {
         pwHashLazy.cryptoPwHashStr("A cool password", PwHash.OPSLIMIT_MIN, PwHash.MEMLIMIT_MIN);
   }
 
-  private byte[] fromBase64(String base64) throws UnsupportedEncodingException {
-    return Base64.getUrlDecoder().decode(base64.getBytes("UTF-8"));
+  @Test
+  public void testFlow() {
+    cryptoWrapper.getCryptoUtilV3().testFlow();
+  }
+
+  @Test
+  public void testKeyGen() throws IOException {
+    CryptoWrapper.genKeys();
   }
 }

@@ -26,22 +26,21 @@ import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper;
 import ch.ubique.notifyme.sdk.backend.ws.util.DateTimeUtil;
 import ch.ubique.openapi.docannotations.Documentation;
 import com.google.protobuf.ByteString;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.CacheControl;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
+import java.io.UnsupportedEncodingException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import javax.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.CacheControl;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/v3")
@@ -119,9 +118,11 @@ public class NotifyMeControllerV3 {
       produces = {"application/x-protobuf", "application/protobuf"})
   @Documentation(
       description =
-          "Requests trace keys uploaded after _lastKeyBundleTag_. If _lastKeyBundleTag_ is ommited, all uploaded trace keys are returned",
+          "Requests trace keys uploaded after _lastKeyBundleTag_. If _lastKeyBundleTag_ is"
+              + " ommited, all uploaded trace keys are returned",
       responses = {
-        "200 => protobuf/json of all keys in that interval. response header _x-key-bundle-tag_ contains _lastKeyBundleTag_ for next request",
+        "200 => protobuf/json of all keys in that interval. response header _x-key-bundle-tag_"
+            + " contains _lastKeyBundleTag_ for next request",
         "404 => Invalid _lastKeyBundleTag_"
       },
       responseHeaders = {
@@ -203,14 +204,15 @@ public class NotifyMeControllerV3 {
   }
 
   /**
-   * Upload of stored identities if user tested positive and wishes to notify other visitors:
-   * - Sanity check on stored (e.g. no overlapping timestamps)
-   * - Generate traceKey = secretKey_I using an identity and the master secretkey
-   * - Store tracekey such that other user can poll for possible exposure events
+   * Upload of stored identities if user tested positive and wishes to notify other visitors: -
+   * Sanity check on stored (e.g. no overlapping timestamps) - Generate traceKey = secretKey_I using
+   * an identity and the master secretkey - Store tracekey such that other user can poll for
+   * possible exposure events
    *
    * @param userUploadPayload Protobuf containing the identities stored locally in the app and a
    *     version number
    * @return Status ok if sanity check passed and tracekeys successfuly uploaded
+   * @throws UnsupportedEncodingException
    */
   @PostMapping(
       value = "/userupload",
@@ -219,22 +221,24 @@ public class NotifyMeControllerV3 {
       description = "User upload of stored identities",
       responses = {"200 => success", "400 => Error"})
   public @ResponseBody Callable<ResponseEntity<String>> userUpload(
-      @Documentation(description = "Identities to upload as protobuf") @Valid @RequestBody final UserUploadPayload userUploadPayload,
+      @Documentation(description = "Identities to upload as protobuf") @Valid @RequestBody
+          final UserUploadPayload userUploadPayload,
       @AuthenticationPrincipal
           @Documentation(description = "JWT token that can be verified by the backend server")
-              Object principal)
-      throws WrongScopeException, WrongAudienceException, NotAJwtException {
+          Object principal)
+      throws WrongScopeException, WrongAudienceException, NotAJwtException,
+          UnsupportedEncodingException {
     final var now = LocalDateTime.now();
 
-    //requestValidator.isValid(principal);
-   
+    // requestValidator.isValid(principal);
+
     var traceKeys = cryptoWrapper.getCryptoUtilV3().createTraceV3ForUserUpload(userUploadPayload);
-    dataService.insertTraceKey(traceKeys); 
+    dataService.insertTraceKey(traceKeys);
 
     return () -> {
       try {
         DateTimeUtil.normalizeDuration(now, requestTime);
-      } catch(DateTimeUtil.DurationExpiredException e) {
+      } catch (DateTimeUtil.DurationExpiredException e) {
         logger.error("Total time spent in endpoint is longer than requestTime");
       }
       return ResponseEntity.ok().build();

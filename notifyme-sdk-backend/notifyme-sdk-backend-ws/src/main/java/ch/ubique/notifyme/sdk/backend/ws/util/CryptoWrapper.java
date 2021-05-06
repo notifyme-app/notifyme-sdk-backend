@@ -21,16 +21,11 @@ import com.goterl.lazycode.lazysodium.utils.LibraryLoadingException;
 import com.herumi.mcl.*;
 import com.sun.jna.Native;
 import com.sun.jna.Platform;
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.lang3.ArrayUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
@@ -40,7 +35,13 @@ import java.security.GeneralSecurityException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang3.ArrayUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CryptoWrapper {
 
@@ -102,9 +103,45 @@ public class CryptoWrapper {
       logger.error("unable to load libmcl", e);
       throw new RuntimeException(e);
     }
-    
+
     cryptoUtilV3 = new CryptoUtilV3(mskHex, mpkHex);
     cryptoUtilV2 = new CryptoUtilV2();
+  }
+
+  public static void genKeys() throws UnsupportedEncodingException {
+    Fr msk = new Fr();
+    msk.setByCSPRNG();
+    G2 mpk = new G2();
+    Mcl.mul(mpk, baseG2(), msk);
+    System.out.println("MSK: " + Arrays.toString(msk.serialize()));
+    System.out.println("MSK: " + Hex.encodeHexString(msk.serialize()));
+    System.out.println("MSK: " + toBase64(msk.serialize()));
+
+    System.out.println("MPK: " + Arrays.toString(mpk.serialize()));
+    System.out.println("MPK: " + Hex.encodeHexString(mpk.serialize()));
+    System.out.println("MPK: " + toBase64(mpk.serialize()));
+  }
+
+  public static String toBase64(byte[] bytes) throws UnsupportedEncodingException {
+    return Base64.getUrlEncoder().encodeToString(bytes);
+  }
+
+  public static byte[] fromBase64(String base64) throws UnsupportedEncodingException {
+    return Base64.getUrlDecoder().decode(base64.getBytes("UTF-8"));
+  }
+
+  public static G2 baseG2() {
+    G2 baseG2 = new G2();
+    baseG2.setStr(
+        "1 3527010695874666181871391160110601448900299527927752"
+            + "40219908644239793785735715026873347600343865175952761926303160 "
+            + "305914434424421370997125981475378163698647032547664755865937320"
+            + "6291635324768958432433509563104347017837885763365758 "
+            + "198515060228729193556805452117717163830086897821565573085937866"
+            + "5066344726373823718423869104263333984641494340347905 "
+            + "927553665492332455747201965776037880757740193453592970025027978"
+            + "793976877002675564980949289727957565575433344219582");
+    return baseG2;
   }
 
   /**
@@ -192,7 +229,7 @@ public class CryptoWrapper {
     return result;
   }
 
-  private byte[] cryptoHashSHA256(byte[] in) {
+  public byte[] cryptoHashSHA256(byte[] in) {
     byte[] out = new byte[HASH_BYTES];
     int result = sodium.crypto_hash_sha256(out, in, in.length);
     if (result != 0) {
@@ -203,6 +240,7 @@ public class CryptoWrapper {
 
   /**
    * Generate a pair of public and private keys.
+   *
    * @return a tuple containing the master public key and the master secret key
    */
   public KeyPair keyGen() {
@@ -218,7 +256,7 @@ public class CryptoWrapper {
     return createNonce(Box.NONCEBYTES);
   }
 
-  private byte[] createNonce(int bytes) {
+  public byte[] createNonce(int bytes) {
     byte[] nonce = new byte[bytes];
     sodium.randombytes_buf(nonce, nonce.length);
     return nonce;
@@ -259,8 +297,9 @@ public class CryptoWrapper {
 
     private final byte[] msk;
     private final byte[] mpk;
-    
+
     private final Fr mskFr;
+    private final G2 mpkG2;
 
     public CryptoUtilV3(String mskHex, String mpkHex) {
       try {
@@ -273,44 +312,89 @@ public class CryptoWrapper {
       }
       try {
         this.mpk = Hex.decodeHex(mpkHex);
+        this.mpkG2 = new G2();
+        this.mpkG2.deserialize(this.mpk);
       } catch (DecoderException e) {
         logger.error("unable to parse pk hexstring", e);
         throw new RuntimeException(e);
       }
     }
-    
-    public List<ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey> createTraceV3ForUserUpload(UserUploadPayload userUpload) {
-        var traceKeys = new ArrayList<ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey>();
-        for (UploadVenueInfo venueInfo: userUpload.getVenueInfosList()) {
-            if (!venueInfo.getFake()) {
-                byte[] identity = cryptoHashSHA256(concatenate("CN-ID".getBytes(StandardCharsets.US_ASCII),
-                                    venueInfo.getPreId().toByteArray(),
-                                    intToBytes(3600),
-                                    longToBytes(venueInfo.getIntervalStartMs()),
-                                    venueInfo.getTimeKey().toByteArray()));
-                
-                G1 secretKeyForIdentity = keyDer(this.mskFr, identity);
-                
-                byte[] nonce = createNonce();
-                NotifyMeAssociatedData countryData = NotifyMeAssociatedData.newBuilder()
-                                .setCriticality(EventCriticality.LOW).setVersion(1).build();
-                byte[] encryptedAssociatedData = this.encryptAssociatedData(
-                                venueInfo.getNotificationKey().toByteArray(), "",
-                                countryData.toByteArray(), nonce);
-                
-                var traceKeyV3 = new ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey();
-                traceKeyV3.setVersion(3);
-                traceKeyV3.setCipherTextNonce(nonce);
-                traceKeyV3.setEncryptedAssociatedData(encryptedAssociatedData);
-                traceKeyV3.setEndTime(Instant.ofEpochMilli(venueInfo.getIntervalStartMs()));
-                traceKeyV3.setStartTime(Instant.ofEpochMilli(venueInfo.getIntervalEndMs()));
-                traceKeyV3.setIdentity(identity);
-                traceKeyV3.setSecretKeyForIdentity(secretKeyForIdentity.serialize());
-                traceKeys.add(traceKeyV3);
-            }
+
+    public G2 getMpkG2() {
+      return mpkG2;
+    }
+    ;
+
+    public void testFlow() {
+      Fr msk = new Fr();
+      msk.setByCSPRNG();
+      G2 mpk = new G2();
+      Mcl.mul(mpk, baseG2(), msk);
+
+      byte[] identity = createNonce(32);
+      G1 secretKeyForIdentity = keyDer(this.mskFr, identity);
+
+      // verifyTrace
+      int NONCE_LENGTH = 32;
+      byte[] msg_orig = createNonce(NONCE_LENGTH);
+      IBECiphertext ibeCiphertext = encryptInternal(this.mpkG2, identity, msg_orig);
+      byte[] msg_dec = decryptInternal(ibeCiphertext, secretKeyForIdentity, identity);
+      if (msg_dec == null) {
+        throw new RuntimeException("Health Authority could not verify Trace");
+      }
+    }
+
+    public List<ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey>
+        createTraceV3ForUserUpload(UserUploadPayload userUpload) {
+      var traceKeys = new ArrayList<ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey>();
+      for (UploadVenueInfo venueInfo : userUpload.getVenueInfosList()) {
+        if (!venueInfo.getFake()) {
+          byte[] identity =
+              cryptoHashSHA256(
+                  concatenate(
+                      "CN-ID".getBytes(StandardCharsets.US_ASCII),
+                      venueInfo.getPreId().toByteArray(),
+                      intToBytes(3600),
+                      longToBytes(venueInfo.getIntervalStartMs() / 1000),
+                      venueInfo.getTimeKey().toByteArray()));
+
+          G1 secretKeyForIdentity = keyDer(this.mskFr, identity);
+
+          byte[] nonce = createNonce();
+          NotifyMeAssociatedData countryData =
+              NotifyMeAssociatedData.newBuilder()
+                  .setCriticality(EventCriticality.LOW)
+                  .setVersion(1)
+                  .build();
+          byte[] encryptedAssociatedData =
+              this.encryptAssociatedData(
+                  venueInfo.getNotificationKey().toByteArray(),
+                  "",
+                  countryData.toByteArray(),
+                  nonce);
+
+          var traceKeyV3 = new ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey();
+          traceKeyV3.setVersion(3);
+          traceKeyV3.setCipherTextNonce(nonce);
+          traceKeyV3.setEncryptedAssociatedData(encryptedAssociatedData);
+          traceKeyV3.setStartTime(Instant.ofEpochMilli(venueInfo.getIntervalStartMs()));
+          traceKeyV3.setEndTime(Instant.ofEpochMilli(venueInfo.getIntervalEndMs()));
+          traceKeyV3.setIdentity(identity);
+          traceKeyV3.setSecretKeyForIdentity(secretKeyForIdentity.serialize());
+          traceKeys.add(traceKeyV3);
+
+          // verifyTrace
+          int NONCE_LENGTH = 32;
+          byte[] msg_orig = createNonce(NONCE_LENGTH);
+          IBECiphertext ibeCiphertext = encryptInternal(this.mpkG2, identity, msg_orig);
+          byte[] msg_dec = decryptInternal(ibeCiphertext, secretKeyForIdentity, identity);
+          if (msg_dec == null) {
+            throw new RuntimeException("Health Authority could not verify Trace");
+          }
         }
-        
-        return traceKeys;
+      }
+
+      return traceKeys;
     }
 
     public ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey createTraceV3(
@@ -383,10 +467,10 @@ public class CryptoWrapper {
                 new byte[0],
                 "CrowdNotifier_v3".getBytes(StandardCharsets.US_ASCII),
                 96);
-        byte[] nonce1 = Arrays.copyOfRange(hkdfOutput, 0, 32);
-        byte[] nonce2 = Arrays.copyOfRange(hkdfOutput, 32, 64);
+        byte[] noncePreId = Arrays.copyOfRange(hkdfOutput, 0, 32);
+        byte[] nonceTimekey = Arrays.copyOfRange(hkdfOutput, 32, 64);
         byte[] notificationKey = Arrays.copyOfRange(hkdfOutput, 64, 96);
-        return new NoncesAndNotificationKey(nonce1, nonce2, notificationKey);
+        return new NoncesAndNotificationKey(noncePreId, nonceTimekey, notificationKey);
       } catch (GeneralSecurityException e) {
         throw new RuntimeException("HKDF threw GeneralSecurityException");
       }
@@ -486,7 +570,7 @@ public class CryptoWrapper {
               concatenate(
                   "CN-PREID".getBytes(StandardCharsets.US_ASCII),
                   qrCodePayload,
-                  cryptoData.nonce1));
+                  cryptoData.noncePreId));
 
       return cryptoHashSHA256(
           concatenate(
@@ -494,24 +578,24 @@ public class CryptoWrapper {
               preid,
               intToBytes(3600),
               longToBytes(startOfInterval),
-              cryptoData.nonce2));
+              cryptoData.nonceTimekey));
     }
 
-    private byte[] longToBytes(long l) {
+    public byte[] longToBytes(long l) {
       ByteBuffer byteBuffer = ByteBuffer.allocate(8);
       byteBuffer.order(ByteOrder.BIG_ENDIAN);
       byteBuffer.putLong(l);
       return byteBuffer.array();
     }
 
-    private byte[] intToBytes(int i) {
+    public byte[] intToBytes(int i) {
       ByteBuffer byteBuffer = ByteBuffer.allocate(4);
       byteBuffer.order(ByteOrder.BIG_ENDIAN);
       byteBuffer.putInt(i);
       return byteBuffer.array();
     }
 
-    private byte[] concatenate(byte[]... byteArrays) {
+    public byte[] concatenate(byte[]... byteArrays) {
       try {
         byte[] result = new byte[0];
         for (byte[] byteArray : byteArrays) {
@@ -547,7 +631,7 @@ public class CryptoWrapper {
       return c;
     }
 
-    private G2 baseG2() {
+    public G2 baseG2() {
       G2 baseG2 = new G2();
       baseG2.setStr(
           "1 3527010695874666181871391160110601448900299527927752"
@@ -610,13 +694,14 @@ public class CryptoWrapper {
   }
 
   public class NoncesAndNotificationKey {
-    public final byte[] nonce1;
-    public final byte[] nonce2;
+    public final byte[] noncePreId;
+    public final byte[] nonceTimekey;
     public final byte[] notificationKey;
 
-    public NoncesAndNotificationKey(byte[] nonce1, byte[] nonce2, byte[] notificationKey) {
-      this.nonce1 = nonce1;
-      this.nonce2 = nonce2;
+    public NoncesAndNotificationKey(
+        byte[] noncePreId, byte[] nonceTimekey, byte[] notificationKey) {
+      this.noncePreId = noncePreId;
+      this.nonceTimekey = nonceTimekey;
       this.notificationKey = notificationKey;
     }
   }
