@@ -21,7 +21,9 @@ import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass
 import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEvent.Builder;
 import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEventWrapper;
 import ch.ubique.notifyme.sdk.backend.ws.security.RequestValidator;
-import ch.ubique.notifyme.sdk.backend.ws.security.RequestValidator.*;
+import ch.ubique.notifyme.sdk.backend.ws.security.RequestValidator.NotAJwtException;
+import ch.ubique.notifyme.sdk.backend.ws.security.RequestValidator.WrongAudienceException;
+import ch.ubique.notifyme.sdk.backend.ws.security.RequestValidator.WrongScopeException;
 import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper;
 import ch.ubique.notifyme.sdk.backend.ws.util.DateTimeUtil;
 import ch.ubique.openapi.docannotations.Documentation;
@@ -40,7 +42,13 @@ import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("/v3")
@@ -163,8 +171,7 @@ public class NotifyMeControllerV3 {
             .setVersion(t.getVersion())
             .setIdentity(ByteString.copyFrom(t.getIdentity()))
             .setSecretKeyForIdentity(ByteString.copyFrom(t.getSecretKeyForIdentity()))
-            .setStartTime(DateUtil.toEpochMilli(t.getStartTime()))
-            .setEndTime(DateUtil.toEpochMilli(t.getEndTime()));
+            .setDay(DateUtil.toEpochMilli(t.getDay()));
     if (t.getEncryptedAssociatedData() != null) {
       b.setEncryptedAssociatedData(ByteString.copyFrom(t.getEncryptedAssociatedData()));
     }

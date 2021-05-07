@@ -1,5 +1,7 @@
 package ch.ubique.notifyme.sdk.backend.ws.crypto;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -7,13 +9,18 @@ import ch.ubique.notifyme.sdk.backend.model.PreTraceWithProofOuterClass.PreTrace
 import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
 import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload;
 import ch.ubique.notifyme.sdk.backend.model.tracekey.v2.TraceKey;
+import ch.ubique.notifyme.sdk.backend.model.v3.AssociatedDataOuterClass.AssociatedData;
+import ch.ubique.notifyme.sdk.backend.model.v3.NotifyMeAssociatedDataOuterClass.EventCriticality;
+import ch.ubique.notifyme.sdk.backend.model.v3.NotifyMeAssociatedDataOuterClass.NotifyMeAssociatedData;
 import ch.ubique.notifyme.sdk.backend.model.v3.QrCodePayload.CrowdNotifierData;
 import ch.ubique.notifyme.sdk.backend.model.v3.QrCodePayload.QRCodePayload;
 import ch.ubique.notifyme.sdk.backend.model.v3.QrCodePayload.TraceLocation;
 import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper;
+import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper.IBECiphertext;
 import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper.NoncesAndNotificationKey;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.herumi.mcl.G1;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -124,14 +131,15 @@ public class SodiumWrapperTest {
   public void testUserUpload()
       throws UnsupportedEncodingException, InvalidProtocolBufferException, DecoderException {
     Instant now = Instant.now();
-    Instant start = now.minus(6, ChronoUnit.HOURS);
-    Instant end = now.minus(4, ChronoUnit.HOURS);
+    Instant uploadStart = now.minus(10, ChronoUnit.HOURS);
+    Instant uploadEnd = now.minus(1, ChronoUnit.HOURS);
 
     Instant validFrom = now.minus(10, ChronoUnit.HOURS);
     Instant validTo = now.minus(1, ChronoUnit.HOURS);
 
     List<Long> intervalStarts =
-        getAffectedIntervalStarts(start.toEpochMilli() / 1000, end.toEpochMilli() / 1000);
+        getAffectedIntervalStarts(
+            uploadStart.toEpochMilli() / 1000, uploadEnd.toEpochMilli() / 1000);
     UserUploadPayload.Builder userUploadBuilder = UserUploadPayload.newBuilder().setVersion(1);
 
     VenueInfo venueInfo =
@@ -154,9 +162,9 @@ public class SodiumWrapperTest {
               .setPreId(ByteString.copyFrom(preIdAndTimeKey.preId))
               .setNotificationKey(ByteString.copyFrom(venueInfo.getNotificationKey()))
               .setTimeKey(ByteString.copyFrom(preIdAndTimeKey.timeKey))
-              .setIntervalStartMs(Math.max(intervalStart * 1000, start.toEpochMilli()))
+              .setIntervalStartMs(Math.max(intervalStart * 1000, uploadStart.toEpochMilli()))
               .setIntervalEndMs(
-                  Math.min((intervalStart + INTERVAL_LENGTH) * 1000, end.toEpochMilli()))
+                  Math.min((intervalStart + INTERVAL_LENGTH) * 1000, uploadEnd.toEpochMilli()))
               .build());
     }
 
@@ -165,7 +173,84 @@ public class SodiumWrapperTest {
     List<ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey> traceKeys =
         cryptoWrapper.getCryptoUtilV3().createTraceV3ForUserUpload(userUpload);
 
-    // TODO: test Machting.
+    // 1 hour checkin, should give 2 matches, as long es the test does not run
+    // exactly at the full hour.
+    Instant matchStart = now.minus(4, ChronoUnit.HOURS);
+    Instant matchEnd = now.minus(3, ChronoUnit.HOURS);
+
+    int matchCount = 0;
+
+    for (ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey k : traceKeys) {
+      byte[] decryptedAssociatedData =
+          cryptoWrapper
+              .getCryptoUtilV3()
+              .cryptoSecretboxOpenEasy(
+                  venueInfo.getNotificationKey(),
+                  k.getEncryptedAssociatedData(),
+                  k.getCipherTextNonce());
+      assertFalse(decryptedAssociatedData.length == 0);
+      AssociatedData associatedData = AssociatedData.parseFrom(decryptedAssociatedData);
+      NotifyMeAssociatedData notifyMeAssociatedData =
+          NotifyMeAssociatedData.parseFrom(associatedData.getCountryData().toByteArray());
+      assertEquals("", associatedData.getMessage());
+      assertEquals(EventCriticality.LOW, notifyMeAssociatedData.getCriticality());
+
+      if (doIntersect(
+          matchStart.toEpochMilli(),
+          matchEnd.toEpochMilli(),
+          associatedData.getStartTimestamp() * 1000,
+          associatedData.getEndTimestamp() * 1000)) {
+        matchCount++;
+      }
+    }
+    assertEquals(2, matchCount);
+  }
+
+  @Test
+  public void testUserUploadMatching()
+      throws UnsupportedEncodingException, InvalidProtocolBufferException {
+    byte[] identity = fromBase64("x-oEasv8-6-B5BjpawjPYEQs5uv7k0l_J461lZRNyFo=");
+    byte[] secretKeyForIdentity =
+        fromBase64("sWofRGzy7NLQXYTfq8Vk09X9ZltMJfniVBiheAyrXn0ajbvqAdjGcZZ_JedJyd0J");
+    byte[] encryptedAssociatedData = fromBase64("fhRQTTtKnvKpvfyuv_BjJsCqRCb7jg==");
+    byte[] cipherTextNonce = fromBase64("Xzbn4Wr041OEsrJ525Q_E2IjBaMHVKwe");
+    byte[] notificationKey =
+        new byte[] {
+          100, -18, 12, -102, -114, -120, -55, 93, 47, 96, -120, -12, 60, -7, 89, 84, 2, -92, 11,
+          92, 84, -86, 19, -91, -89, -1, -18, 22, -126, -79, 78, -23
+        };
+    byte[] decryptedAssociatedData =
+        cryptoWrapper
+            .getCryptoUtilV3()
+            .cryptoSecretboxOpenEasy(notificationKey, encryptedAssociatedData, cipherTextNonce);
+    assertFalse(decryptedAssociatedData.length == 0);
+    AssociatedData associatedData = AssociatedData.parseFrom(decryptedAssociatedData);
+    NotifyMeAssociatedData notifyMeAssociatedData =
+        NotifyMeAssociatedData.parseFrom(associatedData.getCountryData().toByteArray());
+    assertEquals("", associatedData.getMessage());
+    assertEquals(EventCriticality.LOW, notifyMeAssociatedData.getCriticality());
+
+    // verifyTrace
+    G1 secretKeyForIdentityG1 = new G1();
+    secretKeyForIdentityG1.deserialize(secretKeyForIdentity);
+
+    int NONCE_LENGTH = 32;
+    byte[] msg_orig = cryptoWrapper.createNonce(NONCE_LENGTH);
+    IBECiphertext ibeCiphertext =
+        cryptoWrapper
+            .getCryptoUtilV3()
+            .encryptInternal(cryptoWrapper.getCryptoUtilV3().getMpkG2(), identity, msg_orig);
+    byte[] msg_dec =
+        cryptoWrapper
+            .getCryptoUtilV3()
+            .decryptInternal(ibeCiphertext, secretKeyForIdentityG1, identity);
+    if (msg_dec == null) {
+      throw new RuntimeException("Health Authority could not verify Trace");
+    }
+  }
+
+  private boolean doIntersect(long startTime1, long endTime1, long startTime2, long endTime2) {
+    return startTime1 <= endTime2 && endTime1 >= startTime2;
   }
 
   private PreIdAndTimeKey getPreIdAndTimeKey(

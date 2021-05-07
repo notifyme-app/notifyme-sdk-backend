@@ -18,7 +18,11 @@ import com.goterl.lazycode.lazysodium.interfaces.Box;
 import com.goterl.lazycode.lazysodium.utils.Key;
 import com.goterl.lazycode.lazysodium.utils.KeyPair;
 import com.goterl.lazycode.lazysodium.utils.LibraryLoadingException;
-import com.herumi.mcl.*;
+import com.herumi.mcl.Fr;
+import com.herumi.mcl.G1;
+import com.herumi.mcl.G2;
+import com.herumi.mcl.GT;
+import com.herumi.mcl.Mcl;
 import com.sun.jna.Native;
 import com.sun.jna.Platform;
 import java.io.ByteArrayOutputStream;
@@ -33,6 +37,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.security.GeneralSecurityException;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -371,14 +376,16 @@ public class CryptoWrapper {
                   venueInfo.getNotificationKey().toByteArray(),
                   "",
                   countryData.toByteArray(),
-                  nonce);
+                  nonce,
+                  venueInfo.getIntervalStartMs(),
+                  venueInfo.getIntervalEndMs());
 
           var traceKeyV3 = new ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey();
           traceKeyV3.setVersion(3);
           traceKeyV3.setCipherTextNonce(nonce);
           traceKeyV3.setEncryptedAssociatedData(encryptedAssociatedData);
-          traceKeyV3.setStartTime(Instant.ofEpochMilli(venueInfo.getIntervalStartMs()));
-          traceKeyV3.setEndTime(Instant.ofEpochMilli(venueInfo.getIntervalEndMs()));
+          traceKeyV3.setDay(
+              Instant.ofEpochMilli(venueInfo.getIntervalStartMs()).truncatedTo(ChronoUnit.DAYS));
           traceKeyV3.setIdentity(identity);
           traceKeyV3.setSecretKeyForIdentity(secretKeyForIdentity.serialize());
           traceKeys.add(traceKeyV3);
@@ -439,14 +446,16 @@ public class CryptoWrapper {
               preTraceWithProof.getPreTrace().getNotificationKey().toByteArray(),
               message,
               countryData,
-              nonce);
+              nonce,
+              preTraceWithProof.getStartTime(),
+              preTraceWithProof.getEndTime());
 
       ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey traceKey =
           new ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey();
       traceKey.setIdentity(preTrace.getIdentity().toByteArray());
       traceKey.setCipherTextNonce(nonce);
-      traceKey.setStartTime(Instant.ofEpochSecond(preTraceWithProof.getStartTime()));
-      traceKey.setEndTime(Instant.ofEpochSecond(preTraceWithProof.getEndTime()));
+      traceKey.setDay(
+          Instant.ofEpochSecond(preTraceWithProof.getStartTime()).truncatedTo(ChronoUnit.DAYS));
       traceKey.setCipherTextNonce(nonce);
       traceKey.setEncryptedAssociatedData(encryptedAssociatedData);
       traceKey.setSecretKeyForIdentity(secretKeyForIdentity.serialize());
@@ -543,11 +552,27 @@ public class CryptoWrapper {
       return msg_p;
     }
 
+    public byte[] cryptoSecretboxOpenEasy(byte[] key, byte[] cipherText, byte[] nonce) {
+      byte[] decryptedMessage = new byte[cipherText.length - Box.MACBYTES];
+      int result =
+          sodium.crypto_secretbox_open_easy(
+              decryptedMessage, cipherText, cipherText.length, nonce, key);
+      if (result != 0) return new byte[0];
+      return decryptedMessage;
+    }
+
     public byte[] encryptAssociatedData(
-        byte[] secretKey, String message, byte[] countryData, byte[] nonce) {
+        byte[] secretKey,
+        String message,
+        byte[] countryData,
+        byte[] nonce,
+        long startTimestampMs,
+        long endTimestampMs) {
       AssociatedData associatedData =
           AssociatedData.newBuilder()
               .setMessage(message)
+              .setStartTimestamp(startTimestampMs / 1000)
+              .setEndTimestamp(endTimestampMs / 1000)
               .setCountryData(ByteString.copyFrom(countryData))
               .setVersion(QR_CODE_VERSION_3)
               .build();

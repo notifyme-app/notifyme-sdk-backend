@@ -1,5 +1,15 @@
 package ch.ubique.notifyme.sdk.backend.ws.controller;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV3;
 import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
 import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload;
@@ -7,6 +17,14 @@ import ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey;
 import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass;
 import ch.ubique.notifyme.sdk.backend.ws.util.TokenHelper;
 import com.google.protobuf.ByteString;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,26 +38,14 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles({"dev", "jwt"})
-@TestPropertySource(properties = {"ws.app.jwt.publickey=classpath://generated_public_test.pem", "traceKey.bucketSizeInMs=1"})
+@TestPropertySource(
+    properties = {
+      "ws.app.jwt.publickey=classpath://generated_public_test.pem",
+      "traceKey.bucketSizeInMs=1"
+    })
 public class NotifyMeControllerV3Test extends BaseControllerTest {
 
   private static boolean setUpIsDone = false;
@@ -60,9 +66,9 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
   Long requestTime;
 
   private static TokenHelper tokenHelper;
-  
+
   public NotifyMeControllerV3Test() {
-      super(true);
+    super(true);
   }
 
   private TraceKey getTraceKey() {
@@ -71,8 +77,7 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
     traceKey.setVersion(3);
     traceKey.setIdentity(identityString.getBytes(charset));
     traceKey.setSecretKeyForIdentity(secretKey.getBytes(charset));
-    traceKey.setStartTime(start);
-    traceKey.setEndTime(end);
+    traceKey.setDay(start.truncatedTo(ChronoUnit.DAYS));
     traceKey.setCreatedAt(start.minusSeconds(60 * 60 * 3));
     traceKey.setEncryptedAssociatedData(associatedData.getBytes(charset));
     traceKey.setCipherTextNonce(cipherTextNonce.getBytes(charset));
@@ -142,24 +147,25 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
   @Test
   @Rollback
   public void testUploadAndGetTraceKeys() throws Exception {
-      final var payload = createUserUploadPayload();
-      final byte[] payloadBytes = payload.toByteArray();
-      final var expiry = LocalDateTime.now().plusMinutes(5).toInstant(ZoneOffset.UTC);
-      final var token =
-          tokenHelper.createToken("2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), true);
-    
-      final var start = LocalDateTime.now();
-      final var mvcResult =
-          mockMvc
-              .perform(
-                  post("/v3/userupload")
-              .contentType("application/x-protobuf")
-              .header("Authorization", "Bearer " + token)
-                      .content(payloadBytes))
-              .andExpect(request().asyncStarted())
-              .andReturn();
-      mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isOk());      
-      
+    final var payload = createUserUploadPayload();
+    final byte[] payloadBytes = payload.toByteArray();
+    final var expiry = LocalDateTime.now().plusMinutes(5).toInstant(ZoneOffset.UTC);
+    final var token =
+        tokenHelper.createToken(
+            "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), true);
+
+    final var start = LocalDateTime.now();
+    final var mvcResult =
+        mockMvc
+            .perform(
+                post("/v3/userupload")
+                    .contentType("application/x-protobuf")
+                    .header("Authorization", "Bearer " + token)
+                    .content(payloadBytes))
+            .andExpect(request().asyncStarted())
+            .andReturn();
+    mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isOk());
+
     final MockHttpServletResponse response =
         mockMvc
             .perform(get("/v3/traceKeys").accept("application/protobuf"))
@@ -178,9 +184,9 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
     assertEquals(1, wrapper.getEventsCount());
     final var event = wrapper.getEvents(0);
     assertNotNull(event);
-    //TODO: test result
+    // TODO: test result
   }
-  
+
   @Test
   @Rollback
   public void testUserUploadDuration() throws Exception {
@@ -188,7 +194,8 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
     final byte[] payloadBytes = payload.toByteArray();
     final var expiry = LocalDateTime.now().plusMinutes(5).toInstant(ZoneOffset.UTC);
     final var token =
-        tokenHelper.createToken("2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), true);
+        tokenHelper.createToken(
+            "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), true);
 
     final var start = LocalDateTime.now();
     final var mvcResult =
@@ -213,7 +220,8 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
     final byte[] payloadBytes = payload.toByteArray();
     final var expiry = LocalDateTime.now().plusMinutes(5).toInstant(ZoneOffset.UTC);
     final var token =
-        tokenHelper.createToken("2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), true);
+        tokenHelper.createToken(
+            "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), true);
 
     final var mvcResult =
         mockMvc
@@ -234,7 +242,8 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
     final byte[] payloadBytes = payload.toByteArray();
     final var expiry = LocalDateTime.now().plusMinutes(120).toInstant(ZoneOffset.UTC);
     final var token =
-        tokenHelper.createToken("2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), false);
+        tokenHelper.createToken(
+            "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), false);
 
     final var result =
         mockMvc
@@ -243,32 +252,34 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
                     .contentType("application/x-protobuf")
                     .header("Authorization", "Bearer " + token)
                     .content(payloadBytes))
-                    .andExpect(request().asyncNotStarted())
-                    .andExpect(status().is(401))
+            .andExpect(request().asyncNotStarted())
+            .andExpect(status().is(401))
             .andReturn();
     String authenticationError = result.getResponse().getHeader("www-authenticate");
     assertTrue(authenticationError.contains("Bearer"));
   }
-  
+
   /**
    * Creates simple user upload payload with one venue info
+   *
    * @return
    */
   private UserUploadPayload createUserUploadPayload() {
-      final var to = LocalDateTime.now().toInstant(ZoneOffset.UTC);
-      final var from = to.minus(Duration.ofHours(1));
-      var venueInfo = UploadVenueInfo.newBuilder()
-                      .setFake(false)
-                      .setPreId(ByteString.copyFromUtf8("preId"))
-                      .setNotificationKey(ByteString.copyFromUtf8("notificationKey"))
-                      .setTimeKey(ByteString.copyFromUtf8("timeKey"))
-                      .setIntervalStartMs(from.toEpochMilli())
-                      .setIntervalEndMs(to.toEpochMilli()).build();
-      
-      final var userUpload = UserUploadPayload.newBuilder()
-                      .setVersion(3)
-                      .addVenueInfos(venueInfo).build();
-      
-      return userUpload;
+    final var to = LocalDateTime.now().toInstant(ZoneOffset.UTC);
+    final var from = to.minus(Duration.ofHours(1));
+    var venueInfo =
+        UploadVenueInfo.newBuilder()
+            .setFake(false)
+            .setPreId(ByteString.copyFromUtf8("preId"))
+            .setNotificationKey(ByteString.copyFromUtf8("notificationKey"))
+            .setTimeKey(ByteString.copyFromUtf8("timeKey"))
+            .setIntervalStartMs(from.toEpochMilli())
+            .setIntervalEndMs(to.toEpochMilli())
+            .build();
+
+    final var userUpload =
+        UserUploadPayload.newBuilder().setVersion(3).addVenueInfos(venueInfo).build();
+
+    return userUpload;
   }
 }

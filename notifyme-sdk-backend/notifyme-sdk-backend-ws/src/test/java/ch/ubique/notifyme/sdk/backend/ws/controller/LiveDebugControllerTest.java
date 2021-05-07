@@ -33,30 +33,30 @@ import org.springframework.web.client.RestTemplate;
 @Ignore("run manually with server running locally on #port")
 public class LiveDebugControllerTest extends BaseControllerTest {
 
-    private String liveDiaryEntriesEndPoint;
+  private String liveDiaryEntriesEndPoint;
 
-    public LiveDebugControllerTest() {
-        super(false);
-    }
-    
-    @Before
-    public void setUp() {
-        final String liveDebugControllerEndPoint = "http://localhost:" + 8080 + "/v1/debug";
-        liveDiaryEntriesEndPoint = liveDebugControllerEndPoint + "/diaryEntries";
-    }
+  public LiveDebugControllerTest() {
+    super(false);
+  }
 
-    @Test
-    public void uploadDiaryEntryProtobufShouldReturnOk() {
-        final var wrapper = DebugControllerTestHelper.getTestDiaryEntryWrapper();
+  @Before
+  public void setUp() {
+    final String liveDebugControllerEndPoint = "http://localhost:" + 8080 + "/v1/debug";
+    liveDiaryEntriesEndPoint = liveDebugControllerEndPoint + "/diaryEntries";
+  }
 
-        final var headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType("application/x-protobuf"));
-        final HttpEntity<byte[]> entity = new HttpEntity<>(wrapper.toByteArray(), headers);
-        final ResponseEntity<String> response =
-                new RestTemplate()
-                        .postForEntity(URI.create(liveDiaryEntriesEndPoint), entity, String.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        logger.info("responseBody: {}", response.getBody());
-        assertThat(response.getBody()).isEqualTo("OK");
-    }
+  @Test
+  public void uploadDiaryEntryProtobufShouldReturnOk() {
+    final var wrapper = DebugControllerTestHelper.getTestDiaryEntryWrapper();
+
+    final var headers = new HttpHeaders();
+    headers.setContentType(MediaType.parseMediaType("application/x-protobuf"));
+    final HttpEntity<byte[]> entity = new HttpEntity<>(wrapper.toByteArray(), headers);
+    final ResponseEntity<String> response =
+        new RestTemplate()
+            .postForEntity(URI.create(liveDiaryEntriesEndPoint), entity, String.class);
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    logger.info("responseBody: {}", response.getBody());
+    assertThat(response.getBody()).isEqualTo("OK");
+  }
 }

@@ -24,6 +24,7 @@ import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper;
 import ch.ubique.openapi.docannotations.Documentation;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.nio.charset.StandardCharsets;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -41,93 +42,133 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/v1/debug")
-@CrossOrigin({ "https://upload-dev.notify-me.ch", "https://upload.notify-me.ch", "http://localhost:1313",
-                "https://notify-me.c4dt.org", "https://notify-me-dev.c4dt.org" })
+@CrossOrigin({
+  "https://upload-dev.notify-me.ch",
+  "https://upload.notify-me.ch",
+  "http://localhost:1313",
+  "https://notify-me.c4dt.org",
+  "https://notify-me-dev.c4dt.org"
+})
 public class DebugControllerV2 {
-    private static final Logger logger = LoggerFactory.getLogger(DebugControllerV2.class);
+  private static final Logger logger = LoggerFactory.getLogger(DebugControllerV2.class);
 
-    private final NotifyMeDataServiceV2 notifyMeDataServiceV2;
-    private final NotifyMeDataServiceV3 notifyMeDataServiceV3;
-    private final DiaryEntryDataService diaryEntryDataService;
-    private final CryptoWrapper cryptoWrapper;
+  private final NotifyMeDataServiceV2 notifyMeDataServiceV2;
+  private final NotifyMeDataServiceV3 notifyMeDataServiceV3;
+  private final DiaryEntryDataService diaryEntryDataService;
+  private final CryptoWrapper cryptoWrapper;
 
-    public DebugControllerV2(final NotifyMeDataServiceV2 notifyMeDataServiceV2,
-                    final NotifyMeDataServiceV3 notifyMeDataServiceV3,
-                    final DiaryEntryDataService diaryEntryDataService, final CryptoWrapper cryptoWrapper) {
-        this.notifyMeDataServiceV2 = notifyMeDataServiceV2;
-        this.notifyMeDataServiceV3 = notifyMeDataServiceV3;
-        this.diaryEntryDataService = diaryEntryDataService;
-        this.cryptoWrapper = cryptoWrapper;
+  public DebugControllerV2(
+      final NotifyMeDataServiceV2 notifyMeDataServiceV2,
+      final NotifyMeDataServiceV3 notifyMeDataServiceV3,
+      final DiaryEntryDataService diaryEntryDataService,
+      final CryptoWrapper cryptoWrapper) {
+    this.notifyMeDataServiceV2 = notifyMeDataServiceV2;
+    this.notifyMeDataServiceV3 = notifyMeDataServiceV3;
+    this.diaryEntryDataService = diaryEntryDataService;
+    this.cryptoWrapper = cryptoWrapper;
+  }
+
+  @GetMapping("")
+  @Documentation(
+      description = "Hello return",
+      responses = {"200=>server live"})
+  public ResponseEntity<String> hello() {
+    return ResponseEntity.ok()
+        .header("X-HELLO", "notifyme")
+        .body("Hello from NotifyMe Debug WS v1");
+  }
+
+  @PostMapping("/traceKey")
+  public ResponseEntity<String> uploadTraceKey(
+      @RequestParam Long startTime,
+      @RequestParam Long endTime,
+      @RequestParam @Documentation(description = "list of url base64 encoded pre trace keys")
+          List<String> preTraces,
+      @RequestParam @Documentation(description = "list of the affected hours for the trace keys")
+          List<Integer> affectedHours,
+      @RequestParam String message,
+      @RequestParam(required = false, defaultValue = "0") Integer criticality) {
+
+    List<TraceKey> traceKeysToInsert = new ArrayList<>();
+    List<ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey> traceKeysV3ToInsert =
+        new ArrayList<>();
+    for (int i = 0; i < affectedHours.size(); i++) {
+      String preTraceKeyBase64 = preTraces.get(i);
+      Integer affectedHour = affectedHours.get(i);
+
+      TraceKey traceKey = new TraceKey();
+      traceKey.setStartTime(DateUtil.toInstant(startTime));
+      traceKey.setEndTime(DateUtil.toInstant(endTime));
+      try {
+        byte[] preTraceKeyBytes =
+            Base64.getUrlDecoder().decode(preTraceKeyBase64.getBytes(StandardCharsets.UTF_8));
+        PreTraceWithProof preTraceWithProofProto = PreTraceWithProof.parseFrom(preTraceKeyBytes);
+
+        cryptoWrapper
+            .getCryptoUtilV2()
+            .calculateSecretKeyForIdentityAndIdentity(
+                preTraceWithProofProto, affectedHour, traceKey);
+
+        byte[] nonce = cryptoWrapper.createNonce();
+        byte[] encryptedMessage =
+            cryptoWrapper
+                .getCryptoUtilV2()
+                .encryptMessage(
+                    preTraceWithProofProto.getPreTrace().getNotificationKey().toByteArray(),
+                    nonce,
+                    message);
+        traceKey.setMessage(encryptedMessage);
+        traceKey.setNonce(nonce);
+        traceKeysToInsert.add(traceKey);
+
+        // insert v2 into v3
+        NotifyMeAssociatedData countryData =
+            NotifyMeAssociatedData.newBuilder()
+                .setCriticality(EventCriticality.forNumber(criticality))
+                .setVersion(1)
+                .build();
+        byte[] encryptedAssociatedData =
+            cryptoWrapper
+                .getCryptoUtilV3()
+                .encryptAssociatedData(
+                    preTraceWithProofProto.getPreTrace().getNotificationKey().toByteArray(),
+                    message,
+                    countryData.toByteArray(),
+                    nonce,
+                    traceKey.getStartTime().toEpochMilli(),
+                    traceKey.getEndTime().toEpochMilli());
+        var traceKeyV3 = new ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey();
+        traceKeyV3.setCipherTextNonce(traceKey.getNonce());
+        traceKeyV3.setEncryptedAssociatedData(encryptedAssociatedData);
+        traceKeyV3.setDay(traceKey.getStartTime().truncatedTo(ChronoUnit.DAYS));
+        traceKeyV3.setIdentity(traceKey.getIdentity());
+        traceKeyV3.setSecretKeyForIdentity(traceKey.getSecretKeyForIdentity());
+        traceKeysV3ToInsert.add(traceKeyV3);
+      } catch (InvalidProtocolBufferException e) {
+        logger.error("unable to parse protobuf", e);
+      }
     }
+    notifyMeDataServiceV2.insertTraceKey(traceKeysToInsert);
+    notifyMeDataServiceV3.insertTraceKey(traceKeysV3ToInsert);
+    return ResponseEntity.ok("OK");
+  }
 
-    @GetMapping("")
-    @Documentation(description = "Hello return", responses = { "200=>server live" })
-    public ResponseEntity<String> hello() {
-        return ResponseEntity.ok().header("X-HELLO", "notifyme").body("Hello from NotifyMe Debug WS v1");
-    }
+  @PostMapping(
+      value = "/diaryEntries",
+      consumes = {"application/x-protobuf", "application/protobuf"})
+  @Documentation(
+      description = "Requests upload of all diary entries",
+      responses = {"200 => success"})
+  public ResponseEntity<String> postDiaryEntries(
+      @RequestBody final DiaryEntryWrapper diaryEntryWrapper) {
+    logger.debug("received {} diaryEntries", diaryEntryWrapper.getDiaryEntriesCount());
 
-    @PostMapping("/traceKey")
-    public ResponseEntity<String> uploadTraceKey(@RequestParam Long startTime, @RequestParam Long endTime,
-                    @RequestParam @Documentation(description = "list of url base64 encoded pre trace keys") List<String> preTraces,
-                    @RequestParam @Documentation(description = "list of the affected hours for the trace keys") List<Integer> affectedHours,
-                    @RequestParam String message, @RequestParam(required = false, defaultValue = "0") Integer criticality) {
+    final var diaryEntries =
+        diaryEntryWrapper.getDiaryEntriesList().stream()
+            .map(JavaDiaryEntry::from)
+            .collect(Collectors.toList());
+    diaryEntryDataService.insertDiaryEntries(diaryEntries);
 
-        List<TraceKey> traceKeysToInsert = new ArrayList<>();
-        List<ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey> traceKeysV3ToInsert = new ArrayList<>();
-        for (int i = 0; i < affectedHours.size(); i++) {
-            String preTraceKeyBase64 = preTraces.get(i);
-            Integer affectedHour = affectedHours.get(i);
-
-            TraceKey traceKey = new TraceKey();
-            traceKey.setStartTime(DateUtil.toInstant(startTime));
-            traceKey.setEndTime(DateUtil.toInstant(endTime));
-            try {
-                byte[] preTraceKeyBytes = Base64.getUrlDecoder()
-                                .decode(preTraceKeyBase64.getBytes(StandardCharsets.UTF_8));
-                PreTraceWithProof preTraceWithProofProto = PreTraceWithProof.parseFrom(preTraceKeyBytes);
-
-                cryptoWrapper.getCryptoUtilV2().calculateSecretKeyForIdentityAndIdentity(preTraceWithProofProto, affectedHour, traceKey);
-
-                byte[] nonce = cryptoWrapper.createNonce();
-                byte[] encryptedMessage = cryptoWrapper.getCryptoUtilV2().encryptMessage(
-                                preTraceWithProofProto.getPreTrace().getNotificationKey().toByteArray(), nonce,
-                                message);
-                traceKey.setMessage(encryptedMessage);
-                traceKey.setNonce(nonce);
-                traceKeysToInsert.add(traceKey);
-
-                // insert v2 into v3
-                NotifyMeAssociatedData countryData = NotifyMeAssociatedData.newBuilder()
-                                .setCriticality(EventCriticality.forNumber(criticality)).setVersion(1).build();
-                byte[] encryptedAssociatedData = cryptoWrapper.getCryptoUtilV3().encryptAssociatedData(
-                                preTraceWithProofProto.getPreTrace().getNotificationKey().toByteArray(), message,
-                                countryData.toByteArray(), nonce);
-                var traceKeyV3 = new ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey();
-                traceKeyV3.setCipherTextNonce(traceKey.getNonce());
-                traceKeyV3.setEncryptedAssociatedData(encryptedAssociatedData);
-                traceKeyV3.setEndTime(traceKey.getEndTime());
-                traceKeyV3.setStartTime(traceKey.getStartTime());
-                traceKeyV3.setIdentity(traceKey.getIdentity());
-                traceKeyV3.setSecretKeyForIdentity(traceKey.getSecretKeyForIdentity());
-                traceKeysV3ToInsert.add(traceKeyV3);
-            } catch (InvalidProtocolBufferException e) {
-                logger.error("unable to parse protobuf", e);
-            }
-        }
-        notifyMeDataServiceV2.insertTraceKey(traceKeysToInsert);
-        notifyMeDataServiceV3.insertTraceKey(traceKeysV3ToInsert);
-        return ResponseEntity.ok("OK");
-    }
-
-    @PostMapping(value = "/diaryEntries", consumes = { "application/x-protobuf", "application/protobuf" })
-    @Documentation(description = "Requests upload of all diary entries", responses = { "200 => success" })
-    public ResponseEntity<String> postDiaryEntries(@RequestBody final DiaryEntryWrapper diaryEntryWrapper) {
-        logger.debug("received {} diaryEntries", diaryEntryWrapper.getDiaryEntriesCount());
-
-        final var diaryEntries = diaryEntryWrapper.getDiaryEntriesList().stream().map(JavaDiaryEntry::from)
-                        .collect(Collectors.toList());
-        diaryEntryDataService.insertDiaryEntries(diaryEntries);
-
-        return ResponseEntity.ok("OK");
-    }
+    return ResponseEntity.ok("OK");
+  }
 }

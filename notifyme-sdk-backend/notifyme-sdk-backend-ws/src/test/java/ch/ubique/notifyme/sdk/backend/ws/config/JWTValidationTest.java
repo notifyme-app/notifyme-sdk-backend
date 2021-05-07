@@ -1,9 +1,16 @@
 package ch.ubique.notifyme.sdk.backend.ws.config;
 
+import static org.junit.Assert.assertThrows;
+
 import ch.ubique.notifyme.sdk.backend.data.UUIDDataService;
 import ch.ubique.notifyme.sdk.backend.ws.security.KeyVault;
 import ch.ubique.notifyme.sdk.backend.ws.security.NotifyMeJwtValidator;
 import ch.ubique.notifyme.sdk.backend.ws.util.TokenHelper;
+import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,14 +23,6 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.io.IOException;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.Date;
-
-import static org.junit.Assert.assertThrows;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = WSDevConfig.class)
@@ -48,7 +47,8 @@ public class JWTValidationTest {
     final var now = LocalDateTime.now();
     final var expiry = now.plusMinutes(5).toInstant(ZoneOffset.UTC);
     final var accessToken =
-        tokenHelper.createToken("2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), true);
+        tokenHelper.createToken(
+            "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), true);
     jwtDecoder.decode(accessToken);
   }
 
@@ -57,7 +57,8 @@ public class JWTValidationTest {
     final var now = LocalDateTime.now();
     final var expiry = now.plusMinutes(5).toInstant(ZoneOffset.UTC);
     final var accessToken =
-        tokenHelper.createToken("2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), false);
+        tokenHelper.createToken(
+            "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), false);
     assertThrows(JwtException.class, () -> jwtDecoder.decode(accessToken));
   }
 

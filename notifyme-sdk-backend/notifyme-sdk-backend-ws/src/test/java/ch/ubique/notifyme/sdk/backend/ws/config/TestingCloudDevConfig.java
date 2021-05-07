@@ -22,26 +22,26 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 @Profile("test-cloud")
 public class TestingCloudDevConfig extends WSCloudBaseConfig {
 
-    @Bean
-    @Override
-    public DataSource dataSource() {
-        return new EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.HSQL).build();
-    }
+  @Bean
+  @Override
+  public DataSource dataSource() {
+    return new EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.HSQL).build();
+  }
 
-    @Bean
-    @Override
-    public Flyway flyway() {
-        Flyway flyWay =
-                Flyway.configure()
-                        .dataSource(dataSource())
-                        .locations("classpath:/db/migration/hsqldb")
-                        .load();
-        flyWay.migrate();
-        return flyWay;
-    }
+  @Bean
+  @Override
+  public Flyway flyway() {
+    Flyway flyWay =
+        Flyway.configure()
+            .dataSource(dataSource())
+            .locations("classpath:/db/migration/hsqldb")
+            .load();
+    flyWay.migrate();
+    return flyWay;
+  }
 
-    @Override
-    public String getDbType() {
-        return "hsqldb";
-    }
+  @Override
+  public String getDbType() {
+    return "hsqldb";
+  }
 }

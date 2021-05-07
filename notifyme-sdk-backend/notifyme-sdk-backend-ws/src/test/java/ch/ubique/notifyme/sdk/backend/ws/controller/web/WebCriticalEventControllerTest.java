@@ -15,33 +15,34 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles({"dev", "enable-debug"})
 public class WebCriticalEventControllerTest extends BaseControllerTest {
 
-    private String criticalEventEndPoint;
-    
-    public WebCriticalEventControllerTest() {
-        super(false);
-    }
+  private String criticalEventEndPoint;
 
-    @Before
-    public void setUp() throws Exception {
-        criticalEventEndPoint = "/criticalevent";
+  public WebCriticalEventControllerTest() {
+    super(false);
+  }
 
-        final var wrapper = DebugControllerTestHelper.getTestDiaryEntryWrapper();
+  @Before
+  public void setUp() throws Exception {
+    criticalEventEndPoint = "/criticalevent";
 
-        mockMvc.perform(
-                post("/v1/debug/criticalevent")
-                        .contentType("application/x-protobuf")
-                        .content(wrapper.toByteArray()));
-    }
+    final var wrapper = DebugControllerTestHelper.getTestDiaryEntryWrapper();
 
-    @Test
-    public void shouldReturnHtml() throws Exception {
-        final var wrapper = DebugControllerTestHelper.getTestDiaryEntryWrapper();
+    mockMvc.perform(
+        post("/v1/debug/criticalevent")
+            .contentType("application/x-protobuf")
+            .content(wrapper.toByteArray()));
+  }
 
-        mockMvc.perform(
-                        get(criticalEventEndPoint)
-                                .contentType("application/x-protobuf")
-                                .content(wrapper.toByteArray()))
-                .andExpect(status().isOk())
-                .andExpect(content().string(Matchers.startsWith("<!DOCTYPE html>")));
-    }
+  @Test
+  public void shouldReturnHtml() throws Exception {
+    final var wrapper = DebugControllerTestHelper.getTestDiaryEntryWrapper();
+
+    mockMvc
+        .perform(
+            get(criticalEventEndPoint)
+                .contentType("application/x-protobuf")
+                .content(wrapper.toByteArray()))
+        .andExpect(status().isOk())
+        .andExpect(content().string(Matchers.startsWith("<!DOCTYPE html>")));
+  }
 }

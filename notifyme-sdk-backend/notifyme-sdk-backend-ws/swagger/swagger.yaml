@@ -359,17 +359,13 @@ components:
       - version
       - identity
       - secretKeyForIdentity
-      - startTime
-      - endTime
+      - day
       properties:
         id:
           type: integer
         version:
           type: integer
-        startTime:
-          allOf:
-          - $ref: '#/components/schemas/java.time.Instant'
-        endTime:
+        day:
           allOf:
           - $ref: '#/components/schemas/java.time.Instant'
         createdAt:
@@ -380,10 +376,7 @@ components:
       properties:
         version_:
           type: integer
-        startTime_:
-          type: integer
-          format: long
-        endTime_:
+        day_:
           type: integer
           format: long
         memoizedIsInitialized:

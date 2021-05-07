@@ -17,13 +17,13 @@ import java.net.URL;
 
 public class KeyHelper {
 
-    private static ObjectMapper objectMapper = new ObjectMapper();
+  private static ObjectMapper objectMapper = new ObjectMapper();
 
-    private KeyHelper() {}
+  private KeyHelper() {}
 
-    public static String getPublicKeyFromKeycloak(String url) throws IOException {
-        URL jsonUrl = new URL(url);
-        KeyCloakPublicKey publicKey = objectMapper.readValue(jsonUrl, KeyCloakPublicKey.class);
-        return publicKey.getPublicKey();
-    }
+  public static String getPublicKeyFromKeycloak(String url) throws IOException {
+    URL jsonUrl = new URL(url);
+    KeyCloakPublicKey publicKey = objectMapper.readValue(jsonUrl, KeyCloakPublicKey.class);
+    return publicKey.getPublicKey();
+  }
 }

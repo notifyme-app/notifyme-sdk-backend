@@ -10,8 +10,21 @@
 
 package ch.ubique.notifyme.sdk.backend.ws.config;
 
-import ch.ubique.notifyme.sdk.backend.data.*;
-import ch.ubique.notifyme.sdk.backend.ws.controller.*;
+import ch.ubique.notifyme.sdk.backend.data.DiaryEntryDataService;
+import ch.ubique.notifyme.sdk.backend.data.JdbcDiaryEntryDataServiceImpl;
+import ch.ubique.notifyme.sdk.backend.data.JdbcNotifyMeDataServiceV2Impl;
+import ch.ubique.notifyme.sdk.backend.data.JdbcNotifyMeDataServiceV3Impl;
+import ch.ubique.notifyme.sdk.backend.data.JdbcPushRegistrationDataServiceImpl;
+import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV2;
+import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV3;
+import ch.ubique.notifyme.sdk.backend.data.PushRegistrationDataService;
+import ch.ubique.notifyme.sdk.backend.data.UUIDDataService;
+import ch.ubique.notifyme.sdk.backend.data.UUIDDataServiceImpl;
+import ch.ubique.notifyme.sdk.backend.ws.controller.ConfigController;
+import ch.ubique.notifyme.sdk.backend.ws.controller.DebugControllerV2;
+import ch.ubique.notifyme.sdk.backend.ws.controller.DebugControllerV3;
+import ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeControllerV2;
+import ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeControllerV3;
 import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebController;
 import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebCriticalEventController;
 import ch.ubique.notifyme.sdk.backend.ws.security.NotifyMeJwtRequestValidator;
@@ -27,6 +40,13 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,14 +64,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import javax.sql.DataSource;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 @Configuration
 @EnableScheduling
@@ -178,7 +190,7 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
       NotifyMeDataServiceV3 notifyMeDataServiceV3,
       PushRegistrationDataService pushRegistrationDataService,
       UUIDDataService uuidDataService,
-      RequestValidator requestValidator, 
+      RequestValidator requestValidator,
       CryptoWrapper cryptoWrapper,
       String revision) {
     return new NotifyMeControllerV3(

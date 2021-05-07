@@ -11,13 +11,12 @@
 package ch.ubique.notifyme.sdk.backend.ws.security;
 
 import ch.ubique.notifyme.sdk.backend.data.UUIDDataService;
+import java.time.Duration;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
 import org.springframework.security.oauth2.jwt.Jwt;
-
-import java.time.Duration;
 
 public class NotifyMeJwtValidator implements OAuth2TokenValidator<Jwt> {
 

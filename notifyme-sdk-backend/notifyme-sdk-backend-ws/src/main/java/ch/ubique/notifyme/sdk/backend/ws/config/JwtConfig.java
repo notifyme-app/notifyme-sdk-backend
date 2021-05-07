@@ -15,6 +15,11 @@ import ch.ubique.notifyme.sdk.backend.ws.security.KeyVault;
 import ch.ubique.notifyme.sdk.backend.ws.security.KeyVault.PublicKeyNoSuitableEncodingFoundException;
 import ch.ubique.notifyme.sdk.backend.ws.security.NotifyMeJwtValidator;
 import ch.ubique.notifyme.sdk.backend.ws.util.KeyHelper;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.interfaces.RSAPublicKey;
+import java.time.Duration;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,12 +35,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.interfaces.RSAPublicKey;
-import java.time.Duration;
 
 @Configuration
 @EnableWebSecurity(debug = true)
