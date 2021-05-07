@@ -171,7 +171,7 @@ public class NotifyMeControllerV3 {
             .setVersion(t.getVersion())
             .setIdentity(ByteString.copyFrom(t.getIdentity()))
             .setSecretKeyForIdentity(ByteString.copyFrom(t.getSecretKeyForIdentity()))
-            .setDay(DateUtil.toEpochMilli(t.getDay()));
+            .setDay(t.getDay().getEpochSecond());
     if (t.getEncryptedAssociatedData() != null) {
       b.setEncryptedAssociatedData(ByteString.copyFrom(t.getEncryptedAssociatedData()));
     }
