@@ -9,12 +9,11 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
-import org.springframework.beans.factory.annotation.Autowired;
 
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
 public class JdbcNotifyMeDataServiceV3ImplTest extends BaseDataServiceTest {
 
   @Autowired private NotifyMeDataServiceV3 notifyMeDataServiceV3;
@@ -52,12 +51,13 @@ public class JdbcNotifyMeDataServiceV3ImplTest extends BaseDataServiceTest {
   }
 
   @Test
-  public void t1_contextLoads() {
+  public void contextLoadsTest() {
     assertNotNull(notifyMeDataServiceV3);
   }
 
   @Test
-  public void t2_RemoveTraceKeys() {
+  @Transactional
+  public void removeTraceKeysTest() {
     final TraceKey keyToRemove = getTraceKey();
     keyToRemove.setDay(keyToRemove.getDay().minus(2, ChronoUnit.DAYS));
     TraceKey keyToKeep = getTraceKey();
@@ -72,7 +72,8 @@ public class JdbcNotifyMeDataServiceV3ImplTest extends BaseDataServiceTest {
   }
 
   @Test
-  public void t3_InsertTraceKey() {
+  @Transactional
+  public void insertTraceKeyTest() {
     final TraceKey actualKey = getTraceKey();
     notifyMeDataServiceV3.insertTraceKey(actualKey);
     notifyMeDataServiceV3.insertTraceKey(actualKey);
@@ -81,12 +82,11 @@ public class JdbcNotifyMeDataServiceV3ImplTest extends BaseDataServiceTest {
     assertEquals(3, traceKeyList.size());
     final TraceKey storedKey = traceKeyList.get(0);
     verifyStored(storedKey);
-    notifyMeDataServiceV3.removeTraceKeys(end.plusSeconds(1));
-    assertTrue(notifyMeDataServiceV3.findTraceKeys(null).isEmpty());
   }
 
   @Test
-  public void t4_InsertTraceKeyList() {
+  @Transactional
+  public void insertTraceKeyListTest() {
     final List<TraceKey> actualTraceKeyList = new ArrayList<>();
     actualTraceKeyList.add(getTraceKey());
     actualTraceKeyList.add(getTraceKey());
@@ -95,7 +95,5 @@ public class JdbcNotifyMeDataServiceV3ImplTest extends BaseDataServiceTest {
     final List<TraceKey> storedTraceKeyList = notifyMeDataServiceV3.findTraceKeys(null);
     assertEquals(3, storedTraceKeyList.size());
     verifyStored(storedTraceKeyList.get(0));
-    notifyMeDataServiceV3.removeTraceKeys(end.plusSeconds(1));
-    assertTrue(notifyMeDataServiceV3.findTraceKeys(null).isEmpty());
   }
 }
