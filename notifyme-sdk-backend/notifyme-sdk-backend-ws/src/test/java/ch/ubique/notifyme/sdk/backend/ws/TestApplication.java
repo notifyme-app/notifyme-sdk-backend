@@ -8,9 +8,9 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-package ch.ubique.notifyme.sdk.backend.ws.controller;
+package ch.ubique.notifyme.sdk.backend.ws;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication(scanBasePackages = {"ch.ubique.notifyme.sdk.backend.ws.config"})
-public class TestControllerApplication {}
+public class TestApplication {}

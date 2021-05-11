@@ -25,21 +25,19 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = WSDevConfig.class)
+@SpringBootTest
 @ActiveProfiles({"dev", "jwt"})
 @TestPropertySource(properties = {"ws.app.jwt.publickey=classpath://generated_public_test.pem"})
 public class JWTValidationTest {
 
   @Autowired UUIDDataService uuidDataService;
 
-  // TODO: How to do this nicely with dependency injection?
-  JwtDecoder jwtDecoder;
+  @Autowired JwtDecoder jwtDecoder;
   TokenHelper tokenHelper;
 
   @Before
   public void setup() throws Exception {
     tokenHelper = new TokenHelper();
-    jwtDecoder = jwtDecoder();
   }
 
   @Test

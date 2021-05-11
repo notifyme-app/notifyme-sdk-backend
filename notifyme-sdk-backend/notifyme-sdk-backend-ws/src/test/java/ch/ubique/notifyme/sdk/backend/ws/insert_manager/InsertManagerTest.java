@@ -2,7 +2,6 @@ package ch.ubique.notifyme.sdk.backend.ws.insert_manager;
 
 import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV3;
 import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
-import ch.ubique.notifyme.sdk.backend.ws.config.WSDevConfig;
 import ch.ubique.notifyme.sdk.backend.ws.insert_manager.insertion_filters.UploadInsertionFilter;
 import ch.ubique.notifyme.sdk.backend.ws.semver.Version;
 import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper;
@@ -26,7 +25,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -38,8 +38,7 @@ public class InsertManagerTest {
   @Autowired NotifyMeDataServiceV3 notifyMeDataServiceV3;
   @Autowired CryptoWrapper cryptoWrapper;
 
-  @Autowired
-  TransactionManager transactionManager;
+  @Autowired TransactionManager transactionManager;
 
   private TokenHelper tokenHelper;
 
@@ -53,9 +52,11 @@ public class InsertManagerTest {
   @Transactional
   public void testInsertEmptyList() throws Exception {
     final LocalDateTime now = LocalDateTime.now();
-    assertTrue(notifyMeDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC)).isEmpty());
+    assertTrue(
+        notifyMeDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC)).isEmpty());
     insertWith(null, new ArrayList<>(), now);
-    assertTrue(notifyMeDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC)).isEmpty());
+    assertTrue(
+        notifyMeDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC)).isEmpty());
   }
 
   @Test
@@ -78,16 +79,11 @@ public class InsertManagerTest {
         };
     final List<UploadVenueInfo> uploadVenueInfoList = new ArrayList<>();
     uploadVenueInfoList.add(
-            createUploadVenueInfo(
-                    now.toInstant(ZoneOffset.UTC), now.plusMinutes(60).toInstant(ZoneOffset.UTC)));
+        createUploadVenueInfo(
+            now.toInstant(ZoneOffset.UTC), now.plusMinutes(60).toInstant(ZoneOffset.UTC)));
     insertWith(removeAll, uploadVenueInfoList, now);
-    assertTrue(notifyMeDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC)).isEmpty());
-  }
-
-  @Test
-  @Transactional
-  public void testInsertInvalidUserAgent() throws Exception {
-    // TODO: Add filter that removes any upload
+    assertTrue(
+        notifyMeDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC)).isEmpty());
   }
 
   @Test
@@ -110,13 +106,18 @@ public class InsertManagerTest {
         };
     final List<UploadVenueInfo> uploadVenueInfoList = new ArrayList<>();
     uploadVenueInfoList.add(
-            createUploadVenueInfo(
-                    now.toInstant(ZoneOffset.UTC), now.plusMinutes(60).toInstant(ZoneOffset.UTC)));
+        createUploadVenueInfo(
+            now.toInstant(ZoneOffset.UTC), now.plusMinutes(60).toInstant(ZoneOffset.UTC)));
     insertWith(removeNone, uploadVenueInfoList, now);
-    assertFalse(notifyMeDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC)).isEmpty());
+    assertFalse(
+        notifyMeDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC)).isEmpty());
   }
 
-  private void insertWith(UploadInsertionFilter insertionFilter, List<UploadVenueInfo> uploadVenueInfoList, LocalDateTime now) throws Exception {
+  private void insertWith(
+      UploadInsertionFilter insertionFilter,
+      List<UploadVenueInfo> uploadVenueInfoList,
+      LocalDateTime now)
+      throws Exception {
     if (insertionFilter != null) {
       insertManager.addFilter(insertionFilter);
     }
@@ -151,6 +152,7 @@ public class InsertManagerTest {
         .setIntervalStartMs(start.getEpochSecond())
         .setIntervalEndMs(end.getEpochSecond())
         .setNotificationKey(ByteString.copyFrom(noncesAndNotificationKey.notificationKey))
+        .setFake(false)
         .build();
   }
 }
