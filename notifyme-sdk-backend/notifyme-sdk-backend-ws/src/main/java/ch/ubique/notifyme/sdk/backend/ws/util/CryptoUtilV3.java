@@ -82,9 +82,9 @@ public class CryptoUtilV3 extends CryptoUtil {
     }
 
     public List<TraceKey>
-    createTraceV3ForUserUpload(UserUploadPayloadOuterClass.UserUploadPayload userUpload) {
+    createTraceV3ForUserUpload(List<UserUploadPayloadOuterClass.UploadVenueInfo> uploadVenueInfoList) {
         var traceKeys = new ArrayList<TraceKey>();
-        for (UserUploadPayloadOuterClass.UploadVenueInfo venueInfo : userUpload.getVenueInfosList()) {
+        for (UserUploadPayloadOuterClass.UploadVenueInfo venueInfo : uploadVenueInfoList) {
             if (!venueInfo.getFake()) {
                 byte[] identity =
                         cryptoHashSHA256(

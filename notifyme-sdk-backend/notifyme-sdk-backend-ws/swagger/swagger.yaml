@@ -240,6 +240,15 @@ paths:
             schema:
               $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload'
         description: Identities to upload as protobuf
+      parameters:
+      - name: User-Agent
+        in: header
+        description: App Identifier (PackageName/BundleIdentifier) + App-Version +
+          OS (Android/iOS) + OS-Version
+        example: ch.ubique.android.dp3t;1.0;iOS;13.3
+        required: true
+        schema:
+          type: string
 components:
   schemas:
     ch.ubique.notifyme.sdk.backend.model.ProblematicEventWrapperOuterClass.ProblematicEvent:

@@ -154,6 +154,7 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
         tokenHelper.createToken(
             "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), true);
 
+    final String userAgent = "ch.admin.bag.notifyMe.dev;1.0.7;1595591959493;Android;29";
     final var start = LocalDateTime.now();
     final var mvcResult =
         mockMvc
@@ -161,11 +162,11 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
                 post("/v3/userupload")
                     .contentType("application/x-protobuf")
                     .header("Authorization", "Bearer " + token)
+                    .header("User-Agent", userAgent)
                     .content(payloadBytes))
             .andExpect(request().asyncStarted())
             .andReturn();
     mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isOk());
-
     final MockHttpServletResponse response =
         mockMvc
             .perform(get("/v3/traceKeys").accept("application/protobuf"))
@@ -196,7 +197,7 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
     final var token =
         tokenHelper.createToken(
             "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), true);
-
+    final String userAgent = "ch.admin.bag.notifyMe.dev;1.0.7;1595591959493;Android;29";
     final var start = LocalDateTime.now();
     final var mvcResult =
         mockMvc
@@ -204,6 +205,7 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
                 post("/v3/userupload")
                     .contentType("application/x-protobuf")
                     .header("Authorization", "Bearer " + token)
+                    .header("User-Agent", userAgent)
                     .content(payloadBytes))
             .andExpect(request().asyncStarted())
             .andReturn();
@@ -222,13 +224,14 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
     final var token =
         tokenHelper.createToken(
             "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), true);
-
+    final String userAgent = "ch.admin.bag.notifyMe.dev;1.0.7;1595591959493;Android;29";
     final var mvcResult =
         mockMvc
             .perform(
                 post("/v3/userupload")
                     .contentType("application/x-protobuf")
                     .header("Authorization", "Bearer " + token)
+                    .header("User-Agent", userAgent)
                     .content(payloadBytes))
             .andExpect(request().asyncStarted())
             .andReturn();
@@ -244,13 +247,14 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
     final var token =
         tokenHelper.createToken(
             "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), false);
-
+    final String userAgent = "ch.admin.bag.notifyMe.dev;1.0.7;1595591959493;Android;29";
     final var result =
         mockMvc
             .perform(
                 post("/v3/userupload")
                     .contentType("application/x-protobuf")
                     .header("Authorization", "Bearer " + token)
+                    .header("User-Agent", userAgent)
                     .content(payloadBytes))
             .andExpect(request().asyncNotStarted())
             .andExpect(status().is(401))

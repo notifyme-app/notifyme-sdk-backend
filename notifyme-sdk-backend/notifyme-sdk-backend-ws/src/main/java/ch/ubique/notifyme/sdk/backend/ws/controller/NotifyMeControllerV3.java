@@ -20,6 +20,8 @@ import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
 import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEvent;
 import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEvent.Builder;
 import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEventWrapper;
+import ch.ubique.notifyme.sdk.backend.ws.insert_manager.InsertException;
+import ch.ubique.notifyme.sdk.backend.ws.insert_manager.InsertManager;
 import ch.ubique.notifyme.sdk.backend.ws.security.RequestValidator;
 import ch.ubique.notifyme.sdk.backend.ws.security.RequestValidator.NotAJwtException;
 import ch.ubique.notifyme.sdk.backend.ws.security.RequestValidator.WrongAudienceException;
@@ -30,6 +32,7 @@ import ch.ubique.openapi.docannotations.Documentation;
 import com.google.protobuf.ByteString;
 import java.io.UnsupportedEncodingException;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -42,13 +45,7 @@ import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/v3")
@@ -58,6 +55,7 @@ public class NotifyMeControllerV3 {
   private static final Logger logger = LoggerFactory.getLogger(NotifyMeControllerV3.class);
 
   private final NotifyMeDataServiceV3 dataService;
+  private final InsertManager insertManager;
   private final PushRegistrationDataService pushRegistrationDataService;
   private final UUIDDataService uuidDataService;
   private final RequestValidator requestValidator;
@@ -70,6 +68,7 @@ public class NotifyMeControllerV3 {
 
   public NotifyMeControllerV3(
       NotifyMeDataServiceV3 dataService,
+      InsertManager insertManager,
       PushRegistrationDataService pushRegistrationDataService,
       UUIDDataService uuidDataService,
       RequestValidator requestValidator,
@@ -79,6 +78,7 @@ public class NotifyMeControllerV3 {
       Long traceKeysCacheControlInMs,
       Duration requestTime) {
     this.dataService = dataService;
+    this.insertManager = insertManager;
     this.pushRegistrationDataService = pushRegistrationDataService;
     this.uuidDataService = uuidDataService;
     this.requestValidator = requestValidator;
@@ -230,6 +230,13 @@ public class NotifyMeControllerV3 {
   public @ResponseBody Callable<ResponseEntity<String>> userUpload(
       @Documentation(description = "Identities to upload as protobuf") @Valid @RequestBody
           final UserUploadPayload userUploadPayload,
+      @RequestHeader(value = "User-Agent")
+      @Documentation(
+              description =
+                      "App Identifier (PackageName/BundleIdentifier) + App-Version +"
+                              + " OS (Android/iOS) + OS-Version",
+              example = "ch.ubique.android.dp3t;1.0;iOS;13.3")
+              String userAgent,
       @AuthenticationPrincipal
           @Documentation(description = "JWT token that can be verified by the backend server")
           Object principal)
@@ -237,10 +244,17 @@ public class NotifyMeControllerV3 {
           UnsupportedEncodingException {
     final var now = LocalDateTime.now();
 
-    // requestValidator.isValid(principal);
+    try {
+      insertManager.insertIntoDatabase(
+              userUploadPayload.getVenueInfosList(), userAgent, principal, now);
+    } catch (InsertException e) {
+      // TODO What to do
+    }
 
-    var traceKeys = cryptoWrapper.getCryptoUtilV3().createTraceV3ForUserUpload(userUploadPayload);
-    dataService.insertTraceKey(traceKeys);
+//     requestValidator.isValid(principal);
+
+//    var traceKeys = cryptoWrapper.getCryptoUtilV3().createTraceV3ForUserUpload(userUploadPayload.getVenueInfosList());
+//    dataService.insertTraceKey(traceKeys);
 
     return () -> {
       try {
