@@ -59,6 +59,6 @@ public class CryptoTest {
 
   @Test
   public void testKeyGen() throws IOException {
-    CryptoWrapper.genKeys();
+    cryptoWrapper.getCryptoUtilV3().genKeys();
   }
 }

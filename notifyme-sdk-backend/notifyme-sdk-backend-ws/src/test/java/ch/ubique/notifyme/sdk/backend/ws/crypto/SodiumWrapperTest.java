@@ -16,8 +16,8 @@ import ch.ubique.notifyme.sdk.backend.model.v3.QrCodePayload.CrowdNotifierData;
 import ch.ubique.notifyme.sdk.backend.model.v3.QrCodePayload.QRCodePayload;
 import ch.ubique.notifyme.sdk.backend.model.v3.QrCodePayload.TraceLocation;
 import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper;
-import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper.IBECiphertext;
-import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper.NoncesAndNotificationKey;
+import ch.ubique.notifyme.sdk.backend.ws.util.CryptoUtil.IBECiphertext;
+import ch.ubique.notifyme.sdk.backend.ws.util.CryptoUtil.NoncesAndNotificationKey;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.herumi.mcl.G1;
@@ -77,7 +77,7 @@ public class SodiumWrapperTest {
           preTraceWithProofProto.getPreTrace().getNotificationKey().toByteArray();
       assertTrue(notificationKey.length > 0);
 
-      byte[] nonce = cryptoWrapper.createNonce();
+      byte[] nonce = cryptoWrapper.getCryptoUtilV2().createNonce();
       byte[] encryptedMessage =
           cryptoWrapper.getCryptoUtilV2().encryptMessage(notificationKey, nonce, message);
       traceKey.setMessage(encryptedMessage);
@@ -119,7 +119,7 @@ public class SodiumWrapperTest {
           preTraceWithProofProto.getPreTrace().getNotificationKey().toByteArray();
       assertTrue(notificationKey.length > 0);
 
-      byte[] nonce = cryptoWrapper.createNonce();
+      byte[] nonce = cryptoWrapper.getCryptoUtilV2().createNonce();
       byte[] encryptedMessage =
           cryptoWrapper.getCryptoUtilV2().encryptMessage(notificationKey, nonce, message);
       traceKey.setMessage(encryptedMessage);
@@ -235,7 +235,7 @@ public class SodiumWrapperTest {
     secretKeyForIdentityG1.deserialize(secretKeyForIdentity);
 
     int NONCE_LENGTH = 32;
-    byte[] msg_orig = cryptoWrapper.createNonce(NONCE_LENGTH);
+    byte[] msg_orig = cryptoWrapper.getCryptoUtilV3().createNonce(NONCE_LENGTH);
     IBECiphertext ibeCiphertext =
         cryptoWrapper
             .getCryptoUtilV3()
@@ -258,7 +258,7 @@ public class SodiumWrapperTest {
     NoncesAndNotificationKey cryptoData =
         cryptoWrapper.getCryptoUtilV3().getNoncesAndNotificationKey(qrCodePayload);
     byte[] preId =
-        cryptoWrapper.cryptoHashSHA256(
+        cryptoWrapper.getCryptoUtilV3().cryptoHashSHA256(
             cryptoWrapper
                 .getCryptoUtilV3()
                 .concatenate(
@@ -267,7 +267,7 @@ public class SodiumWrapperTest {
                     cryptoData.noncePreId));
 
     byte[] timeKey =
-        cryptoWrapper.cryptoHashSHA256(
+        cryptoWrapper.getCryptoUtilV3().cryptoHashSHA256(
             cryptoWrapper
                 .getCryptoUtilV3()
                 .concatenate(
@@ -323,7 +323,7 @@ public class SodiumWrapperTest {
         CrowdNotifierData.newBuilder()
             .setVersion(QR_CODE_VERSION_3)
             .setCryptographicSeed(
-                ByteString.copyFrom(cryptoWrapper.createNonce(CRYPTOGRAPHIC_SEED_BYTES)))
+                ByteString.copyFrom(cryptoWrapper.getCryptoUtilV3().createNonce(CRYPTOGRAPHIC_SEED_BYTES)))
             .setPublicKey(ByteString.copyFrom(masterPublicKey))
             .build();
 
