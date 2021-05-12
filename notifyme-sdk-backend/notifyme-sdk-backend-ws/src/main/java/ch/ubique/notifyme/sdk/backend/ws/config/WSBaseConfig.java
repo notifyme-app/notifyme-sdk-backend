@@ -26,6 +26,10 @@ import ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeControllerV3;
 import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebController;
 import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebCriticalEventController;
 import ch.ubique.notifyme.sdk.backend.ws.insert_manager.InsertManager;
+import ch.ubique.notifyme.sdk.backend.ws.insert_manager.insertion_filters.BeforeOnsetFilter;
+import ch.ubique.notifyme.sdk.backend.ws.insert_manager.insertion_filters.FakeRequestFilter;
+import ch.ubique.notifyme.sdk.backend.ws.insert_manager.insertion_filters.IntervalThresholdFilter;
+import ch.ubique.notifyme.sdk.backend.ws.insert_manager.insertion_filters.OverlappingIntervalsFilter;
 import ch.ubique.notifyme.sdk.backend.ws.security.NotifyMeJwtRequestValidator;
 import ch.ubique.notifyme.sdk.backend.ws.security.RequestValidator;
 import ch.ubique.notifyme.sdk.backend.ws.service.PhoneHeartbeatSilentPush;
@@ -174,7 +178,12 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
           final CryptoWrapper cryptoWrapper,
           final NotifyMeDataServiceV3 notifyMeDataServiceV3
   ) {
-    return new InsertManager(cryptoWrapper, notifyMeDataServiceV3);
+    final var insertManager = new InsertManager(cryptoWrapper, notifyMeDataServiceV3);
+    insertManager.addFilter(new FakeRequestFilter());
+    insertManager.addFilter(new IntervalThresholdFilter());
+    insertManager.addFilter(new BeforeOnsetFilter());
+    insertManager.addFilter(new OverlappingIntervalsFilter());
+    return insertManager;
   }
 
   @Bean

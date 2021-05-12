@@ -2,7 +2,6 @@ package ch.ubique.notifyme.sdk.backend.ws.insert_manager;
 
 import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV3;
 import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
-import ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey;
 import ch.ubique.notifyme.sdk.backend.ws.insert_manager.insertion_filters.UploadInsertionFilter;
 import ch.ubique.notifyme.sdk.backend.ws.semver.Version;
 import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper;
@@ -38,14 +37,15 @@ public class InsertManager {
             LocalDateTime now
     ) throws InsertException {
         if (uploadVenueInfoList != null && !uploadVenueInfoList.isEmpty()) {
-            final var traceKeys = filterUpload(uploadVenueInfoList, header, principal, now);
+            final var filteredVenueInfoList = filterUpload(uploadVenueInfoList, header, principal, now);
+            final var traceKeys = cryptoWrapper.getCryptoUtilV3().createTraceV3ForUserUpload(filteredVenueInfoList);
             if (!traceKeys.isEmpty()) {
                 notifyMeDataServiceV3.insertTraceKey(traceKeys);
             }
         }
     }
 
-    private List<TraceKey> filterUpload(List<UploadVenueInfo> uploadVenueInfoList, String header, Object principal, LocalDateTime now) throws InsertException {
+    private List<UploadVenueInfo> filterUpload(List<UploadVenueInfo> uploadVenueInfoList, String header, Object principal, LocalDateTime now) throws InsertException {
         var headerParts = header.split(";");
         if (headerParts.length < 5) {
             headerParts =
@@ -64,7 +64,7 @@ public class InsertManager {
         for (UploadInsertionFilter insertionFilter: filterList) {
             venueInfoList = insertionFilter.filter(now, venueInfoList, osType, osVersion, appVersion, principal);
         }
-        return cryptoWrapper.getCryptoUtilV3().createTraceV3ForUserUpload(venueInfoList);
+        return venueInfoList;
     }
 
     /**
