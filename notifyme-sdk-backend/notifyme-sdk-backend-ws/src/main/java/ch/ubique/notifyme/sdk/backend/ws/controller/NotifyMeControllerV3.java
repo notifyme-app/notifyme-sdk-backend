@@ -240,9 +240,19 @@ public class NotifyMeControllerV3 {
       @AuthenticationPrincipal
           @Documentation(description = "JWT token that can be verified by the backend server")
           Object principal)
-      throws WrongScopeException, WrongAudienceException, NotAJwtException,
-          UnsupportedEncodingException {
+      throws WrongScopeException, WrongAudienceException, NotAJwtException {
+
     final var now = LocalDateTime.now();
+
+    try {
+      requestValidator.isValid(principal);
+    } catch (WrongScopeException e) {
+      return () -> ResponseEntity.status(400).body("Wrong scope");
+    } catch (WrongAudienceException e) {
+      return () -> ResponseEntity.status(400).body("Wrong audience");
+    } catch (NotAJwtException e) {
+      return () -> ResponseEntity.status(400).body("Not a JWT");
+    }
 
     try {
       insertManager.insertIntoDatabase(
@@ -250,11 +260,6 @@ public class NotifyMeControllerV3 {
     } catch (InsertException e) {
       // TODO What to do
     }
-
-//     requestValidator.isValid(principal);
-
-//    var traceKeys = cryptoWrapper.getCryptoUtilV3().createTraceV3ForUserUpload(userUploadPayload.getVenueInfosList());
-//    dataService.insertTraceKey(traceKeys);
 
     return () -> {
       try {

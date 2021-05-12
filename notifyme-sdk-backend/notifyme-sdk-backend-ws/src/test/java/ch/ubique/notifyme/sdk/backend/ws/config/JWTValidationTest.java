@@ -42,7 +42,7 @@ public class JWTValidationTest {
     final var expiry = now.plusMinutes(5).toInstant(ZoneOffset.UTC);
     final var accessToken =
         tokenHelper.createToken(
-            "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), true, Instant.now());
+            "2021-04-29", "0", "checkin", "userupload", Date.from(expiry), true, now.toInstant(ZoneOffset.UTC));
     jwtDecoder.decode(accessToken);
   }
 
@@ -52,7 +52,7 @@ public class JWTValidationTest {
     final var expiry = now.plusMinutes(5).toInstant(ZoneOffset.UTC);
     final var accessToken =
         tokenHelper.createToken(
-            "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), false, Instant.now());
+            "2021-04-29", "0", "checkin", "userupload", Date.from(expiry), false, now.toInstant(ZoneOffset.UTC));
     assertThrows(JwtException.class, () -> jwtDecoder.decode(accessToken));
   }
 }

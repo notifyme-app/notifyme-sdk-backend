@@ -149,10 +149,11 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
   public void testUploadAndGetTraceKeys() throws Exception {
     final var payload = createUserUploadPayload();
     final byte[] payloadBytes = payload.toByteArray();
-    final var expiry = LocalDateTime.now().plusMinutes(5).toInstant(ZoneOffset.UTC);
+    final var now = LocalDateTime.now();
+    final var expiry = now.plusMinutes(5).toInstant(ZoneOffset.UTC);
     final var token =
         tokenHelper.createToken(
-            "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), true, Instant.now());
+            "2021-04-29", "0", "checkin", "userupload", Date.from(expiry), true, now.toInstant(ZoneOffset.UTC));
 
     final String userAgent = "ch.admin.bag.notifyMe.dev;1.0.7;1595591959493;Android;29";
     final var start = LocalDateTime.now();
@@ -185,7 +186,6 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
     assertEquals(1, wrapper.getEventsCount());
     final var event = wrapper.getEvents(0);
     assertNotNull(event);
-    // TODO: test result
   }
 
   @Test
@@ -193,10 +193,11 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
   public void testUserUploadDuration() throws Exception {
     final var payload = createUserUploadPayload();
     final byte[] payloadBytes = payload.toByteArray();
-    final var expiry = LocalDateTime.now().plusMinutes(5).toInstant(ZoneOffset.UTC);
+    final var now = LocalDateTime.now();
+    final var expiry = now.plusMinutes(5).toInstant(ZoneOffset.UTC);
     final var token =
         tokenHelper.createToken(
-            "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), true, Instant.now());
+            "2021-04-29", "0", "checkin", "userupload", Date.from(expiry), true, now.toInstant(ZoneOffset.UTC));
     final String userAgent = "ch.admin.bag.notifyMe.dev;1.0.7;1595591959493;Android;29";
     final var start = LocalDateTime.now();
     final var mvcResult =
@@ -220,10 +221,11 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
   public void testUserUploadValidToken() throws Exception {
     final var payload = createUserUploadPayload();
     final byte[] payloadBytes = payload.toByteArray();
-    final var expiry = LocalDateTime.now().plusMinutes(5).toInstant(ZoneOffset.UTC);
+    final var now = LocalDateTime.now();
+    final var expiry = now.plusMinutes(5).toInstant(ZoneOffset.UTC);
     final var token =
         tokenHelper.createToken(
-            "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), true, Instant.now());
+            "2021-04-29", "0", "checkin", "userupload", Date.from(expiry), true, now.toInstant(ZoneOffset.UTC));
     final String userAgent = "ch.admin.bag.notifyMe.dev;1.0.7;1595591959493;Android;29";
     final var mvcResult =
         mockMvc
@@ -240,13 +242,15 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
 
   @Test
   @Rollback
+  // TODO: Add more fine-grained tests for wrong audiences, scopes etc.
   public void testUserUploadInvalidToken() throws Exception {
     final var payload = createUserUploadPayload();
     final byte[] payloadBytes = payload.toByteArray();
-    final var expiry = LocalDateTime.now().plusMinutes(120).toInstant(ZoneOffset.UTC);
+    final var now = LocalDateTime.now();
+    final var expiry = now.plusMinutes(120).toInstant(ZoneOffset.UTC);
     final var token =
         tokenHelper.createToken(
-            "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), false, Instant.now());
+            "2021-04-29", "0", "checkin", "userupload", Date.from(expiry), false, now.toInstant(ZoneOffset.UTC));
     final String userAgent = "ch.admin.bag.notifyMe.dev;1.0.7;1595591959493;Android;29";
     final var result =
         mockMvc
