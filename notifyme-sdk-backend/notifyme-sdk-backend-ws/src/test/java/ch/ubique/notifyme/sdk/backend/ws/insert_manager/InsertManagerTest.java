@@ -2,6 +2,9 @@ package ch.ubique.notifyme.sdk.backend.ws.insert_manager;
 
 import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV3;
 import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
+import ch.ubique.notifyme.sdk.backend.ws.insert_manager.insertion_filters.FakeRequestFilter;
+import ch.ubique.notifyme.sdk.backend.ws.insert_manager.insertion_filters.IntervalThresholdFilter;
+import ch.ubique.notifyme.sdk.backend.ws.insert_manager.insertion_filters.OverlappingIntervalsFilter;
 import ch.ubique.notifyme.sdk.backend.ws.insert_manager.insertion_filters.UploadInsertionFilter;
 import ch.ubique.notifyme.sdk.backend.ws.semver.Version;
 import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper;
@@ -21,12 +24,9 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -54,7 +54,7 @@ public class InsertManagerTest {
     final LocalDateTime now = LocalDateTime.now();
     assertTrue(
         notifyMeDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC)).isEmpty());
-    insertWith(null, new ArrayList<>(), now);
+    insertWith(new ArrayList<>(), new ArrayList<>(), now);
     assertTrue(
         notifyMeDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC)).isEmpty());
   }
@@ -80,8 +80,8 @@ public class InsertManagerTest {
     final List<UploadVenueInfo> uploadVenueInfoList = new ArrayList<>();
     uploadVenueInfoList.add(
         createUploadVenueInfo(
-            now.toInstant(ZoneOffset.UTC), now.plusMinutes(60).toInstant(ZoneOffset.UTC)));
-    insertWith(removeAll, uploadVenueInfoList, now);
+            now, now.plusMinutes(60), false));
+    insertWith(Collections.singletonList(removeAll), uploadVenueInfoList, now);
     assertTrue(
         notifyMeDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC)).isEmpty());
   }
@@ -107,19 +107,41 @@ public class InsertManagerTest {
     final List<UploadVenueInfo> uploadVenueInfoList = new ArrayList<>();
     uploadVenueInfoList.add(
         createUploadVenueInfo(
-            now.toInstant(ZoneOffset.UTC), now.plusMinutes(60).toInstant(ZoneOffset.UTC)));
-    insertWith(removeNone, uploadVenueInfoList, now);
-    assertFalse(
-        notifyMeDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC)).isEmpty());
+            now, now.plusMinutes(60), false));
+    insertWith(Collections.singletonList(removeNone), uploadVenueInfoList, now);
+    assertEquals(1,
+        notifyMeDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC)).size());
+  }
+
+  @Test
+  @Transactional
+  public void testAddRequestFilters() throws Exception {
+    final LocalDateTime now = LocalDateTime.now();
+    final var venueInfoList = new ArrayList<UploadVenueInfo>();
+    final var fakeUpload = createUploadVenueInfo(now.minusDays(6), now.minusDays(5), true);
+    venueInfoList.add(fakeUpload);
+    final var negativeIntervalUpload = createUploadVenueInfo(now.minusDays(3), now.minusDays(4), false);
+    venueInfoList.add(negativeIntervalUpload);
+    final var overlapIntervalUpload1 = createUploadVenueInfo(now.minusHours(60), now.minusDays(2), false);
+    final var overlapIntervalUpload2 = createUploadVenueInfo(now.minusHours(54), now.minusHours(36), false);
+    venueInfoList.add(overlapIntervalUpload1);
+    venueInfoList.add(overlapIntervalUpload2);
+    final var validUpload = createUploadVenueInfo(now.minusHours(24), now.minusHours(23), false);
+    venueInfoList.add(validUpload);
+    insertWith(Arrays.asList(new FakeRequestFilter(), new IntervalThresholdFilter(), new OverlappingIntervalsFilter()), venueInfoList, now);
+    assertEquals(1, notifyMeDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC)).size());
   }
 
   private void insertWith(
-      UploadInsertionFilter insertionFilter,
-      List<UploadVenueInfo> uploadVenueInfoList,
-      LocalDateTime now)
+          List<UploadInsertionFilter> insertionFilterList,
+          List<UploadVenueInfo> uploadVenueInfoList,
+          LocalDateTime now)
       throws Exception {
-    if (insertionFilter != null) {
-      insertManager.addFilter(insertionFilter);
+
+    for(var insertionFilter: insertionFilterList) {
+      if (insertionFilter != null) {
+        insertManager.addFilter(insertionFilter);
+      }
     }
     final String userAgent = "ch.admin.bag.notifyMe.dev;1.0.7;1595591959493;Android;29";
     final var expiry = LocalDateTime.now().plusMinutes(5).toInstant(ZoneOffset.UTC);
@@ -129,7 +151,9 @@ public class InsertManagerTest {
     insertManager.insertIntoDatabase(uploadVenueInfoList, userAgent, token, now);
   }
 
-  private UploadVenueInfo createUploadVenueInfo(Instant start, Instant end) {
+  private UploadVenueInfo createUploadVenueInfo(LocalDateTime start, LocalDateTime end, boolean fake) {
+    final var startInstant = start.toInstant(ZoneOffset.UTC);
+    final var endInstant = end.toInstant(ZoneOffset.UTC);
     final var crypto = cryptoWrapper.getCryptoUtilV3();
     final var noncesAndNotificationKey =
         crypto.getNoncesAndNotificationKey(crypto.createNonce(256));
@@ -144,15 +168,15 @@ public class InsertManagerTest {
             crypto.concatenate(
                 "CN-TIMEKEY".getBytes(StandardCharsets.US_ASCII),
                 crypto.longToBytes(3600L),
-                crypto.longToBytes(start.getEpochSecond()),
+                crypto.longToBytes(startInstant.getEpochSecond()),
                 noncesAndNotificationKey.nonceTimekey));
     return UploadVenueInfo.newBuilder()
         .setPreId(ByteString.copyFrom(preid))
         .setTimeKey(ByteString.copyFrom(timekey))
-        .setIntervalStartMs(start.getEpochSecond())
-        .setIntervalEndMs(end.getEpochSecond())
+        .setIntervalStartMs(startInstant.toEpochMilli())
+        .setIntervalEndMs(endInstant.toEpochMilli())
         .setNotificationKey(ByteString.copyFrom(noncesAndNotificationKey.notificationKey))
-        .setFake(false)
+        .setFake(fake)
         .build();
   }
 }
