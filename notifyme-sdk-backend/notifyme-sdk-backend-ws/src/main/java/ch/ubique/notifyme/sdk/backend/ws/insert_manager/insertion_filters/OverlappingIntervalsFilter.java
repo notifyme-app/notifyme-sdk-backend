@@ -40,7 +40,6 @@ public class OverlappingIntervalsFilter implements UploadInsertionFilter {
     return uploadVenueInfoList;
   }
 
-  // TODO: Consider rounded venue visit times - Will probably need to tolerate some amount of overlap
   private boolean doOverlap(
       UserUploadPayloadOuterClass.UploadVenueInfo visit1,
       UserUploadPayloadOuterClass.UploadVenueInfo visit2) {

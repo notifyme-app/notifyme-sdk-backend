@@ -25,6 +25,9 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,14 +36,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles({"dev", "jwt"})
+@ActiveProfiles({"dev", "jwt", "test-config"})
 @TestPropertySource(
     properties = {
       "ws.app.jwt.publickey=classpath://generated_public_test.pem",
@@ -124,7 +127,7 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
   }
 
   @Test
-  @Rollback
+  @Transactional
   public void testEmptyGetTraceKeys() throws Exception {
     final MockHttpServletResponse response =
         mockMvc
@@ -145,7 +148,7 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
   }
 
   @Test
-  @Rollback
+  @Transactional
   public void testUploadAndGetTraceKeys() throws Exception {
     final var now = LocalDateTime.now();
     final var payload = createUserUploadPayload(now.minusDays(1), now.minusHours(12));
@@ -189,9 +192,10 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
   }
 
   @Test
-  @Rollback
+  @Transactional
   public void testUserUploadValidToken() throws Exception {
-    final var now = LocalDateTime.now();
+    final var now = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS);
+    final var initSize = notifyMeDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC)).size();
     final var payload = createUserUploadPayload(now.minusDays(1), now.minusHours(12));
     final byte[] payloadBytes = payload.toByteArray();
     final var expiry = now.plusMinutes(5).toInstant(ZoneOffset.UTC);
@@ -212,12 +216,13 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
             .andReturn();
     mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isOk());
     final var duration = start.until(LocalDateTime.now(), ChronoUnit.MILLIS);
-    assertEquals(2, notifyMeDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC)).size());
+    final var traceKeys = notifyMeDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC));
+    assertEquals(initSize + 1, traceKeys.size());
     assertTrue(requestTime <= duration);
   }
 
   @Test
-  @Rollback
+  @Transactional
   public void testUserUploadInvalidTokenSig() throws Exception {
     final var now = LocalDateTime.now();
     final var payload = createUserUploadPayload(now.minusDays(1), now.minusHours(12));
@@ -243,9 +248,10 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
   }
 
   @Test
-  @Rollback
+  @Transactional
   public void testUserUploadVisitFilters() throws Exception {
-    final var now = LocalDateTime.now();
+    final var now = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS);
+    final var initSize = notifyMeDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC)).size();
     final var fakeUpload = getUploadVenueInfo(now.minusDays(3), now.minusHours(60), true);
     final var invalidIntervalUpload = getUploadVenueInfo(now.minusHours(59), now.minusHours(34), false);
     final var validUpload = getUploadVenueInfo(now.minusHours(12), now.minusHours(10), false);
@@ -269,7 +275,8 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
                     .andReturn();
     mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isOk());
     final var duration = start.until(LocalDateTime.now(), ChronoUnit.MILLIS);
-    assertEquals(2, notifyMeDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC)).size());
+    final var traceKeys = notifyMeDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC));
+    assertEquals(initSize + 1, traceKeys.size());
     assertTrue(requestTime <= duration);
   }
 
