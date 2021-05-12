@@ -45,6 +45,7 @@ public class IntervalThresholdFilterTest extends UploadInsertionFilterTest {
                 crypto.longToBytes(3600L),
                 crypto.longToBytes(start.toInstant(ZoneOffset.UTC).getEpochSecond()),
                 noncesAndNotificationKey.nonceTimekey));
+    // TODO: What happens when we don't set fields?
     return UserUploadPayloadOuterClass.UploadVenueInfo.newBuilder()
         .setPreId(ByteString.copyFrom(preid))
         .setTimeKey(ByteString.copyFrom(timekey))

@@ -59,18 +59,4 @@ public class JWTValidationTest {
             "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), false);
     assertThrows(JwtException.class, () -> jwtDecoder.decode(accessToken));
   }
-
-  private NotifyMeJwtValidator jwtValidator() {
-    return new NotifyMeJwtValidator(uuidDataService, Duration.ofMinutes(60));
-  }
-
-  private JwtDecoder jwtDecoder()
-      throws IOException, KeyVault.PublicKeyNoSuitableEncodingFoundException {
-    final var nimbusJwtDecoder =
-        NimbusJwtDecoder.withPublicKey(tokenHelper.getPublicKey())
-            .signatureAlgorithm(SignatureAlgorithm.RS256)
-            .build();
-    nimbusJwtDecoder.setJwtValidator(jwtValidator());
-    return nimbusJwtDecoder;
-  }
 }

@@ -1,8 +1,9 @@
 package ch.ubique.notifyme.sdk.backend.ws.security;
 
-import ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey;
 import org.springframework.security.oauth2.jwt.Jwt;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class NotifyMeJwtRequestValidator implements RequestValidator {
@@ -25,18 +26,16 @@ public class NotifyMeJwtRequestValidator implements RequestValidator {
     }
 
     @Override
-    public long validateKeyDate(Object authObject, Object others) throws ClaimIsBeforeOnsetException, InvalidDateException {
-    // TODO Implement: Check not larger than threshold (~24h), onset before start of interval (for each interval)
-    final var DATE_FORMATTER = DateTimeFormatter.ofPattern("YYYY-MM-dd"); // parse as local date
-    if (authObject instanceof Jwt) {
-      Jwt token = (Jwt) authObject;
-//      var jwtKeyDate = DateTime.parseDate(token.getClaim("onset"));
-      if(others instanceof TraceKey) {
-          final var key = (TraceKey) others;
-      }
+    public boolean isOnsetBefore(Object authObject, LocalDateTime dateTime) {
+        if(authObject instanceof Jwt) {
+            Jwt token = (Jwt) authObject;
+            final var dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            final var onset = LocalDate.parse(token.getClaim("onset"), dateTimeFormatter);
+            return !onset.isAfter(dateTime.toLocalDate()); // Use isAfter because onset could be on the same day
+        }
+        return false;
     }
-    throw new IllegalArgumentException();
-    }
+
 
     @Override
     public boolean isFakeRequest(Object authObject, Object others) {
