@@ -29,11 +29,13 @@ import ch.ubique.notifyme.sdk.backend.ws.security.RequestValidator.WrongScopeExc
 import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper;
 import ch.ubique.notifyme.sdk.backend.ws.util.DateTimeUtil;
 import ch.ubique.openapi.docannotations.Documentation;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.protobuf.ByteString;
 import java.io.UnsupportedEncodingException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -42,9 +44,11 @@ import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.CacheControl;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -226,7 +230,10 @@ public class NotifyMeControllerV3 {
       consumes = {"application/x-protobuf", "application/protobuf"})
   @Documentation(
       description = "User upload of stored identities",
-      responses = {"200 => success", "400 => Error"})
+      responses = {
+              "200 => success",
+              "400 => Bad Upload Data",
+              "403 => Authentication failed"})
   public @ResponseBody Callable<ResponseEntity<String>> userUpload(
       @Documentation(description = "Identities to upload as protobuf") @Valid @RequestBody
           final UserUploadPayload userUploadPayload,
@@ -240,26 +247,13 @@ public class NotifyMeControllerV3 {
       @AuthenticationPrincipal
           @Documentation(description = "JWT token that can be verified by the backend server")
           Object principal)
-      throws WrongScopeException, WrongAudienceException, NotAJwtException {
+      throws WrongScopeException, WrongAudienceException, NotAJwtException, InsertException {
 
     final var now = LocalDateTime.now();
 
-    try {
-      requestValidator.isValid(principal);
-    } catch (WrongScopeException e) {
-      return () -> ResponseEntity.status(400).body("Wrong scope");
-    } catch (WrongAudienceException e) {
-      return () -> ResponseEntity.status(400).body("Wrong audience");
-    } catch (NotAJwtException e) {
-      return () -> ResponseEntity.status(400).body("Not a JWT");
-    }
+    requestValidator.isValid(principal);
 
-    try {
-      insertManager.insertIntoDatabase(
-              userUploadPayload.getVenueInfosList(), userAgent, principal, now);
-    } catch (InsertException e) {
-      // TODO What to do
-    }
+    insertManager.insertIntoDatabase(userUploadPayload.getVenueInfosList(), userAgent, principal, now);
 
     return () -> {
       try {
@@ -269,5 +263,23 @@ public class NotifyMeControllerV3 {
       }
       return ResponseEntity.ok().build();
     };
+  }
+
+  @ExceptionHandler({
+          InsertException.class
+  })
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ResponseEntity<Object> invalidArguments() {
+    return ResponseEntity.badRequest().build();
+  }
+
+  @ExceptionHandler({
+          WrongScopeException.class,
+          WrongAudienceException.class,
+          NotAJwtException.class
+  })
+  @ResponseStatus(HttpStatus.FORBIDDEN)
+  public ResponseEntity<Object> forbidden() {
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
   }
 }
