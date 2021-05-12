@@ -151,7 +151,7 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
   @Transactional
   public void testUploadAndGetTraceKeys() throws Exception {
     final var now = LocalDateTime.now();
-    final var payload = createUserUploadPayload(now.minusDays(1), now.minusHours(12));
+    final var payload = createUserUploadPayload(now.minusDays(1), now.minusHours(23));
     final byte[] payloadBytes = payload.toByteArray();
     final var expiry = now.plusMinutes(5).toInstant(ZoneOffset.UTC);
     final var token =
@@ -196,7 +196,7 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
   public void testUserUploadValidToken() throws Exception {
     final var now = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS);
     final var initSize = notifyMeDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC)).size();
-    final var payload = createUserUploadPayload(now.minusDays(1), now.minusHours(12));
+    final var payload = createUserUploadPayload(now.minusDays(1), now.minusHours(23));
     final byte[] payloadBytes = payload.toByteArray();
     final var expiry = now.plusMinutes(5).toInstant(ZoneOffset.UTC);
     final var token =
@@ -254,7 +254,7 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
     final var initSize = notifyMeDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC)).size();
     final var fakeUpload = getUploadVenueInfo(now.minusDays(3), now.minusHours(60), true);
     final var invalidIntervalUpload = getUploadVenueInfo(now.minusHours(59), now.minusHours(34), false);
-    final var validUpload = getUploadVenueInfo(now.minusHours(12), now.minusHours(10), false);
+    final var validUpload = getUploadVenueInfo(now.minusHours(12), now.minusHours(11), false);
     final var payload = getUserUploadPayload(fakeUpload, invalidIntervalUpload, validUpload);
     final byte[] payloadBytes = payload.toByteArray();
     final var expiry = now.plusMinutes(5).toInstant(ZoneOffset.UTC);

@@ -11,9 +11,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * TODO: What's the minimum value we can use here?
- * The app doesn't support store visit of longer than 24 hours (users are automatically checked out).
- * UploadVenueInfo objects that break the interval threshold of (0,24) are dropped.
+ * The app doesn't support store visit of longer than 1 hour (users are automatically checked out).
+ * UploadVenueInfo objects that break the interval threshold of (0,1) are dropped.
  */
 public class IntervalThresholdFilter implements UploadInsertionFilter {
   @Override
@@ -29,8 +28,8 @@ public class IntervalThresholdFilter implements UploadInsertionFilter {
         final var start = uploadVenueInfo.getIntervalStartMs();
         final var end = uploadVenueInfo.getIntervalEndMs();
         final var notNegative = end - start > 0;
-        final var lessThan24h = end - start <= 24 * 60 * 60 * 1000;
-        return (notNegative && lessThan24h);
+        final var lessThan1h = end - start <= 60 * 60 * 1000;
+        return (notNegative && lessThan1h);
     }).collect(Collectors.toList());
   }
 }

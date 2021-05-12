@@ -26,10 +26,24 @@ public class InsertManager {
         this.notifyMeDataServiceV3 = notifyMeDataServiceV3;
     }
 
+    /**
+     * Adds a filter to the list of filters to be applied to a {@link UploadVenueInfo} object before inserting it
+     * into the database as a {@link ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey}.
+     * @param filter to be added to the filter list. The filter method must return a filtered list of VenueInfo's
+     */
     public void addFilter(UploadInsertionFilter filter) {
         this.filterList.add(filter);
     }
 
+    /**
+     * Applies the stored list of filters, transforms any remaining venueInfo's into trace keys, and stores them to the
+     * database.
+     * @param uploadVenueInfoList List of UploadVenueInfo objects to be stored to the database
+     * @param header User-Agent header as included in the user-upload request
+     * @param principal the authorization context which belongs to the uploaded keys. This will usually be a JWT token.
+     * @param now Current timestamp
+     * @throws InsertException
+     */
     public void insertIntoDatabase(
             List<UploadVenueInfo> uploadVenueInfoList,
             String header,
@@ -49,7 +63,7 @@ public class InsertManager {
         var headerParts = header.split(";");
         if (headerParts.length < 5) {
             headerParts =
-                    List.of("org.example.dp3t", "1.0.0", "0", "Android", "29").toArray(new String[0]);
+                    List.of("org.example.notifyMe", "1.0.0", "0", "Android", "29").toArray(new String[0]);
             logger.error("We received an invalid header, setting default.");
         }
 
@@ -67,13 +81,11 @@ public class InsertManager {
         return venueInfoList;
     }
 
-    /**
-     * Extracts the {@link OSType} from the osString that is given by the client request.
-     *
-     * @param osString
-     * @return
-     */
-    private OSType exctractOS(String osString) {
+  /**
+   * Extracts the {@link OSType} from the osString that is given by the client request's
+   * user-agent header.
+   */
+  private OSType exctractOS(String osString) {
         var result = OSType.ANDROID;
         switch (osString.toLowerCase()) {
             case "ios":
@@ -87,10 +99,18 @@ public class InsertManager {
         return result;
     }
 
-    private Version extractOsVersion(String osVersionString) {
+  /**
+   * Extracts the {@link Version} from the osVersionString that is given by the client request's
+   * user-agent header.
+   */
+  private Version extractOsVersion(String osVersionString) {
         return new Version(osVersionString);
     }
 
+    /**
+     * Extracts the {@link Version} from the osAppVersionString and osMetaInfo that are given by the client request's
+     * user-agent header.
+     */
     private Version extractAppVersion(String osAppVersionString, String osMetaInfo) {
         return new Version(osAppVersionString + "+" + osMetaInfo);
     }

@@ -14,9 +14,15 @@ public class IntervalThresholdFilterTest extends UploadInsertionFilterTest {
   List<UploadVenueInfo> getValidVenueInfo() {
     final var venueInfoList = new ArrayList<UploadVenueInfo>();
     LocalDateTime start = LocalDateTime.now();
-    LocalDateTime end = start.plusHours(2);
-    final var venueInfo = getVenueInfo(start, end);
-    venueInfoList.add(venueInfo);
+    LocalDateTime end = start.plusMinutes(30);
+    // Not an edge case
+    final var venueInfoCase1 = getVenueInfo(start, end);
+    venueInfoList.add(venueInfoCase1);
+    start = LocalDateTime.now();
+    end = start.plusHours(1);
+    // Exactly 1 hour
+    final var venueInfoCase2 = getVenueInfo(start, end);
+    venueInfoList.add(venueInfoCase2);
     return venueInfoList;
   }
 
@@ -59,7 +65,6 @@ public class IntervalThresholdFilterTest extends UploadInsertionFilterTest {
                 crypto.longToBytes(3600L),
                 crypto.longToBytes(start.toInstant(ZoneOffset.UTC).getEpochSecond()),
                 noncesAndNotificationKey.nonceTimekey));
-    // TODO: What happens when we don't set fields?
     return UploadVenueInfo.newBuilder()
         .setPreId(ByteString.copyFrom(preid))
         .setTimeKey(ByteString.copyFrom(timekey))

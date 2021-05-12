@@ -24,8 +24,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -63,10 +62,10 @@ public abstract class UploadInsertionFilterTest {
     final var osVersion = new Version("29");
     final var appVersion = new Version("1.0.0+0");
     final var token = getToken(now);
-    assertFalse(
+    assertEquals(uploadVenueInfoList.size(),
         insertionFilter()
             .filter(now, uploadVenueInfoList, osType, osVersion, appVersion, token)
-            .isEmpty());
+            .size());
   }
 
   @Test
