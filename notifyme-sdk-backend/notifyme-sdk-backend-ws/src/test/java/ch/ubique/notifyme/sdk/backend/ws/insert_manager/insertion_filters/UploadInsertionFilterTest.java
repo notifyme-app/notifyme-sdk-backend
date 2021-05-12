@@ -16,11 +16,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -38,16 +38,16 @@ public abstract class UploadInsertionFilterTest {
   @Autowired CryptoWrapper cryptoWrapper;
   @Autowired JwtDecoder jwtDecoder;
 
-  abstract UploadVenueInfo getValidVenueInfo();
+  abstract List<UploadVenueInfo> getValidVenueInfo();
 
-  abstract UploadVenueInfo getInvalidVenueInfo();
+  abstract List<UploadVenueInfo> getInvalidVenueInfo();
 
   abstract UploadInsertionFilter insertionFilter();
 
   public Jwt getToken(LocalDateTime now) throws Exception {
     final var onset = now.minusDays(5).truncatedTo(ChronoUnit.DAYS).format(DATE_FORMATTER);
     final var expiry = now.plusMinutes(5).toInstant(ZoneOffset.UTC);
-    return jwtDecoder.decode(tokenHelper.createToken(onset, "0", "notifyMe", "userupload", Date.from(expiry), true));
+    return jwtDecoder.decode(tokenHelper.createToken(onset, "0", "notifyMe", "userupload", Date.from(expiry), true, now.toInstant(ZoneOffset.UTC)));
   }
 
   @Before
@@ -58,8 +58,7 @@ public abstract class UploadInsertionFilterTest {
   @Test
   public void testFilterValid() throws Exception {
     LocalDateTime now = LocalDateTime.now();
-    final List<UploadVenueInfo> uploadVenueInfoList = new ArrayList<>();
-    uploadVenueInfoList.add(getValidVenueInfo());
+    final List<UploadVenueInfo> uploadVenueInfoList = getValidVenueInfo();
     final var osType = OSType.ANDROID;
     final var osVersion = new Version("29");
     final var appVersion = new Version("1.0.0+0");
@@ -73,8 +72,7 @@ public abstract class UploadInsertionFilterTest {
   @Test
   public void testFilterInvalid() throws Exception {
     LocalDateTime now = LocalDateTime.now();
-    final List<UploadVenueInfo> uploadVenueInfoList = new ArrayList<>();
-    uploadVenueInfoList.add(getInvalidVenueInfo());
+    final List<UploadVenueInfo> uploadVenueInfoList = getInvalidVenueInfo();
     final var osType = OSType.ANDROID;
     final var osVersion = new Version("29");
     final var appVersion = new Version("1.0.0+0");

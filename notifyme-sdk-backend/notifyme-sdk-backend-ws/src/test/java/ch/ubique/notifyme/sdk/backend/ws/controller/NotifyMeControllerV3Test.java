@@ -152,7 +152,7 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
     final var expiry = LocalDateTime.now().plusMinutes(5).toInstant(ZoneOffset.UTC);
     final var token =
         tokenHelper.createToken(
-            "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), true);
+            "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), true, Instant.now());
 
     final String userAgent = "ch.admin.bag.notifyMe.dev;1.0.7;1595591959493;Android;29";
     final var start = LocalDateTime.now();
@@ -196,7 +196,7 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
     final var expiry = LocalDateTime.now().plusMinutes(5).toInstant(ZoneOffset.UTC);
     final var token =
         tokenHelper.createToken(
-            "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), true);
+            "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), true, Instant.now());
     final String userAgent = "ch.admin.bag.notifyMe.dev;1.0.7;1595591959493;Android;29";
     final var start = LocalDateTime.now();
     final var mvcResult =
@@ -223,7 +223,7 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
     final var expiry = LocalDateTime.now().plusMinutes(5).toInstant(ZoneOffset.UTC);
     final var token =
         tokenHelper.createToken(
-            "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), true);
+            "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), true, Instant.now());
     final String userAgent = "ch.admin.bag.notifyMe.dev;1.0.7;1595591959493;Android;29";
     final var mvcResult =
         mockMvc
@@ -246,7 +246,7 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
     final var expiry = LocalDateTime.now().plusMinutes(120).toInstant(ZoneOffset.UTC);
     final var token =
         tokenHelper.createToken(
-            "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), false);
+            "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), false, Instant.now());
     final String userAgent = "ch.admin.bag.notifyMe.dev;1.0.7;1595591959493;Android;29";
     final var result =
         mockMvc

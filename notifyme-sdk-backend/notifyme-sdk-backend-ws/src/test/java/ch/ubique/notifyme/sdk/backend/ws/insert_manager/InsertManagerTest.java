@@ -125,7 +125,7 @@ public class InsertManagerTest {
     final var expiry = LocalDateTime.now().plusMinutes(5).toInstant(ZoneOffset.UTC);
     final var token =
         tokenHelper.createToken(
-            "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), true);
+            "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), true, Instant.now());
     insertManager.insertIntoDatabase(uploadVenueInfoList, userAgent, token, now);
   }
 

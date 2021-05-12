@@ -28,7 +28,9 @@ public class IntervalThresholdFilter implements UploadInsertionFilter {
     return uploadVenueInfoList.stream().filter(uploadVenueInfo -> {
         final var start = uploadVenueInfo.getIntervalStartMs();
         final var end = uploadVenueInfo.getIntervalEndMs();
-        return (end - start > 0 && end - start <= 24 * 60 * 60 * 1000);
+        final var notNegative = end - start > 0;
+        final var lessThan24h = end - start <= 24 * 60 * 60 * 1000;
+        return (notNegative && lessThan24h);
     }).collect(Collectors.toList());
   }
 }

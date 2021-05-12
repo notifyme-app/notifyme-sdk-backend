@@ -3,11 +3,9 @@ package ch.ubique.notifyme.sdk.backend.ws.config;
 import static org.junit.Assert.assertThrows;
 
 import ch.ubique.notifyme.sdk.backend.data.UUIDDataService;
-import ch.ubique.notifyme.sdk.backend.ws.security.KeyVault;
-import ch.ubique.notifyme.sdk.backend.ws.security.NotifyMeJwtValidator;
 import ch.ubique.notifyme.sdk.backend.ws.util.TokenHelper;
-import java.io.IOException;
-import java.time.Duration;
+
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
@@ -16,10 +14,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -46,7 +42,7 @@ public class JWTValidationTest {
     final var expiry = now.plusMinutes(5).toInstant(ZoneOffset.UTC);
     final var accessToken =
         tokenHelper.createToken(
-            "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), true);
+            "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), true, Instant.now());
     jwtDecoder.decode(accessToken);
   }
 
@@ -56,7 +52,7 @@ public class JWTValidationTest {
     final var expiry = now.plusMinutes(5).toInstant(ZoneOffset.UTC);
     final var accessToken =
         tokenHelper.createToken(
-            "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), false);
+            "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), false, Instant.now());
     assertThrows(JwtException.class, () -> jwtDecoder.decode(accessToken));
   }
 }

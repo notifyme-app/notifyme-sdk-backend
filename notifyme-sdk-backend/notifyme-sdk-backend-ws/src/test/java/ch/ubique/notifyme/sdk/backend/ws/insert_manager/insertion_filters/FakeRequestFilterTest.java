@@ -4,21 +4,26 @@ import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UploadVe
 import com.google.protobuf.ByteString;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FakeRequestFilterTest extends UploadInsertionFilterTest {
   @Override
-  UploadVenueInfo getValidVenueInfo() {
-    final UploadVenueInfo.Builder builder = getBuilder();
-    return builder.setFake(false).build();
+  List<UploadVenueInfo> getValidVenueInfo() {
+    final var venueInfoList = new ArrayList<UploadVenueInfo>();
+    final var venueInfo = getVenueInfo(false);
+    venueInfoList.add(venueInfo);
+    return venueInfoList;
   }
 
   @Override
-  UploadVenueInfo getInvalidVenueInfo() {
-    final UploadVenueInfo.Builder builder = getBuilder();
-    return builder.setFake(true).build();
+  List<UploadVenueInfo> getInvalidVenueInfo() {
+    final var venueInfoList = new ArrayList<UploadVenueInfo>();
+    final var venueInfo = getVenueInfo(true);
+    venueInfoList.add(venueInfo);
+    return venueInfoList;
   }
 
   @Override
@@ -26,9 +31,9 @@ public class FakeRequestFilterTest extends UploadInsertionFilterTest {
     return new FakeRequestFilter();
   }
 
-  private UploadVenueInfo.Builder getBuilder() {
-      LocalDateTime start = LocalDateTime.now();
-      LocalDateTime end = start.plusMinutes(30);
+  private UploadVenueInfo getVenueInfo(boolean fake) {
+    LocalDateTime start = LocalDateTime.now();
+    LocalDateTime end = start.plusMinutes(30);
     final var crypto = cryptoWrapper.getCryptoUtilV3();
     final var noncesAndNotificationKey =
         crypto.getNoncesAndNotificationKey(crypto.createNonce(256));
@@ -45,13 +50,13 @@ public class FakeRequestFilterTest extends UploadInsertionFilterTest {
                 crypto.longToBytes(3600L),
                 crypto.longToBytes(start.toInstant(ZoneOffset.UTC).getEpochSecond()),
                 noncesAndNotificationKey.nonceTimekey));
-    final var builder =
-        UploadVenueInfo.newBuilder()
-            .setPreId(ByteString.copyFrom(preid))
-            .setTimeKey(ByteString.copyFrom(timekey))
-            .setIntervalStartMs(start.toInstant(ZoneOffset.UTC).getEpochSecond())
-            .setIntervalEndMs(end.toInstant(ZoneOffset.UTC).getEpochSecond())
-            .setNotificationKey(ByteString.copyFrom(noncesAndNotificationKey.notificationKey));
-    return builder;
+    return UploadVenueInfo.newBuilder()
+        .setPreId(ByteString.copyFrom(preid))
+        .setTimeKey(ByteString.copyFrom(timekey))
+        .setIntervalStartMs(start.toInstant(ZoneOffset.UTC).toEpochMilli())
+        .setIntervalEndMs(end.toInstant(ZoneOffset.UTC).toEpochMilli())
+        .setNotificationKey(ByteString.copyFrom(noncesAndNotificationKey.notificationKey))
+        .setFake(fake)
+        .build();
   }
 }

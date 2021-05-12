@@ -1,25 +1,39 @@
 package ch.ubique.notifyme.sdk.backend.ws.insert_manager.insertion_filters;
 
-import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass;
+import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
 import com.google.protobuf.ByteString;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.List;
 
 public class IntervalThresholdFilterTest extends UploadInsertionFilterTest {
   @Override
-  UserUploadPayloadOuterClass.UploadVenueInfo getValidVenueInfo() {
+  List<UploadVenueInfo> getValidVenueInfo() {
+    final var venueInfoList = new ArrayList<UploadVenueInfo>();
     LocalDateTime start = LocalDateTime.now();
     LocalDateTime end = start.plusHours(2);
-    return getVenueInfo(start, end);
+    final var venueInfo = getVenueInfo(start, end);
+    venueInfoList.add(venueInfo);
+    return venueInfoList;
   }
 
   @Override
-  UserUploadPayloadOuterClass.UploadVenueInfo getInvalidVenueInfo() {
+  List<UploadVenueInfo> getInvalidVenueInfo() {
+    final var venueInfoList = new ArrayList<UploadVenueInfo>();
     LocalDateTime start = LocalDateTime.now();
     LocalDateTime end = start.plusHours(-1);
-    return getVenueInfo(start, end);
+    // End < Start
+    final var venueInfoCase1 = getVenueInfo(start, end);
+    venueInfoList.add(venueInfoCase1);
+    start = LocalDateTime.now();
+    end = start.plusHours(25);
+    // End - Start > 24
+    final var venueInfoCase2 = getVenueInfo(start, end);
+    venueInfoList.add(venueInfoCase2);
+    return venueInfoList;
   }
 
   @Override
@@ -27,7 +41,7 @@ public class IntervalThresholdFilterTest extends UploadInsertionFilterTest {
     return new IntervalThresholdFilter();
   }
 
-  private UserUploadPayloadOuterClass.UploadVenueInfo getVenueInfo(
+  private UploadVenueInfo getVenueInfo(
       LocalDateTime start, LocalDateTime end) {
     final var crypto = cryptoWrapper.getCryptoUtilV3();
     final var noncesAndNotificationKey =
@@ -46,11 +60,11 @@ public class IntervalThresholdFilterTest extends UploadInsertionFilterTest {
                 crypto.longToBytes(start.toInstant(ZoneOffset.UTC).getEpochSecond()),
                 noncesAndNotificationKey.nonceTimekey));
     // TODO: What happens when we don't set fields?
-    return UserUploadPayloadOuterClass.UploadVenueInfo.newBuilder()
+    return UploadVenueInfo.newBuilder()
         .setPreId(ByteString.copyFrom(preid))
         .setTimeKey(ByteString.copyFrom(timekey))
-        .setIntervalStartMs(start.toInstant(ZoneOffset.UTC).getEpochSecond())
-        .setIntervalEndMs(end.toInstant(ZoneOffset.UTC).getEpochSecond())
+        .setIntervalStartMs(start.toInstant(ZoneOffset.UTC).toEpochMilli())
+        .setIntervalEndMs(end.toInstant(ZoneOffset.UTC).toEpochMilli())
         .setNotificationKey(ByteString.copyFrom(noncesAndNotificationKey.notificationKey))
         .setFake(false)
         .build();
