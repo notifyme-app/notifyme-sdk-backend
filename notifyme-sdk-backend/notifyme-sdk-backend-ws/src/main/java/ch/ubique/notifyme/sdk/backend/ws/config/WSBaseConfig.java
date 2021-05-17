@@ -31,8 +31,6 @@ import ch.ubique.notifyme.sdk.backend.ws.security.NotifyMeJwtRequestValidator;
 import ch.ubique.notifyme.sdk.backend.ws.security.RequestValidator;
 import ch.ubique.notifyme.sdk.backend.ws.service.PhoneHeartbeatSilentPush;
 import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper;
-import ch.ubique.pushservice.pushconnector.PushConnectorService;
-import ch.ubique.pushservice.pushconnector.PushConnectorServiceBuilder;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -210,25 +208,19 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
     return new ConfigController();
   }
 
-  @Bean
-  public PushConnectorService pushConnectorService() {
-    return new PushConnectorServiceBuilder(pushAuthToken, pushServerHost)
-        .withAndroidGCM("ch.ubique.n2step.android")
-        .withApple("ch.ubique.n2step.ios")
-        .withAppleSandboxEnabled()
-        .build();
-  }
+  // TODO: Instantiate PushConnectorService bean
+//  @Bean
+//  public PushConnectorService pushConnectorService() {
+//    return new PushConnectorServiceBuilder(pushAuthToken, pushServerHost)
+//        .withAndroidGCM("ch.ubique.n2step.android")
+//        .withApple("ch.ubique.n2step.ios")
+//        .withAppleSandboxEnabled()
+//        .build();
+//  }
 
   @Bean
   public PushRegistrationDataService pushRegistrationDataService(final DataSource dataSource) {
     return new JdbcPushRegistrationDataServiceImpl(dataSource);
-  }
-
-  @Bean
-  public PhoneHeartbeatSilentPush phoneHeartbeatSilentPush(
-      final PushConnectorService pushConnectorService,
-      final PushRegistrationDataService pushRegistrationDataService) {
-    return new PhoneHeartbeatSilentPush(pushConnectorService, pushRegistrationDataService);
   }
 
   @Profile("enable-debug")
