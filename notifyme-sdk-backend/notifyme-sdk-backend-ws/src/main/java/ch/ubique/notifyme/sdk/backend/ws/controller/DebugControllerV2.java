@@ -109,7 +109,7 @@ public class DebugControllerV2 {
             .calculateSecretKeyForIdentityAndIdentity(
                 preTraceWithProofProto, affectedHour, traceKey);
 
-        byte[] nonce = cryptoWrapper.createNonce();
+        byte[] nonce = cryptoWrapper.getCryptoUtilV2().createNonce();
         byte[] encryptedMessage =
             cryptoWrapper
                 .getCryptoUtilV2()
