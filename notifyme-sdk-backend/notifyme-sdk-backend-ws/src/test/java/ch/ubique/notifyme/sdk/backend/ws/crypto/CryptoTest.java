@@ -24,14 +24,6 @@ import org.slf4j.LoggerFactory;
 public class CryptoTest {
 
   protected final Logger logger = LoggerFactory.getLogger(getClass());
-  String healthAuthoritySkHex = "36b3b80a1cd2cc98d84b4ed2c109b74e7026f00c0d40a0b12a936b1814aa5e39";
-  String healthAuthorityPkHex = "e4d2e06641730ce7c9986b1e7e91bf41bb3b8cc1d76d249fa99d0d8925e87a5c";
-  String useruploadMpkHex =
-      "956e6fa1345547e8e060c8962ddd38863bf2c85406ed03b204bc340fb5db01296a960d00be240caa08db001664f4f7028a9dbbb33aea172bffd58b4a644f1ecb3b7bbed378a8a7c9756ac8b4b47346d8dbf37a62377703b7fc8da3bb22a21415";
-  String useruploadMskHex = "ce23ca6a3fd0d1307d3d0b2578784750b3f0e20b64e0c24e4cafb35561a0af35";
-  CryptoWrapper cryptoWrapper =
-      new CryptoWrapper(
-          healthAuthoritySkHex, healthAuthorityPkHex, useruploadMskHex, useruploadMpkHex);
 
   @Test
   public void testDependency() throws SodiumException {
@@ -50,15 +42,5 @@ public class CryptoTest {
     PwHash.Lazy pwHashLazy = (PwHash.Lazy) lazySodium;
     String hash =
         pwHashLazy.cryptoPwHashStr("A cool password", PwHash.OPSLIMIT_MIN, PwHash.MEMLIMIT_MIN);
-  }
-
-  @Test
-  public void testFlow() {
-    cryptoWrapper.getCryptoUtilV3().testFlow();
-  }
-
-  @Test
-  public void testKeyGen() throws IOException {
-    cryptoWrapper.getCryptoUtilV3().genKeys();
   }
 }
