@@ -254,31 +254,12 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
-        <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>ubique-oss-springboot-swagger3</id>
-            <name>bintray</name>
-            <url>https://dl.bintray.com/ubique-oss/springboot-swagger3</url>
-        </repository>
         <!-- repository for lazysodium -->
         <repository>
             <id>jcenter</id>
             <url>https://jcenter.bintray.com/</url>
         </repository>
     </repositories>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>ubique-oss-springboot-swagger3</id>
-            <name>bintray</name>
-            <url>https://dl.bintray.com/ubique-oss/springboot-swagger3</url>
-        </pluginRepository>
-    </pluginRepositories>
 
     <build>
 
