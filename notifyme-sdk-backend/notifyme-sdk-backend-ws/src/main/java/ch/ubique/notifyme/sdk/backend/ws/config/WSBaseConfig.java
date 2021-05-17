@@ -208,19 +208,15 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
     return new ConfigController();
   }
 
-  // TODO: Instantiate PushConnectorService bean
-//  @Bean
-//  public PushConnectorService pushConnectorService() {
-//    return new PushConnectorServiceBuilder(pushAuthToken, pushServerHost)
-//        .withAndroidGCM("ch.ubique.n2step.android")
-//        .withApple("ch.ubique.n2step.ios")
-//        .withAppleSandboxEnabled()
-//        .build();
-//  }
-
   @Bean
   public PushRegistrationDataService pushRegistrationDataService(final DataSource dataSource) {
     return new JdbcPushRegistrationDataServiceImpl(dataSource);
+  }
+
+  @Bean
+  public PhoneHeartbeatSilentPush phoneHeartbeatSilentPush(
+      final PushRegistrationDataService pushRegistrationDataService) {
+    return new PhoneHeartbeatSilentPush(pushRegistrationDataService);
   }
 
   @Profile("enable-debug")

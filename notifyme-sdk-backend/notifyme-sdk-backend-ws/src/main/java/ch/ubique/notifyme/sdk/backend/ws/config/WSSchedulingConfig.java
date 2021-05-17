@@ -36,8 +36,7 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
     
     private final NotifyMeDataServiceV2 notifyMeDataServiceV2;
     private final NotifyMeDataServiceV3 notifyMeDataServiceV3;
-    // TODO: Initialize PhoneHeartbeatSilentPush & Add crontask
-//    private final PhoneHeartbeatSilentPush phoneHeartbeatSilentPush;
+    private final PhoneHeartbeatSilentPush phoneHeartbeatSilentPush;
 
     @Value("${db.cleanCron:0 0 3 * * ?}")
     private String cleanCron;
@@ -50,10 +49,11 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
 
     protected WSSchedulingConfig(
             final NotifyMeDataServiceV2 notifyMeDataServiceV2,
-            final NotifyMeDataServiceV3 notifyMeDataServiceV3
-    ) {
+            final NotifyMeDataServiceV3 notifyMeDataServiceV3,
+            PhoneHeartbeatSilentPush phoneHeartbeatSilentPush) {
         this.notifyMeDataServiceV2 = notifyMeDataServiceV2;
         this.notifyMeDataServiceV3 = notifyMeDataServiceV3;
+        this.phoneHeartbeatSilentPush = phoneHeartbeatSilentPush;
     }
 
     @Override
@@ -94,10 +94,10 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
                                 },
                                 new CronTrigger(cleanCron, TimeZone.getTimeZone("UTC"))));
 
-//        taskRegistrar.addCronTask(
-//                new CronTask(
-//                        phoneHeartbeatSilentPush::sendHeartbeats,
-//                        new CronTrigger(heartBeatSilentPushCron, TimeZone.getTimeZone("UTC"))));
+        taskRegistrar.addCronTask(
+                new CronTask(
+                        phoneHeartbeatSilentPush::sendHeartbeats,
+                        new CronTrigger(heartBeatSilentPushCron, TimeZone.getTimeZone("UTC"))));
         
 
     }
