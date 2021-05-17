@@ -32,7 +32,7 @@
         <spring-boot-version>2.4.5</spring-boot-version>
         <testcontainers-version>1.15.1</testcontainers-version>
 
-        <itCoverageAgent/>
+        <itCoverageAgent></itCoverageAgent>
 
         <build-helper-maven-plugin.version>3.2.0</build-helper-maven-plugin.version>
 
@@ -47,6 +47,7 @@
         <module>notifyme-sdk-backend-model</module>
         <module>notifyme-sdk-backend-data</module>
         <module>notifyme-sdk-backend-ws</module>
+        <module>notifyme-sdk-backend-report</module>
     </modules>
 
     <dependencies>
@@ -403,6 +404,61 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <executions>
+                    <!-- set arg line property for surefire -->
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <configuration>
+                            <propertyName>surefireArgLine</propertyName>
+                        </configuration>
+                    </execution>
+                    <!-- set arg line property for failsafe -->
+                    <execution>
+                        <id>prepare-agent-integration</id>
+                        <goals>
+                            <goal>prepare-agent-integration</goal>
+                        </goals>
+                        <configuration>
+                            <propertyName>failsafeArgLine</propertyName>
+                        </configuration>
+                    </execution>
+
+                    <!-- METHOD 1 -->
+                    <!--<execution> -->
+                    <!--<id>prepare-agent</id> -->
+                    <!--<goals> -->
+                    <!--<goal>prepare-agent</goal> -->
+                    <!--</goals> -->
+                    <!--</execution> -->
+                    <!-- prepare agent for measuring unit tests -->
+
+                    <!-- METHOD 2 -->
+                    <execution>
+                        <id>prepare-unit-tests</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+
+                    <!-- prepare agent for measuring integration tests -->
+                    <execution>
+                        <id>prepare-agent-coverage</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <phase>pre-integration-test</phase>
+                        <configuration>
+                            <propertyName>itCoverageAgent</propertyName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
         <pluginManagement>
             <plugins>
@@ -410,6 +466,11 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.8.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>0.8.5</version>
                 </plugin>
                 <plugin>
                     <groupId>org.sonarsource.scanner.maven</groupId>
