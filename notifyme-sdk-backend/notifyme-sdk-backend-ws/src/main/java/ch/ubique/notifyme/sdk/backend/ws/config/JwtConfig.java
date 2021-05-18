@@ -37,7 +37,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 
 @Configuration
-@EnableWebSecurity(debug = true)
+@EnableWebSecurity(debug = false)
 @Profile(value = "jwt")
 public class JwtConfig extends WebSecurityConfigurerAdapter {
 
