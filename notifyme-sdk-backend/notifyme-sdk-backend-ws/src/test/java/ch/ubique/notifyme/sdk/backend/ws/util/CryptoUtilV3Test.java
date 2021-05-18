@@ -1,6 +1,9 @@
 package ch.ubique.notifyme.sdk.backend.ws.util;
 
+import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass;
+import ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey;
 import com.google.gson.Gson;
+import com.google.protobuf.ByteString;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -11,8 +14,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.List;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.*;
 
 public class CryptoUtilV3Test {
 
@@ -50,24 +54,43 @@ public class CryptoUtilV3Test {
 
   @Test
   public void testCreateTraceV3ForUserUpload() {
-    // TODO: Implement
+    for (TestVectors.UploadTest uploadTest : testVectors.uploadTestVector) {
+      final var uploadVenueInfo =
+          UserUploadPayloadOuterClass.UploadVenueInfo.newBuilder()
+              .setPreId(ByteString.copyFrom(uploadTest.preId))
+              .setTimeKey(ByteString.copyFrom(uploadTest.timeKey))
+              .setIntervalStartMs(uploadTest.intervalStartMs)
+              .setIntervalEndMs(uploadTest.intervalEndMs)
+              .setNotificationKey(ByteString.copyFrom(uploadTest.notificationKey))
+              .setFake(uploadTest.fake)
+              .build();
+      final var userUpload =
+          UserUploadPayloadOuterClass.UserUploadPayload.newBuilder()
+              .setVersion(3)
+              .addVenueInfos(uploadVenueInfo)
+              .build();
+      final var traceKeys = cryptoWrapper.getCryptoUtilV3().createTraceV3ForUserUpload(userUpload);
+      assertNotNull(traceKeys);
+      assertEquals(1, traceKeys.size());
+    }
   }
 
   @Test
   public void testGetNoncesAndNotificationKey() {
-    for (TestVectors.HKDFTest hkdfTest : testVectors.hkdfTestVector) {
+    for (TestVectors.UploadTest uploadTest : testVectors.uploadTestVector) {
       CryptoUtil.NoncesAndNotificationKey noncesAndNotificationKey =
-          cryptoWrapper.getCryptoUtilV3().getNoncesAndNotificationKey(hkdfTest.qrCodePayload);
+          cryptoWrapper.getCryptoUtilV3().getNoncesAndNotificationKey(uploadTest.qrCodePayload);
 
-      assertArrayEquals(hkdfTest.noncePreId, noncesAndNotificationKey.noncePreId);
-      assertArrayEquals(hkdfTest.nonceTimekey, noncesAndNotificationKey.nonceTimekey);
-      assertArrayEquals(hkdfTest.notificationKey, noncesAndNotificationKey.notificationKey);
+      assertArrayEquals(uploadTest.preId, noncesAndNotificationKey.noncePreId);
+      assertArrayEquals(uploadTest.timeKey, noncesAndNotificationKey.nonceTimekey);
+      assertArrayEquals(uploadTest.notificationKey, noncesAndNotificationKey.notificationKey);
     }
   }
 
   public static class TestVectors {
     public ArrayList<IdentityTest> identityTestVector;
     public ArrayList<HKDFTest> hkdfTestVector;
+    public ArrayList<UploadTest> uploadTestVector;
 
     public static class HKDFTest {
       public byte[] qrCodePayload;
@@ -80,6 +103,16 @@ public class CryptoUtilV3Test {
       public byte[] qrCodePayload;
       public int startOfInterval;
       public byte[] identity;
+    }
+
+    public static class UploadTest {
+      public byte[] qrCodePayload;
+      public byte[] preId;
+      public byte[] timeKey;
+      public long intervalStartMs;
+      public long intervalEndMs;
+      public byte[] notificationKey;
+      public boolean fake;
     }
   }
 }
