@@ -1,8 +1,8 @@
-package ch.ubique.notifyme.sdk.backend.ws.insert_manager;
+package ch.ubique.notifyme.sdk.backend.ws.insertmanager;
 
 import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV3;
 import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
-import ch.ubique.notifyme.sdk.backend.ws.insert_manager.insertion_filters.UploadInsertionFilter;
+import ch.ubique.notifyme.sdk.backend.ws.insertmanager.insertfilters.UploadInsertionFilter;
 import ch.ubique.notifyme.sdk.backend.ws.semver.Version;
 import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper;
 import org.slf4j.Logger;

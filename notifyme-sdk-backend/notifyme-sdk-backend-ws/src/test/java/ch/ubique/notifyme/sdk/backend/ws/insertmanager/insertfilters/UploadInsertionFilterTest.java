@@ -1,7 +1,7 @@
-package ch.ubique.notifyme.sdk.backend.ws.insert_manager.insertion_filters;
+package ch.ubique.notifyme.sdk.backend.ws.insertmanager.insertfilters;
 
 import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
-import ch.ubique.notifyme.sdk.backend.ws.insert_manager.OSType;
+import ch.ubique.notifyme.sdk.backend.ws.insertmanager.OSType;
 import ch.ubique.notifyme.sdk.backend.ws.semver.Version;
 import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper;
 import ch.ubique.notifyme.sdk.backend.ws.util.TokenHelper;
@@ -16,7 +16,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;

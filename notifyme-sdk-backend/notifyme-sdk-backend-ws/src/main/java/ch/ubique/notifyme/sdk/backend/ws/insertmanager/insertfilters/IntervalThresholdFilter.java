@@ -1,11 +1,10 @@
-package ch.ubique.notifyme.sdk.backend.ws.insert_manager.insertion_filters;
+package ch.ubique.notifyme.sdk.backend.ws.insertmanager.insertfilters;
 
 import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass;
-import ch.ubique.notifyme.sdk.backend.ws.insert_manager.InsertException;
-import ch.ubique.notifyme.sdk.backend.ws.insert_manager.OSType;
+import ch.ubique.notifyme.sdk.backend.ws.insertmanager.InsertException;
+import ch.ubique.notifyme.sdk.backend.ws.insertmanager.OSType;
 import ch.ubique.notifyme.sdk.backend.ws.semver.Version;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;

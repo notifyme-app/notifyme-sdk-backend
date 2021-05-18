@@ -1,4 +1,4 @@
-package ch.ubique.notifyme.sdk.backend.ws.insert_manager.insertion_filters;
+package ch.ubique.notifyme.sdk.backend.ws.insertmanager.insertfilters;
 
 import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
 import com.google.protobuf.ByteString;

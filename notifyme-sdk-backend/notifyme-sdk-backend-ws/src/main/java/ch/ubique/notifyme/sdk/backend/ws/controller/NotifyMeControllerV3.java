@@ -20,8 +20,8 @@ import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
 import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEvent;
 import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEvent.Builder;
 import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEventWrapper;
-import ch.ubique.notifyme.sdk.backend.ws.insert_manager.InsertException;
-import ch.ubique.notifyme.sdk.backend.ws.insert_manager.InsertManager;
+import ch.ubique.notifyme.sdk.backend.ws.insertmanager.InsertException;
+import ch.ubique.notifyme.sdk.backend.ws.insertmanager.InsertManager;
 import ch.ubique.notifyme.sdk.backend.ws.security.RequestValidator;
 import ch.ubique.notifyme.sdk.backend.ws.security.RequestValidator.NotAJwtException;
 import ch.ubique.notifyme.sdk.backend.ws.security.RequestValidator.WrongAudienceException;
@@ -29,13 +29,10 @@ import ch.ubique.notifyme.sdk.backend.ws.security.RequestValidator.WrongScopeExc
 import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper;
 import ch.ubique.notifyme.sdk.backend.ws.util.DateTimeUtil;
 import ch.ubique.openapi.docannotations.Documentation;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.protobuf.ByteString;
 import java.io.UnsupportedEncodingException;
 import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -48,7 +45,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 @Controller

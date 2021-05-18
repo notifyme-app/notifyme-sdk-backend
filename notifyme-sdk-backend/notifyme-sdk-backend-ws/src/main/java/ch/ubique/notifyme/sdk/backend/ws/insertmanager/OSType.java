@@ -1,4 +1,4 @@
-package ch.ubique.notifyme.sdk.backend.ws.insert_manager;
+package ch.ubique.notifyme.sdk.backend.ws.insertmanager;
 
 public enum OSType {
     ANDROID,
