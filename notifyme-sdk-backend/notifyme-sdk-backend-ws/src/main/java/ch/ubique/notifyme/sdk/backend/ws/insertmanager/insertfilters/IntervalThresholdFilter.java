@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * The app uploads VenueInfo objects that last at most 1 hour.
+ * The app uploads VenueInfo objects that span at most 1 hour.
  * UploadVenueInfo objects that break the interval threshold of (0,1) are dropped.
  */
 public class IntervalThresholdFilter implements UploadInsertionFilter {
