@@ -19,10 +19,10 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration("test-config")
 public class TestConfig {
-    @Autowired DataSource dataSource;
+  @Autowired DataSource dataSource;
 
-    @Bean
-    public PlatformTransactionManager testTransactionManager() {
-        return new DataSourceTransactionManager(dataSource);
-    }
+  @Bean
+  public PlatformTransactionManager testTransactionManager() {
+    return new DataSourceTransactionManager(dataSource);
+  }
 }

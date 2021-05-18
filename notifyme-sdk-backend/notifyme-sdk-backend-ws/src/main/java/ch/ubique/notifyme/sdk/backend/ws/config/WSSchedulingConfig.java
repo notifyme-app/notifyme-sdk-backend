@@ -50,7 +50,7 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
     protected WSSchedulingConfig(
             final NotifyMeDataServiceV2 notifyMeDataServiceV2,
             final NotifyMeDataServiceV3 notifyMeDataServiceV3,
-            final PhoneHeartbeatSilentPush phoneHeartbeatSilentPush) {
+            PhoneHeartbeatSilentPush phoneHeartbeatSilentPush) {
         this.notifyMeDataServiceV2 = notifyMeDataServiceV2;
         this.notifyMeDataServiceV3 = notifyMeDataServiceV3;
         this.phoneHeartbeatSilentPush = phoneHeartbeatSilentPush;

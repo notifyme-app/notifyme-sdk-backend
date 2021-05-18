@@ -1,10 +1,12 @@
 syntax = "proto3";
 
 package ch.ubique.notifyme.sdk.backend.model;
-option java_package = "ch.ubique.notifyme.sdk.backend.model.v3";
+option java_package = "ch.ubique.notifyme.sdk.backend.model.v3";    
 
 message AssociatedData {
   int32 version = 1;
   string message = 2;
-  bytes countryData = 3;
+  int64 startTimestamp = 3;
+  int64 endTimestamp = 4;
+  bytes countryData = 5;
 }
