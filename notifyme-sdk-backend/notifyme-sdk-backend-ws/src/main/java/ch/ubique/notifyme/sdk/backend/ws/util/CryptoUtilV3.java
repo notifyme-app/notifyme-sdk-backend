@@ -136,65 +136,6 @@ public class CryptoUtilV3 extends CryptoUtil {
         return traceKeys;
     }
 
-    public ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey createTraceV3(
-            ch.ubique.notifyme.sdk.backend.model.v3.PreTraceWithProofOuterClass.PreTraceWithProof
-                    preTraceWithProof,
-            String message,
-            byte[] countryData)
-            throws InvalidProtocolBufferException {
-
-        ch.ubique.notifyme.sdk.backend.model.v3.PreTraceWithProofOuterClass.PreTrace preTrace =
-                preTraceWithProof.getPreTrace();
-        ch.ubique.notifyme.sdk.backend.model.v3.PreTraceWithProofOuterClass.TraceProof proof =
-                preTraceWithProof.getProof();
-
-        byte[] ctxha = preTrace.getCipherTextHealthAuthority().toByteArray();
-        G1 secretKeyForIdentity =
-                getSecretKeyForIdentity(
-                        ctxha,
-                        preTrace.getIdentity().toByteArray(),
-                        preTrace.getPartialSecretKeyForIdentityOfLocation().toByteArray());
-
-        QrCodePayload.QRCodePayload qrCodePayload = QrCodePayload.QRCodePayload.parseFrom(preTraceWithProof.getQrCodePayload());
-        byte[] identity = generateIdentity(qrCodePayload, preTraceWithProof.getStartOfInterval());
-        if (!Arrays.equals(preTrace.getIdentity().toByteArray(), identity)) {
-            return null;
-        }
-
-        // verifyTrace
-        int NONCE_LENGTH = 32;
-        byte[] msg_orig = createNonce(NONCE_LENGTH);
-        G2 masterPublicKey = new G2();
-        masterPublicKey.deserialize(proof.getMasterPublicKey().toByteArray());
-        IBECiphertext ibeCiphertext = encryptInternal(masterPublicKey, identity, msg_orig);
-        byte[] msg_dec = decryptInternal(ibeCiphertext, secretKeyForIdentity, identity);
-        if (msg_dec == null) {
-            throw new RuntimeException("Health Authority could not verify Trace");
-        }
-
-        byte[] nonce = createNonce(Box.NONCEBYTES);
-        byte[] encryptedAssociatedData =
-                encryptAssociatedData(
-                        preTraceWithProof.getPreTrace().getNotificationKey().toByteArray(),
-                        message,
-                        countryData,
-                        nonce,
-                        preTraceWithProof.getStartTime(),
-                        preTraceWithProof.getEndTime());
-
-        ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey traceKey =
-                new ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey();
-        traceKey.setIdentity(preTrace.getIdentity().toByteArray());
-        traceKey.setCipherTextNonce(nonce);
-        traceKey.setDay(
-                Instant.ofEpochSecond(preTraceWithProof.getStartTime()).truncatedTo(ChronoUnit.DAYS));
-        traceKey.setCipherTextNonce(nonce);
-        traceKey.setEncryptedAssociatedData(encryptedAssociatedData);
-        traceKey.setSecretKeyForIdentity(secretKeyForIdentity.serialize());
-        traceKey.setVersion(3);
-        return traceKey;
-    }
-
     public NoncesAndNotificationKey getNoncesAndNotificationKey(QrCodePayload.QRCodePayload qrCodePayload) {
         return getNoncesAndNotificationKey(qrCodePayload.toByteArray());
     }
@@ -311,28 +252,6 @@ public class CryptoUtilV3 extends CryptoUtil {
 
         byte[] messageBytes = associatedData.toByteArray();
         return cryptoSecretboxEasy(secretKey, messageBytes, nonce);
-    }
-
-    public byte[] generateIdentity(QrCodePayload.QRCodePayload qrCodePayload, long startOfInterval) {
-        return generateIdentity(qrCodePayload.toByteArray(), startOfInterval);
-    }
-
-    public byte[] generateIdentity(byte[] qrCodePayload, long startOfInterval) {
-        NoncesAndNotificationKey cryptoData = getNoncesAndNotificationKey(qrCodePayload);
-        byte[] preid =
-                cryptoHashSHA256(
-                        concatenate(
-                                "CN-PREID".getBytes(StandardCharsets.US_ASCII),
-                                qrCodePayload,
-                                cryptoData.noncePreId));
-
-        return cryptoHashSHA256(
-                concatenate(
-                        "CN-ID".getBytes(StandardCharsets.US_ASCII),
-                        preid,
-                        intToBytes(3600),
-                        longToBytes(startOfInterval),
-                        cryptoData.nonceTimekey));
     }
 
     public byte[] longToBytes(long l) {

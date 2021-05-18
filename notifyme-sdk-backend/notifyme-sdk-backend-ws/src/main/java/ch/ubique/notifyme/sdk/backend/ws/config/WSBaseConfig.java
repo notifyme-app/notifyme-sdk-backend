@@ -21,8 +21,6 @@ import ch.ubique.notifyme.sdk.backend.data.PushRegistrationDataService;
 import ch.ubique.notifyme.sdk.backend.data.UUIDDataService;
 import ch.ubique.notifyme.sdk.backend.data.UUIDDataServiceImpl;
 import ch.ubique.notifyme.sdk.backend.ws.controller.ConfigController;
-import ch.ubique.notifyme.sdk.backend.ws.controller.DebugControllerV2;
-import ch.ubique.notifyme.sdk.backend.ws.controller.DebugControllerV3;
 import ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeControllerV2;
 import ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeControllerV3;
 import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebController;
@@ -241,24 +239,6 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
     String prettyTime =
         zonedDateTime.withZoneSameInstant(ZoneId.of("Europe/Zurich")).format(prettyFormatter);
     return "Rev: " + commitId + "\n" + prettyTime;
-  }
-
-  @Profile("enable-debug")
-  @Bean
-  public DebugControllerV3 debugControllerV3(
-      final NotifyMeDataServiceV3 notifyMeDataServiceV3, final CryptoWrapper cryptoWrapper) {
-    return new DebugControllerV3(notifyMeDataServiceV3, cryptoWrapper);
-  }
-
-  @Profile("enable-debug")
-  @Bean
-  public DebugControllerV2 debugControllerV2(
-      final NotifyMeDataServiceV2 notifyMeDataServiceV2,
-      final NotifyMeDataServiceV3 notifyMeDataServiceV3,
-      final DiaryEntryDataService diaryEntryDataService,
-      final CryptoWrapper cryptoWrapper) {
-    return new DebugControllerV2(
-        notifyMeDataServiceV2, notifyMeDataServiceV3, diaryEntryDataService, cryptoWrapper);
   }
 
   @Bean
