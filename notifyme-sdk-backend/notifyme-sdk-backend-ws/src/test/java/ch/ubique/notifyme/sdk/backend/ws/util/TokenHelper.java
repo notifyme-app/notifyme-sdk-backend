@@ -12,6 +12,7 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Base64;
@@ -66,14 +67,14 @@ public class TokenHelper {
   }
 
   public String createToken(
-      String onsetDate,
-      String fake,
-      String audience,
-      String scope,
-      Date expiresAt,
-      boolean validSig)
+          String onsetDate,
+          String fake,
+          String audience,
+          String scope,
+          Date expiresAt,
+          boolean validSig,
+          Instant now)
       throws Exception {
-    final var now = LocalDateTime.now().toInstant(ZoneOffset.UTC);
     final var sigKey = validSig ? privateKey : loadPrivateKey(PATH_TO_SK_OTHER);
 
     return Jwts.builder()

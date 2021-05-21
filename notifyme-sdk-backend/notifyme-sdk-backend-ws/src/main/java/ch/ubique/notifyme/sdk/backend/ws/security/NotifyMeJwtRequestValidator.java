@@ -2,6 +2,10 @@ package ch.ubique.notifyme.sdk.backend.ws.security;
 
 import org.springframework.security.oauth2.jwt.Jwt;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 public class NotifyMeJwtRequestValidator implements RequestValidator {
 
     @Override
@@ -22,14 +26,23 @@ public class NotifyMeJwtRequestValidator implements RequestValidator {
     }
 
     @Override
-    public long validateKeyDate(Object authObject, Object others) throws ClaimIsBeforeOnsetException, InvalidDateException {
-        // TODO Implement
-        return 0;
+    public boolean isOnsetBefore(Object authObject, LocalDateTime dateTime) {
+        if(authObject instanceof Jwt) {
+            Jwt token = (Jwt) authObject;
+            final var dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            final var onset = LocalDate.parse(token.getClaim("onset"), dateTimeFormatter);
+            return !onset.isAfter(dateTime.toLocalDate()); // Use isAfter because onset could be on the same day
+        }
+        return false;
     }
+
 
     @Override
     public boolean isFakeRequest(Object authObject, Object others) {
-        // TODO Implement
+        if (authObject instanceof Jwt) {
+            Jwt token = (Jwt) authObject;
+            return Boolean.TRUE.equals(token.containsClaim("fake")) && "1".equals(token.getClaim("fake"));
+        }
         return false;
     }
 }

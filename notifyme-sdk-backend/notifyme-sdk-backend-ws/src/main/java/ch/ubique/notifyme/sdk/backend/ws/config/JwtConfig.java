@@ -37,7 +37,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 
 @Configuration
-@EnableWebSecurity(debug = false)
+@EnableWebSecurity
 @Profile(value = "jwt")
 public class JwtConfig extends WebSecurityConfigurerAdapter {
 
@@ -53,6 +53,10 @@ public class JwtConfig extends WebSecurityConfigurerAdapter {
   protected void configure(HttpSecurity http) throws Exception {
     http.sessionManagement()
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        .and()
+        .csrf()
+        .disable()
+        .cors()
         .and()
         .authorizeRequests()
         .antMatchers(HttpMethod.POST, "/v3/userupload", "/v3/traceKeys")

@@ -171,7 +171,7 @@ public class SodiumWrapperTest {
     UserUploadPayload userUpload = userUploadBuilder.build();
 
     List<ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey> traceKeys =
-        cryptoWrapper.getCryptoUtilV3().createTraceV3ForUserUpload(userUpload);
+        cryptoWrapper.getCryptoUtilV3().createTraceV3ForUserUpload(userUpload.getVenueInfosList());
 
     // 1 hour checkin, should give 2 matches, as long es the test does not run
     // exactly at the full hour.
