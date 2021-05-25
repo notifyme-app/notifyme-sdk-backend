@@ -7,7 +7,6 @@ import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper;
 import ch.ubique.notifyme.sdk.backend.ws.util.TokenHelper;
 import com.google.protobuf.ByteString;
 import java.nio.charset.StandardCharsets;
-import org.apache.tomcat.jni.Local;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,13 +59,10 @@ public abstract class UploadInsertionFilterTest {
   public void testFilterValid() throws Exception {
     LocalDateTime now = LocalDateTime.now();
     final List<UploadVenueInfo> uploadVenueInfoList = getValidVenueInfo();
-    final var osType = OSType.ANDROID;
-    final var osVersion = new Version("29");
-    final var appVersion = new Version("1.0.0+0");
     final var token = getToken(now);
     assertEquals(uploadVenueInfoList.size(),
         insertionFilter()
-            .filter(now, uploadVenueInfoList, osType, osVersion, appVersion, token)
+            .filter(now, uploadVenueInfoList, token)
             .size());
   }
 
@@ -74,13 +70,10 @@ public abstract class UploadInsertionFilterTest {
   public void testFilterInvalid() throws Exception {
     LocalDateTime now = LocalDateTime.now();
     final List<UploadVenueInfo> uploadVenueInfoList = getInvalidVenueInfo();
-    final var osType = OSType.ANDROID;
-    final var osVersion = new Version("29");
-    final var appVersion = new Version("1.0.0+0");
     final var token = getToken(now);
     assertTrue(
         insertionFilter()
-            .filter(now, uploadVenueInfoList, osType, osVersion, appVersion, token)
+            .filter(now, uploadVenueInfoList, token)
             .isEmpty());
   }
 

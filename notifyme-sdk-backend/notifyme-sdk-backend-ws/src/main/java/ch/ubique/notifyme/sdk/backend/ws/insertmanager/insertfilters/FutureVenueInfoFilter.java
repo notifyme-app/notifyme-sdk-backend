@@ -2,8 +2,6 @@ package ch.ubique.notifyme.sdk.backend.ws.insertmanager.insertfilters;
 
 import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
 import ch.ubique.notifyme.sdk.backend.ws.insertmanager.InsertException;
-import ch.ubique.notifyme.sdk.backend.ws.insertmanager.OSType;
-import ch.ubique.notifyme.sdk.backend.ws.semver.Version;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -15,7 +13,7 @@ public class FutureVenueInfoFilter implements
 
   @Override
   public List<UploadVenueInfo> filter(LocalDateTime now, List<UploadVenueInfo> uploadVenueInfoList,
-      OSType osType, Version osVersion, Version appVersion, Object principal)
+      Object principal)
       throws InsertException {
     return uploadVenueInfoList.stream().filter(uploadVenueInfo -> {
       final var intervalEnd = LocalDateTime.ofInstant(Instant.ofEpochMilli(uploadVenueInfo.getIntervalEndMs()), ZoneOffset.UTC);

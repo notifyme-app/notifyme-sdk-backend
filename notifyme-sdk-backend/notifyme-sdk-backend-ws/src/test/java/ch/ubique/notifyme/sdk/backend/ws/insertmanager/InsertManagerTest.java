@@ -2,12 +2,10 @@ package ch.ubique.notifyme.sdk.backend.ws.insertmanager;
 
 import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV3;
 import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
-import ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey;
 import ch.ubique.notifyme.sdk.backend.ws.insertmanager.insertfilters.FakeRequestFilter;
 import ch.ubique.notifyme.sdk.backend.ws.insertmanager.insertfilters.IntervalThresholdFilter;
 import ch.ubique.notifyme.sdk.backend.ws.insertmanager.insertfilters.OverlappingIntervalsFilter;
 import ch.ubique.notifyme.sdk.backend.ws.insertmanager.insertfilters.UploadInsertionFilter;
-import ch.ubique.notifyme.sdk.backend.ws.semver.Version;
 import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper;
 import ch.ubique.notifyme.sdk.backend.ws.util.TokenHelper;
 import com.google.protobuf.ByteString;
@@ -15,7 +13,6 @@ import java.time.Clock;
 import mockit.Mock;
 import mockit.MockUp;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,9 +75,6 @@ public class InsertManagerTest {
           public List<UploadVenueInfo> filter(
               LocalDateTime now,
               List<UploadVenueInfo> uploadVenueInfoList,
-              OSType osType,
-              Version osVersion,
-              Version appVersion,
               Object principal)
               throws InsertException {
             return new ArrayList<>();
@@ -105,9 +99,6 @@ public class InsertManagerTest {
           public List<UploadVenueInfo> filter(
               LocalDateTime now,
               List<UploadVenueInfo> uploadVenueInfoList,
-              OSType osType,
-              Version osVersion,
-              Version appVersion,
               Object principal)
               throws InsertException {
             return uploadVenueInfoList;
@@ -167,12 +158,11 @@ public class InsertManagerTest {
         insertManager.addFilter(insertionFilter);
       }
     }
-    final String userAgent = "ch.admin.bag.notifyMe.dev;1.0.7;1595591959493;Android;29";
     final var expiry = Instant.now().plus(5, ChronoUnit.MINUTES);
     final var token =
         tokenHelper.createToken(
             "2021-04-29", "0", "notifyMe", "userupload", Date.from(expiry), true, Instant.now());
-    insertManager.insertIntoDatabase(uploadVenueInfoList, userAgent, token, now);
+    insertManager.insertIntoDatabase(uploadVenueInfoList, token, now);
   }
 
   private UploadVenueInfo createUploadVenueInfo(Instant start, Instant end, boolean fake) {

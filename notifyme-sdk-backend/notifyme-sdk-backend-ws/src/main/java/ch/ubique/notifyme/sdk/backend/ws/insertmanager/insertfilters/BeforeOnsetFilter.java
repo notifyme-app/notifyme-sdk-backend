@@ -1,10 +1,9 @@
 package ch.ubique.notifyme.sdk.backend.ws.insertmanager.insertfilters;
 
 import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass;
+import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
 import ch.ubique.notifyme.sdk.backend.ws.insertmanager.InsertException;
-import ch.ubique.notifyme.sdk.backend.ws.insertmanager.OSType;
 import ch.ubique.notifyme.sdk.backend.ws.security.NotifyMeJwtRequestValidator;
-import ch.ubique.notifyme.sdk.backend.ws.semver.Version;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -20,10 +19,7 @@ public class BeforeOnsetFilter implements UploadInsertionFilter {
   @Override
   public List<UserUploadPayloadOuterClass.UploadVenueInfo> filter(
       LocalDateTime now,
-      List<UserUploadPayloadOuterClass.UploadVenueInfo> uploadVenueInfoList,
-      OSType osType,
-      Version osVersion,
-      Version appVersion,
+      List<UploadVenueInfo> uploadVenueInfoList,
       Object principal)
       throws InsertException {
     final var notifyMeJwtRequestValidator = new NotifyMeJwtRequestValidator();

@@ -4,8 +4,6 @@ import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UploadVe
 import ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey;
 import ch.ubique.notifyme.sdk.backend.ws.insertmanager.InsertException;
 import ch.ubique.notifyme.sdk.backend.ws.insertmanager.InsertManager;
-import ch.ubique.notifyme.sdk.backend.ws.insertmanager.OSType;
-import ch.ubique.notifyme.sdk.backend.ws.semver.Version;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,20 +20,14 @@ public interface UploadInsertionFilter {
    *
    * @param now current timestamp
    * @param uploadVenueInfoList the list of venue info objects to be inserted
-   * @param osType the os type of the client
-   * @param osVersion the os version of the client
-   * @param appVersion the app version of the client
    * @param principal the authorization context which belongs to the uploaded keys. This will
    *     usually be a JWT token.
    * @return Filtered list of {@link UploadVenueInfo} elements
    * @throws InsertException
    */
   public List<UploadVenueInfo> filter(
-          LocalDateTime now,
-          List<UploadVenueInfo> uploadVenueInfoList,
-          OSType osType,
-          Version osVersion,
-          Version appVersion,
-          Object principal)
+      LocalDateTime now,
+      List<UploadVenueInfo> uploadVenueInfoList,
+      Object principal)
       throws InsertException;
 }

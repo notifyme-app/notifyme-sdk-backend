@@ -31,8 +31,6 @@ import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper;
 import ch.ubique.notifyme.sdk.backend.ws.util.DateTimeUtil;
 import ch.ubique.openapi.docannotations.Documentation;
 import com.google.protobuf.ByteString;
-import io.micrometer.core.instrument.config.validate.Validated.Invalid;
-import java.io.InvalidClassException;
 import java.io.UnsupportedEncodingException;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -252,7 +250,7 @@ public class NotifyMeControllerV3 {
 
     requestValidator.isValid(principal);
 
-    insertManager.insertIntoDatabase(userUploadPayload.getVenueInfosList(), userAgent, principal, now);
+    insertManager.insertIntoDatabase(userUploadPayload.getVenueInfosList(), principal, now);
 
     return () -> {
       try {
