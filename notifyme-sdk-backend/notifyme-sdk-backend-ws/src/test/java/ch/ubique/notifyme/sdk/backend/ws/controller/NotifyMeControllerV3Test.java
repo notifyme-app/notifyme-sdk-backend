@@ -19,6 +19,7 @@ import ch.ubique.notifyme.sdk.backend.ws.util.TokenHelper;
 import com.google.protobuf.ByteString;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -28,6 +29,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import mockit.Mock;
+import mockit.MockUp;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -171,6 +174,13 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
             .andExpect(request().asyncStarted())
             .andReturn();
     mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isOk());
+    Clock clock = Clock.fixed(now.plusDays(1).toInstant(ZoneOffset.UTC), ZoneOffset.UTC);
+    new MockUp<Instant>() {
+      @Mock
+      public Instant now() {
+        return Instant.now(clock);
+      }
+    };
     final MockHttpServletResponse response =
         mockMvc
             .perform(get("/v3/traceKeys").accept("application/protobuf"))
@@ -216,6 +226,13 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
             .andReturn();
     mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isOk());
     final var duration = start.until(LocalDateTime.now(), ChronoUnit.MILLIS);
+    Clock clock = Clock.fixed(now.plusDays(1).toInstant(ZoneOffset.UTC), ZoneOffset.UTC);
+    new MockUp<Instant>() {
+      @Mock
+      public Instant now() {
+        return Instant.now(clock);
+      }
+    };
     final var traceKeys = notifyMeDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC));
     assertEquals(initSize + 1, traceKeys.size());
     assertTrue(requestTime <= duration);
@@ -275,6 +292,13 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
                     .andReturn();
     mockMvc.perform(asyncDispatch(mvcResult)).andExpect(status().isOk());
     final var duration = start.until(LocalDateTime.now(), ChronoUnit.MILLIS);
+    Clock clock = Clock.fixed(now.plusDays(1).toInstant(ZoneOffset.UTC), ZoneOffset.UTC);
+    new MockUp<Instant>() {
+      @Mock
+      public Instant now() {
+        return Instant.now(clock);
+      }
+    };
     final var traceKeys = notifyMeDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC));
     assertEquals(initSize + 1, traceKeys.size());
     assertTrue(requestTime <= duration);

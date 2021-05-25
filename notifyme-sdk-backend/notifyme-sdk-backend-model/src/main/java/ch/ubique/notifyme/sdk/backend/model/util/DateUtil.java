@@ -57,6 +57,10 @@ public class DateUtil {
         return (Instant.now().toEpochMilli() / bucketSizeInMs) * bucketSizeInMs;
     }
 
+    public static long getCurrentBucketEndEpochMilli(Long bucketSizeInMs) {
+        return (Instant.now().toEpochMilli() / bucketSizeInMs) * bucketSizeInMs + bucketSizeInMs;
+    }
+
     public static String formattedDateTime(final Instant time) {
         return DATETIME_FORMATTER.format(time);
     }

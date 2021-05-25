@@ -95,7 +95,7 @@ public class JdbcNotifyMeDataServiceV3Impl implements NotifyMeDataServiceV3 {
     if (traceKey.getCreatedAt() != null) {
       params.addValue("created_at", Timestamp.from(traceKey.getCreatedAt()));
     } else {
-      params.addValue("created_at", Timestamp.from(Instant.now()));
+      params.addValue("created_at", new Timestamp(DateUtil.getCurrentBucketEndEpochMilli(bucketSizeInMs)));
     }
     params.addValue("encrypted_associated_data", traceKey.getEncryptedAssociatedData());
     params.addValue("cipher_text_nonce", traceKey.getCipherTextNonce());

@@ -11,6 +11,9 @@ import ch.ubique.notifyme.sdk.backend.ws.semver.Version;
 import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper;
 import ch.ubique.notifyme.sdk.backend.ws.util.TokenHelper;
 import com.google.protobuf.ByteString;
+import java.time.Clock;
+import mockit.Mock;
+import mockit.MockUp;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -94,7 +97,6 @@ public class InsertManagerTest {
 
   @Test
   @Transactional
-  @Ignore("No sleep in automated testcases")
   public void testInsertValid() throws Exception {
     final var now = Instant.now();
     UploadInsertionFilter removeNone =
@@ -116,7 +118,13 @@ public class InsertManagerTest {
         createUploadVenueInfo(
             now.minus(2, ChronoUnit.HOURS), now.minus(1, ChronoUnit.HOURS), false));
     insertWith(Collections.singletonList(removeNone), uploadVenueInfoList, LocalDateTime.ofInstant(now, TimeZone.getDefault().toZoneId()));
-    Thread.sleep(bucketSizeinMs);
+    Clock clock = Clock.fixed(now.plus(1, ChronoUnit.DAYS), ZoneOffset.UTC);
+    new MockUp<Instant>() {
+      @Mock
+      public Instant now() {
+        return Instant.now(clock);
+      }
+    };
     final var traceKeys = notifyMeDataServiceV3.findTraceKeys(now.minus(1, ChronoUnit.DAYS));
     assertEquals(1,
         traceKeys.size());
@@ -124,7 +132,6 @@ public class InsertManagerTest {
 
   @Test
   @Transactional
-  @Ignore("No sleep in automated testcases")
   public void testAddRequestFilters() throws Exception {
     final var now = Instant.now();
     final var venueInfoList = new ArrayList<UploadVenueInfo>();
@@ -139,7 +146,13 @@ public class InsertManagerTest {
     final var validUpload = createUploadVenueInfo(now.minus(24,  ChronoUnit.HOURS), now.minus(23, ChronoUnit.HOURS), false);
     venueInfoList.add(validUpload);
     insertWith(Arrays.asList(new FakeRequestFilter(), new IntervalThresholdFilter(), new OverlappingIntervalsFilter()), venueInfoList, LocalDateTime.ofInstant(now, TimeZone.getDefault().toZoneId()));
-    Thread.sleep(bucketSizeinMs);
+    Clock clock = Clock.fixed(now.plus(1, ChronoUnit.DAYS), ZoneOffset.UTC);
+    new MockUp<Instant>() {
+      @Mock
+      public Instant now() {
+        return Instant.now(clock);
+      }
+    };
     assertEquals(1, notifyMeDataServiceV3.findTraceKeys(now.minus(1, ChronoUnit.DAYS)).size());
   }
 
