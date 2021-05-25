@@ -9,7 +9,7 @@ public interface RequestValidator {
    * @throws WrongScopeException, WrongAudienceException
    */
   public boolean isValid(Object authObject)
-      throws WrongScopeException, WrongAudienceException, NotAJwtException;
+      throws WrongScopeException, WrongAudienceException, NotAJwtException, InvalidOnsetException;
 
   /**
    * Checks if the date in the onset claim is before the given date
@@ -30,7 +30,7 @@ public interface RequestValidator {
    */
   public boolean isFakeRequest(Object authObject, Object others);
 
-  public class InvalidDateException extends Exception {
+  public class InvalidOnsetException extends Exception {
     private static final long serialVersionUID = 5886601055826066148L;
   }
 

@@ -9,12 +9,16 @@ import java.time.format.DateTimeFormatter;
 public class NotifyMeJwtRequestValidator implements RequestValidator {
 
     @Override
-    public boolean isValid(Object authObject) throws WrongScopeException, WrongAudienceException, NotAJwtException {
+    public boolean isValid(Object authObject) throws WrongScopeException, WrongAudienceException, NotAJwtException, InvalidOnsetException {
         if(authObject instanceof Jwt) {
             Jwt token = (Jwt) authObject;
             if (Boolean.TRUE.equals(token.containsClaim("scope")) && token.getClaim("scope").equals("userupload")) {
                 if(token.getAudience().contains("checkin")) {
-                    return true;
+                    if(isOnsetBefore(authObject, LocalDateTime.now())) {
+                        return true;
+                    } else {
+                        throw new InvalidOnsetException();
+                    }
                 } else {
                     throw new WrongAudienceException();
                 }

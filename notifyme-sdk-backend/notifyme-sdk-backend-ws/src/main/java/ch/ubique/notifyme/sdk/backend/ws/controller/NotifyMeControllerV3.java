@@ -23,6 +23,7 @@ import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass
 import ch.ubique.notifyme.sdk.backend.ws.insertmanager.InsertException;
 import ch.ubique.notifyme.sdk.backend.ws.insertmanager.InsertManager;
 import ch.ubique.notifyme.sdk.backend.ws.security.RequestValidator;
+import ch.ubique.notifyme.sdk.backend.ws.security.RequestValidator.InvalidOnsetException;
 import ch.ubique.notifyme.sdk.backend.ws.security.RequestValidator.NotAJwtException;
 import ch.ubique.notifyme.sdk.backend.ws.security.RequestValidator.WrongAudienceException;
 import ch.ubique.notifyme.sdk.backend.ws.security.RequestValidator.WrongScopeException;
@@ -30,6 +31,8 @@ import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper;
 import ch.ubique.notifyme.sdk.backend.ws.util.DateTimeUtil;
 import ch.ubique.openapi.docannotations.Documentation;
 import com.google.protobuf.ByteString;
+import io.micrometer.core.instrument.config.validate.Validated.Invalid;
+import java.io.InvalidClassException;
 import java.io.UnsupportedEncodingException;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -243,7 +246,7 @@ public class NotifyMeControllerV3 {
       @AuthenticationPrincipal
           @Documentation(description = "JWT token that can be verified by the backend server")
           Object principal)
-      throws WrongScopeException, WrongAudienceException, NotAJwtException, InsertException {
+      throws WrongScopeException, WrongAudienceException, NotAJwtException, InvalidOnsetException, InsertException {
 
     final var now = LocalDateTime.now();
 
@@ -272,7 +275,8 @@ public class NotifyMeControllerV3 {
   @ExceptionHandler({
           WrongScopeException.class,
           WrongAudienceException.class,
-          NotAJwtException.class
+          NotAJwtException.class,
+          InvalidOnsetException.class
   })
   @ResponseStatus(HttpStatus.FORBIDDEN)
   public ResponseEntity<Object> forbidden() {
