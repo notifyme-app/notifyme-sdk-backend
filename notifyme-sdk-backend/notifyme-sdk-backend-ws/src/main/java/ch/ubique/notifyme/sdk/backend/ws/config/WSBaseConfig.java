@@ -30,6 +30,7 @@ import ch.ubique.notifyme.sdk.backend.ws.insertmanager.insertfilters.BeforeOnset
 import ch.ubique.notifyme.sdk.backend.ws.insertmanager.insertfilters.FakeRequestFilter;
 import ch.ubique.notifyme.sdk.backend.ws.insertmanager.insertfilters.IntervalThresholdFilter;
 import ch.ubique.notifyme.sdk.backend.ws.insertmanager.insertfilters.OverlappingIntervalsFilter;
+import ch.ubique.notifyme.sdk.backend.ws.insertmanager.insertmodifiers.RemoveFinalIntervalModifier;
 import ch.ubique.notifyme.sdk.backend.ws.security.NotifyMeJwtRequestValidator;
 import ch.ubique.notifyme.sdk.backend.ws.security.RequestValidator;
 import ch.ubique.notifyme.sdk.backend.ws.service.PhoneHeartbeatSilentPush;
@@ -179,6 +180,7 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
           final NotifyMeDataServiceV3 notifyMeDataServiceV3
   ) {
     final var insertManager = new InsertManager(cryptoWrapper, notifyMeDataServiceV3);
+    insertManager.addModifier(new RemoveFinalIntervalModifier());
     insertManager.addFilter(new FakeRequestFilter());
     insertManager.addFilter(new IntervalThresholdFilter());
     insertManager.addFilter(new BeforeOnsetFilter());

@@ -3,6 +3,7 @@ package ch.ubique.notifyme.sdk.backend.ws.insertmanager;
 import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV3;
 import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
 import ch.ubique.notifyme.sdk.backend.ws.insertmanager.insertfilters.UploadInsertionFilter;
+import ch.ubique.notifyme.sdk.backend.ws.insertmanager.insertmodifiers.UploadInsertionModifier;
 import ch.ubique.notifyme.sdk.backend.ws.semver.Version;
 import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper;
 import org.slf4j.Logger;
@@ -17,6 +18,7 @@ public class InsertManager {
     private static final Logger logger = LoggerFactory.getLogger(InsertManager.class);
 
     private final List<UploadInsertionFilter> filterList = new ArrayList<>();
+    private final List<UploadInsertionModifier> modifierList = new ArrayList<>();
 
     private final CryptoWrapper cryptoWrapper;
     private final NotifyMeDataServiceV3 notifyMeDataServiceV3;
@@ -36,6 +38,15 @@ public class InsertManager {
     }
 
     /**
+     * Adds a modifer to the list of modifiers to be applied to a {@link UploadVenueInfo} object before filtering and inserting it
+     * into the database as a {@link ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey}.
+     * @param modifier to be added to the modifier list. The modifier method must return the a list of modified VenueInfo's
+     */
+    public void addModifier(UploadInsertionModifier modifier) {
+        this.modifierList.add(modifier);
+    }
+
+    /**
      * Applies the stored list of filters, transforms any remaining venueInfo's into trace keys, and stores them to the
      * database.
      * @param uploadVenueInfoList List of UploadVenueInfo objects to be stored to the database
@@ -49,7 +60,8 @@ public class InsertManager {
         LocalDateTime now
     ) throws InsertException {
         if (uploadVenueInfoList != null && !uploadVenueInfoList.isEmpty()) {
-            final var filteredVenueInfoList = filterUpload(uploadVenueInfoList, principal, now);
+            final var modifiedVenueInfoList = modifyUpload(uploadVenueInfoList, principal, now);
+            final var filteredVenueInfoList = filterUpload(modifiedVenueInfoList, principal, now);
             final var traceKeys = cryptoWrapper.getCryptoUtilV3().createTraceV3ForUserUpload(filteredVenueInfoList);
             if (!traceKeys.isEmpty()) {
                 notifyMeDataServiceV3.insertTraceKey(traceKeys);
@@ -65,6 +77,15 @@ public class InsertManager {
         var venueInfoList = uploadVenueInfoList;
         for (UploadInsertionFilter insertionFilter: filterList) {
             venueInfoList = insertionFilter.filter(now, venueInfoList, principal);
+        }
+        return venueInfoList;
+    }
+
+    private List<UploadVenueInfo> modifyUpload(List<UploadVenueInfo> uploadVenueInfoList,
+        Object principal, LocalDateTime now) throws InsertException {
+        var venueInfoList = uploadVenueInfoList;
+        for (UploadInsertionModifier insertionModifier: modifierList) {
+            venueInfoList = insertionModifier.modify(now, venueInfoList, principal);
         }
         return venueInfoList;
     }
