@@ -52,24 +52,17 @@ public class JdbcNotifyMeDataServiceV3Impl implements NotifyMeDataServiceV3 {
   }
 
   @Override
-  @Transactional(readOnly = true)
-  public List<TraceKey> findTraceKeys(Instant before, Instant after) {
+  public List<TraceKey> findTraceKeys(Instant after) {
+    final var before = Instant.ofEpochMilli(DateUtil.getLastFullBucketEndEpochMilli(bucketSizeInMs));
     var sql = "select * from t_trace_key_v3";
     MapSqlParameterSource params = new MapSqlParameterSource();
     params.addValue("before", Timestamp.from(before));
     sql += " where created_at < :before";
     if (after != null) {
       sql += " and created_at >= :after";
-//      sql += " where created_at >= :after";
       params.addValue("after", Timestamp.from(after));
     }
     return jt.query(sql, params, new TraceKeyV3RowMapper());
-  }
-
-  @Override
-  public List<TraceKey> findTraceKeys(Instant after) {
-    final var before = Instant.ofEpochMilli(DateUtil.getLastFullBucketEndEpochMilli(bucketSizeInMs));
-    return findTraceKeys(before, after);
   }
 
   @Override

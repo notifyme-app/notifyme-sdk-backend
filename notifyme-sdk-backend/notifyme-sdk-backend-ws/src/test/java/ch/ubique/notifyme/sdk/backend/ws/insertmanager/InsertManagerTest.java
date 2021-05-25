@@ -12,9 +12,11 @@ import ch.ubique.notifyme.sdk.backend.ws.util.CryptoWrapper;
 import ch.ubique.notifyme.sdk.backend.ws.util.TokenHelper;
 import com.google.protobuf.ByteString;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -41,6 +43,8 @@ public class InsertManagerTest {
   @Autowired CryptoWrapper cryptoWrapper;
 
   @Autowired TransactionManager transactionManager;
+
+  @Value("${traceKey.bucketSizeInMs}") Long bucketSizeinMs;
 
   private TokenHelper tokenHelper;
 
@@ -90,6 +94,7 @@ public class InsertManagerTest {
 
   @Test
   @Transactional
+  @Ignore("No sleep in automated testcases")
   public void testInsertValid() throws Exception {
     final var now = Instant.now();
     UploadInsertionFilter removeNone =
@@ -111,13 +116,15 @@ public class InsertManagerTest {
         createUploadVenueInfo(
             now.minus(2, ChronoUnit.HOURS), now.minus(1, ChronoUnit.HOURS), false));
     insertWith(Collections.singletonList(removeNone), uploadVenueInfoList, LocalDateTime.ofInstant(now, TimeZone.getDefault().toZoneId()));
-    final var traceKeys = notifyMeDataServiceV3.findTraceKeys(now.plus(1, ChronoUnit.HOURS), now.minus(1, ChronoUnit.DAYS));
+    Thread.sleep(bucketSizeinMs);
+    final var traceKeys = notifyMeDataServiceV3.findTraceKeys(now.minus(1, ChronoUnit.DAYS));
     assertEquals(1,
         traceKeys.size());
   }
 
   @Test
   @Transactional
+  @Ignore("No sleep in automated testcases")
   public void testAddRequestFilters() throws Exception {
     final var now = Instant.now();
     final var venueInfoList = new ArrayList<UploadVenueInfo>();
@@ -132,7 +139,8 @@ public class InsertManagerTest {
     final var validUpload = createUploadVenueInfo(now.minus(24,  ChronoUnit.HOURS), now.minus(23, ChronoUnit.HOURS), false);
     venueInfoList.add(validUpload);
     insertWith(Arrays.asList(new FakeRequestFilter(), new IntervalThresholdFilter(), new OverlappingIntervalsFilter()), venueInfoList, LocalDateTime.ofInstant(now, TimeZone.getDefault().toZoneId()));
-    assertEquals(1, notifyMeDataServiceV3.findTraceKeys(now.plus(1, ChronoUnit.HOURS), now.minus(1, ChronoUnit.DAYS)).size());
+    Thread.sleep(bucketSizeinMs);
+    assertEquals(1, notifyMeDataServiceV3.findTraceKeys(now.minus(1, ChronoUnit.DAYS)).size());
   }
 
   private void insertWith(

@@ -25,16 +25,6 @@ public interface NotifyMeDataServiceV3 {
     public void insertTraceKey(TraceKey traceKey);
 
     /**
-     * Returns trace keys that where submitted (/created) after the given date.
-     * Returns all trace keys if after == null.
-     *
-     * @param before
-     * @param after
-     * @return
-     */
-    public List<TraceKey> findTraceKeys(Instant before, Instant after);
-
-    /**
      * Wrapper around findTraceKeys where before is set to the end of the previous bucket
      *
      * @param after
