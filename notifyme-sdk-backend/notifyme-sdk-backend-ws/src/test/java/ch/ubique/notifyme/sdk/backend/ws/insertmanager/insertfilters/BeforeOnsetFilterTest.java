@@ -56,34 +56,5 @@ public class BeforeOnsetFilterTest extends UploadInsertionFilterTest {
         return jwtDecoder.decode(tokenHelper.createToken(
                 onset, "0", "notifyMe", "userupload", Date.from(expiry), true, currentTime.toInstant(ZoneOffset.UTC)));
     }
-
-    private UploadVenueInfo getVenueInfo(
-            LocalDateTime start, LocalDateTime end) {
-        final var crypto = cryptoWrapper.getCryptoUtilV3();
-        final var noncesAndNotificationKey =
-                crypto.getNoncesAndNotificationKey(crypto.createNonce(256));
-        byte[] preid =
-                crypto.cryptoHashSHA256(
-                        crypto.concatenate(
-                                "CN-PREID".getBytes(StandardCharsets.US_ASCII),
-                                "payload".getBytes(StandardCharsets.US_ASCII),
-                                noncesAndNotificationKey.noncePreId));
-        byte[] timekey =
-                crypto.cryptoHashSHA256(
-                        crypto.concatenate(
-                                "CN-TIMEKEY".getBytes(StandardCharsets.US_ASCII),
-                                crypto.longToBytes(3600L),
-                                crypto.longToBytes(start.toInstant(ZoneOffset.UTC).getEpochSecond()),
-                                noncesAndNotificationKey.nonceTimekey));
-        return UploadVenueInfo.newBuilder()
-                .setPreId(ByteString.copyFrom(preid))
-                .setTimeKey(ByteString.copyFrom(timekey))
-                .setIntervalStartMs(start.toInstant(ZoneOffset.UTC).toEpochMilli())
-                .setIntervalEndMs(end.toInstant(ZoneOffset.UTC).toEpochMilli())
-                .setNotificationKey(ByteString.copyFrom(noncesAndNotificationKey.notificationKey))
-                .setFake(false)
-                .build();
-    }
-
 }
 
