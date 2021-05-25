@@ -56,6 +56,9 @@ public class InsertManager {
             if (!traceKeys.isEmpty()) {
                 notifyMeDataServiceV3.insertTraceKey(traceKeys);
             }
+        } else {
+          // Invalid upload: Empty VenueInfo list
+          throw new NoVenueInfosException();
         }
     }
 

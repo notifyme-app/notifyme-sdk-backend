@@ -63,7 +63,7 @@ public class InsertManagerTest {
     final var now = Instant.now();
     assertTrue(
         notifyMeDataServiceV3.findTraceKeys(now.minus(1, ChronoUnit.DAYS)).isEmpty());
-    insertWith(new ArrayList<>(), new ArrayList<>(), LocalDateTime.ofInstant(now, TimeZone.getDefault().toZoneId()));
+    assertThrows(InsertException.class, () -> insertWith(new ArrayList<>(), new ArrayList<>(), LocalDateTime.ofInstant(now, TimeZone.getDefault().toZoneId())));
     assertTrue(
         notifyMeDataServiceV3.findTraceKeys(now.minus(1, ChronoUnit.DAYS)).isEmpty());
   }
