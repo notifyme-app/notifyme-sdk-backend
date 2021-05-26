@@ -107,7 +107,7 @@ public class CryptoUtilV3 extends CryptoUtil {
                         NotifyMeAssociatedDataOuterClass.NotifyMeAssociatedData.newBuilder()
                                 .setCriticality(
                                         NotifyMeAssociatedDataOuterClass.EventCriticality.LOW)
-                                .setVersion(1)
+                                .setVersion(4)
                                 .build();
                 byte[] encryptedAssociatedData =
                         this.encryptAssociatedData(
@@ -119,7 +119,7 @@ public class CryptoUtilV3 extends CryptoUtil {
                                 venueInfo.getIntervalEndMs());
 
                 var traceKeyV3 = new ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey();
-                traceKeyV3.setVersion(3);
+                traceKeyV3.setVersion(4);
                 traceKeyV3.setCipherTextNonce(nonce);
                 traceKeyV3.setEncryptedAssociatedData(encryptedAssociatedData);
                 traceKeyV3.setDay(
@@ -255,7 +255,7 @@ public class CryptoUtilV3 extends CryptoUtil {
                         .setStartTimestamp(startTimestampMs / 1000)
                         .setEndTimestamp(endTimestampMs / 1000)
                         .setCountryData(ByteString.copyFrom(countryData))
-                        .setVersion(QR_CODE_VERSION_3)
+                        .setVersion(QR_CODE_VERSION_4)
                         .build();
 
         byte[] messageBytes = associatedData.toByteArray();

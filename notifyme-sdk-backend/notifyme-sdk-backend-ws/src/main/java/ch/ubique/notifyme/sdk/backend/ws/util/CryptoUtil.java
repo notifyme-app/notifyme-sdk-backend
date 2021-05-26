@@ -22,6 +22,7 @@ public abstract class CryptoUtil {
     static final int HASH_BYTES = 32;
     static final int NONCE_BYTES = 32;
     static final int QR_CODE_VERSION_3 = 3;
+    static final int QR_CODE_VERSION_4 = 4;
     final SodiumJava sodium;
 
     private final byte[] sk;
