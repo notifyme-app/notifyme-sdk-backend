@@ -10,7 +10,7 @@
 
 package ch.ubique.swisscovid.cn.sdk.backend.data;
 
-import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.v3.TraceKey;
+import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.TraceKey;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.springframework.jdbc.core.RowMapper;

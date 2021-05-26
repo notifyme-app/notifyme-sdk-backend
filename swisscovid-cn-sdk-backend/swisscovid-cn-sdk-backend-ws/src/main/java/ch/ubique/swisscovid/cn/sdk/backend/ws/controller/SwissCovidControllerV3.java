@@ -15,7 +15,7 @@ import ch.ubique.swisscovid.cn.sdk.backend.data.PushRegistrationDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.model.PushRegistrationOuterClass.PushRegistration;
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload;
-import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.v3.TraceKey;
+import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.TraceKey;
 import ch.ubique.swisscovid.cn.sdk.backend.model.util.DateUtil;
 import ch.ubique.swisscovid.cn.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEvent;
 import ch.ubique.swisscovid.cn.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEvent.Builder;
@@ -180,23 +180,6 @@ public class SwissCovidControllerV3 {
       b.setCipherTextNonce(ByteString.copyFrom(t.getCipherTextNonce()));
     }
     return b.build();
-  }
-
-  @PostMapping("/traceKeys")
-  @Documentation(
-      description = "Endpoint used to upload trace keys to the backend",
-      responses = {
-        "200=>The trace keys have been stored in the database",
-        "403=>Authentication failed"
-      })
-  public @ResponseBody ResponseEntity<String> uploadTraceKeys(
-      @Documentation(description = "Trace key to upload as JSON") @Valid @RequestBody
-          TraceKey traceKey,
-      @AuthenticationPrincipal
-          @Documentation(description = "JWT token that can be verified by the backend server")
-          Object principal) {
-    dataService.insertTraceKey(traceKey);
-    return ResponseEntity.ok().body("OK");
   }
 
   @PostMapping(

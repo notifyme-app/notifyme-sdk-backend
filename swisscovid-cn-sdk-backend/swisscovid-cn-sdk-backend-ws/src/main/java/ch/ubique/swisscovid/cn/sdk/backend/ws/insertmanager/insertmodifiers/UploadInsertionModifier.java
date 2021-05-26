@@ -1,7 +1,7 @@
 package ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertmodifiers;
 
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
-import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.v3.TraceKey;
+import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.TraceKey;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.InsertException;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.InsertManager;
 import java.time.LocalDateTime;

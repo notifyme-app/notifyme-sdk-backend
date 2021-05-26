@@ -169,8 +169,6 @@
                     </blackListedPackages>
                     <outFile>swagger.yaml</outFile>
                     <controllers>
-                        <controller>ch.ubique.swisscovid.cn.sdk.backend.ws.controller.ConfigController</controller>
-                        <controller>ch.ubique.swisscovid.cn.sdk.backend.ws.controller.SwissCovidControllerV2</controller>
                         <controller>ch.ubique.swisscovid.cn.sdk.backend.ws.controller.SwissCovidControllerV3</controller>
                     </controllers>
                     <title>SwissCovid CN API</title>

@@ -13,7 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataServiceV3;
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload;
-import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.v3.TraceKey;
+import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.TraceKey;
 import ch.ubique.swisscovid.cn.sdk.backend.model.v3.ProblematicEventWrapperOuterClass;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.util.TokenHelper;
 import com.google.protobuf.ByteString;

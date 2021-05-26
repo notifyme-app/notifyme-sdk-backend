@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-package ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.v3;
+package ch.ubique.swisscovid.cn.sdk.backend.model.tracekey;
 
 import ch.ubique.swisscovid.cn.sdk.backend.model.util.UrlBase64StringDeserializer;
 import ch.ubique.swisscovid.cn.sdk.backend.model.util.UrlBase64StringSerializer;

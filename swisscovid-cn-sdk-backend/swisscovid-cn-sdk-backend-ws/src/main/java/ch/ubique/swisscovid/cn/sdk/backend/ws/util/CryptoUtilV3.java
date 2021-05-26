@@ -1,7 +1,7 @@
 package ch.ubique.swisscovid.cn.sdk.backend.ws.util;
 
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass;
-import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.v3.TraceKey;
+import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.TraceKey;
 import ch.ubique.swisscovid.cn.sdk.backend.model.v3.AssociatedDataOuterClass;
 import ch.ubique.swisscovid.cn.sdk.backend.model.v3.SwissCovidAssociatedDataOuterClass;
 import ch.ubique.swisscovid.cn.sdk.backend.model.v3.QrCodePayload;

@@ -2,7 +2,7 @@ package ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager;
 
 import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataServiceV3;
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
-import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.v3.TraceKey;
+import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.TraceKey;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.UploadInsertionFilter;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertmodifiers.UploadInsertionModifier;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.util.CryptoWrapper;

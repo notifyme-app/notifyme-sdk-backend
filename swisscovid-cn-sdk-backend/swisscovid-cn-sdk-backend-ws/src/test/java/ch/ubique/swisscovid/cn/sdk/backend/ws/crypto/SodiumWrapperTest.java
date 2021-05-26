@@ -5,10 +5,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import ch.ubique.swisscovid.cn.sdk.backend.model.PreTraceWithProofOuterClass.PreTraceWithProof;
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload;
-import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.v2.TraceKey;
+import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.TraceKey;
 import ch.ubique.swisscovid.cn.sdk.backend.model.v3.AssociatedDataOuterClass.AssociatedData;
 import ch.ubique.swisscovid.cn.sdk.backend.model.v3.SwissCovidAssociatedDataOuterClass.EventCriticality;
 import ch.ubique.swisscovid.cn.sdk.backend.model.v3.SwissCovidAssociatedDataOuterClass.SwissCovidAssociatedData;
@@ -45,87 +44,6 @@ public class SodiumWrapperTest {
           "e4d2e06641730ce7c9986b1e7e91bf41bb3b8cc1d76d249fa99d0d8925e87a5c",
           "ce23ca6a3fd0d1307d3d0b2578784750b3f0e20b64e0c24e4cafb35561a0af35",
           "956e6fa1345547e8e060c8962ddd38863bf2c85406ed03b204bc340fb5db01296a960d00be240caa08db001664f4f7028a9dbbb33aea172bffd58b4a644f1ecb3b7bbed378a8a7c9756ac8b4b47346d8dbf37a62377703b7fc8da3bb22a21415");
-
-  @Test
-  public void test() throws UnsupportedEncodingException, InvalidProtocolBufferException {
-    String message = "This is the secret message";
-    List<Integer> affectedHours = List.of(447347, 447348, 447349, 447350);
-    List<String> preTraces =
-        List.of(
-            "CsgBCiBAzNWU7qWQm4rFZWHEQHxhMSuoyJtgFNYD3E8r6pK0URIwraClwvK8Sx07WmS60hoNWZFt1H3GRsaXLZRF9hJUEh2dj4IOjnlkzBCFCrDojViUGlCXLoE4-SbSc1gwSWVijdyR3uwoeuqdZyG_9FZA7cBjCjtVoZO4_C1ZrISRpukF7l2m7vsZArA5w5MDYQbG64My8A02mUWeStIIBAGhntVJASog3ogH375bltnHWTQ7HvfCOuedgnD4OaJagn5kAvhSxAISpgEKYJLq8RBroSeFJdxEq9JsBSb3uzZzGLmxd6wgqep-CpgfIOGtvca9m9K-DLAuCuIMCi7iqbLQE_DNfrIwEvIq6zCDrTae1pe_4HFTL58WvoZ0IKnDtmHxY9X9YthH96lzihIgRykOFIjxdNkTnmwY4_ODQAHGkIkmCxuuPoJUAtWkDvUaIJC72kXD8AFKuEdXEypUY3j0mesNDP40uITSsg9pM5hfGnQKElRpdGVsIGZvciBVbml0VGVzdBIXVW50ZXJ0aXRlbCBmb3IgVW5pdFRlc3QaE1p1c2F0eiBmb3IgVW5pdFRlc3QgCiog3ogH375bltnHWTQ7HvfCOuedgnD4OaJagn5kAvhSxAIwgOu1ne8uOICjz8bvLg",
-            "CsgBCiBqfB8MENG5x1W9ajCHuPfFa0ks_rpAFxlk1CgMye7c0xIw5Rb5pCAvu8qmd1zMHSs7ZdK5-HacRNXVZj2GoX3M_WOyyo4v2DVolUEJtpJnBnkDGlCXLoE4-SbSc1gwSWVijdyR3uwoeuqdZyG_9FZA7cBjCjtVoZO4_C1ZrISRpukF7l2m7vsZArA5w5MDYQbG64My8A02mUWeStIIBAGhntVJASog3ogH375bltnHWTQ7HvfCOuedgnD4OaJagn5kAvhSxAISpgEKYJLq8RBroSeFJdxEq9JsBSb3uzZzGLmxd6wgqep-CpgfIOGtvca9m9K-DLAuCuIMCi7iqbLQE_DNfrIwEvIq6zCDrTae1pe_4HFTL58WvoZ0IKnDtmHxY9X9YthH96lzihIgRykOFIjxdNkTnmwY4_ODQAHGkIkmCxuuPoJUAtWkDvUaIJC72kXD8AFKuEdXEypUY3j0mesNDP40uITSsg9pM5hfGnQKElRpdGVsIGZvciBVbml0VGVzdBIXVW50ZXJ0aXRlbCBmb3IgVW5pdFRlc3QaE1p1c2F0eiBmb3IgVW5pdFRlc3QgCiog3ogH375bltnHWTQ7HvfCOuedgnD4OaJagn5kAvhSxAIwgOu1ne8uOICjz8bvLg",
-            "CsgBCiBOPDLfaM4PzSRJlhHG9IPwzwxUIRHBXuncooN62nqX_RIwbMg4uAM3P9m9xpTVATiSw_0IF7TOLJB4IooYFp5YfwJCmKCAZd36UkXIsxV5ZK0OGlCXLoE4-SbSc1gwSWVijdyR3uwoeuqdZyG_9FZA7cBjCjtVoZO4_C1ZrISRpukF7l2m7vsZArA5w5MDYQbG64My8A02mUWeStIIBAGhntVJASog3ogH375bltnHWTQ7HvfCOuedgnD4OaJagn5kAvhSxAISpgEKYJLq8RBroSeFJdxEq9JsBSb3uzZzGLmxd6wgqep-CpgfIOGtvca9m9K-DLAuCuIMCi7iqbLQE_DNfrIwEvIq6zCDrTae1pe_4HFTL58WvoZ0IKnDtmHxY9X9YthH96lzihIgRykOFIjxdNkTnmwY4_ODQAHGkIkmCxuuPoJUAtWkDvUaIJC72kXD8AFKuEdXEypUY3j0mesNDP40uITSsg9pM5hfGnQKElRpdGVsIGZvciBVbml0VGVzdBIXVW50ZXJ0aXRlbCBmb3IgVW5pdFRlc3QaE1p1c2F0eiBmb3IgVW5pdFRlc3QgCiog3ogH375bltnHWTQ7HvfCOuedgnD4OaJagn5kAvhSxAIwgOu1ne8uOICjz8bvLg",
-            "CsgBCiBrGPvV2tH2ztwdfBk4aAZ-Fem2-T9WOuLVgI-reYHZVRIwK8-5kSnd6XK8b6ndZwi1jwlkckIUwwMo1GKm4R-BnCxPsGCk5CpcJ7RX-jp8lnEEGlCXLoE4-SbSc1gwSWVijdyR3uwoeuqdZyG_9FZA7cBjCjtVoZO4_C1ZrISRpukF7l2m7vsZArA5w5MDYQbG64My8A02mUWeStIIBAGhntVJASog3ogH375bltnHWTQ7HvfCOuedgnD4OaJagn5kAvhSxAISpgEKYJLq8RBroSeFJdxEq9JsBSb3uzZzGLmxd6wgqep-CpgfIOGtvca9m9K-DLAuCuIMCi7iqbLQE_DNfrIwEvIq6zCDrTae1pe_4HFTL58WvoZ0IKnDtmHxY9X9YthH96lzihIgRykOFIjxdNkTnmwY4_ODQAHGkIkmCxuuPoJUAtWkDvUaIJC72kXD8AFKuEdXEypUY3j0mesNDP40uITSsg9pM5hfGnQKElRpdGVsIGZvciBVbml0VGVzdBIXVW50ZXJ0aXRlbCBmb3IgVW5pdFRlc3QaE1p1c2F0eiBmb3IgVW5pdFRlc3QgCiog3ogH375bltnHWTQ7HvfCOuedgnD4OaJagn5kAvhSxAIwgOu1ne8uOICjz8bvLg");
-
-    for (int i = 0; i < affectedHours.size(); i++) {
-      String preTraceKeyBase64 = preTraces.get(i);
-      Integer affectedHour = affectedHours.get(i);
-
-      TraceKey traceKey = new TraceKey();
-
-      byte[] preTraceKeyBytes = Base64.getUrlDecoder().decode(preTraceKeyBase64.getBytes("UTF-8"));
-      PreTraceWithProof preTraceWithProofProto = PreTraceWithProof.parseFrom(preTraceKeyBytes);
-
-      cryptoWrapper
-          .getCryptoUtilV2()
-          .calculateSecretKeyForIdentityAndIdentity(preTraceWithProofProto, affectedHour, traceKey);
-
-      assertNotNull(traceKey.getIdentity());
-      assertNotNull(traceKey.getSecretKeyForIdentity());
-
-      byte[] notificationKey =
-          preTraceWithProofProto.getPreTrace().getNotificationKey().toByteArray();
-      assertTrue(notificationKey.length > 0);
-
-      byte[] nonce = cryptoWrapper.getCryptoUtilV2().createNonce();
-      byte[] encryptedMessage =
-          cryptoWrapper.getCryptoUtilV2().encryptMessage(notificationKey, nonce, message);
-      traceKey.setMessage(encryptedMessage);
-      traceKey.setNonce(nonce);
-    }
-  }
-
-  @Test
-  public void testWithVenueTypeOther()
-      throws UnsupportedEncodingException, InvalidProtocolBufferException {
-
-    String message = "This is the secret message";
-    List<Integer> affectedHours = List.of(447343, 447344, 447345, 447346, 447347);
-    List<String> preTraces =
-        List.of(
-            "CsgBCiD_TLxamAiOUR9mCw5BArm55970U8PCIq92Lajqh7FNJBIw0NTqvJDbcPBPoNNtI_J9IsIAQyVmMS6NUiftS60mgJ0R1gkwD1X6MsspKhS2iC2KGlA5bdVoAzg1ziaO5enPNTaJ3_JfakxPq6GWq4qRR5hmfS5mOz2kcA7sMaNJPA8p_Ik-mWyQ8apC7sWF-3EMxt6lhFVhADTwf92mTMCCRBaajCog7MthtQxpXJz0ENi9ndiY5mrskV34QBe2Eo0fLKUe0hYSpgEKYBepQedjPJTnNPztXtLdbdGS-8D1wFr-r7E7AVhaG-k_NmCo_MyUPK2AbqsJTXTWDQXpriSdfqLNMny7rY0ya2qh4sUGT2LhnaXoPaRs_VjVS27FXBArI4IrqsF24C6tkRIgaLeZcycH1Knk4DpOenjwF7KmI7-ef2YcAwsRMM0VClcaIGRaKuQf4lBa9mj35M-y0GuX9jqmtbaWAseWEXlJWzhaGnIKElRpdGVsIGZvciBVbml0VGVzdBIXVW50ZXJ0aXRlbCBmb3IgVW5pdFRlc3QaE1p1c2F0eiBmb3IgVW5pdFRlc3QqIOzLYbUMaVyc9BDYvZ3YmOZq7JFd-EAXthKNHyylHtIWMIDrtZ3vLjiAo8_G7y4",
-            "CsgBCiA0Eg6t0gzsvraZycJc5EmzEpsBGAZOLoYIFyYOYqL_iBIw5812RGSTuNlGf8hGjz9pXByHe2X1cICdA4yruqc8elRKNMXrFijlRBVzOt-Gie-PGlA5bdVoAzg1ziaO5enPNTaJ3_JfakxPq6GWq4qRR5hmfS5mOz2kcA7sMaNJPA8p_Ik-mWyQ8apC7sWF-3EMxt6lhFVhADTwf92mTMCCRBaajCog7MthtQxpXJz0ENi9ndiY5mrskV34QBe2Eo0fLKUe0hYSpgEKYBepQedjPJTnNPztXtLdbdGS-8D1wFr-r7E7AVhaG-k_NmCo_MyUPK2AbqsJTXTWDQXpriSdfqLNMny7rY0ya2qh4sUGT2LhnaXoPaRs_VjVS27FXBArI4IrqsF24C6tkRIgaLeZcycH1Knk4DpOenjwF7KmI7-ef2YcAwsRMM0VClcaIGRaKuQf4lBa9mj35M-y0GuX9jqmtbaWAseWEXlJWzhaGnIKElRpdGVsIGZvciBVbml0VGVzdBIXVW50ZXJ0aXRlbCBmb3IgVW5pdFRlc3QaE1p1c2F0eiBmb3IgVW5pdFRlc3QqIOzLYbUMaVyc9BDYvZ3YmOZq7JFd-EAXthKNHyylHtIWMIDrtZ3vLjiAo8_G7y4",
-            "CsgBCiD_WDNY4iEWST56ZOfTlYGIQOW2Cw2qCc4yBVjeVUPm6RIwf1NOTntn2mVre45JbhiHukJFs_IrsXXH_MZvV9EuJZFfbc-nK5Y_E0CNLHqdBpADGlA5bdVoAzg1ziaO5enPNTaJ3_JfakxPq6GWq4qRR5hmfS5mOz2kcA7sMaNJPA8p_Ik-mWyQ8apC7sWF-3EMxt6lhFVhADTwf92mTMCCRBaajCog7MthtQxpXJz0ENi9ndiY5mrskV34QBe2Eo0fLKUe0hYSpgEKYBepQedjPJTnNPztXtLdbdGS-8D1wFr-r7E7AVhaG-k_NmCo_MyUPK2AbqsJTXTWDQXpriSdfqLNMny7rY0ya2qh4sUGT2LhnaXoPaRs_VjVS27FXBArI4IrqsF24C6tkRIgaLeZcycH1Knk4DpOenjwF7KmI7-ef2YcAwsRMM0VClcaIGRaKuQf4lBa9mj35M-y0GuX9jqmtbaWAseWEXlJWzhaGnIKElRpdGVsIGZvciBVbml0VGVzdBIXVW50ZXJ0aXRlbCBmb3IgVW5pdFRlc3QaE1p1c2F0eiBmb3IgVW5pdFRlc3QqIOzLYbUMaVyc9BDYvZ3YmOZq7JFd-EAXthKNHyylHtIWMIDrtZ3vLjiAo8_G7y4",
-            "CsgBCiBI_FZejSPzejgUtc8VoBoi-SJzgdXOZQz8Fx3zC8oKDRIwzpk_IOcUXsbp61I_8DRPInijjeFc3I-j2yhOL3aEY6G0m9pPn6BYIG--YTrPSm-TGlA5bdVoAzg1ziaO5enPNTaJ3_JfakxPq6GWq4qRR5hmfS5mOz2kcA7sMaNJPA8p_Ik-mWyQ8apC7sWF-3EMxt6lhFVhADTwf92mTMCCRBaajCog7MthtQxpXJz0ENi9ndiY5mrskV34QBe2Eo0fLKUe0hYSpgEKYBepQedjPJTnNPztXtLdbdGS-8D1wFr-r7E7AVhaG-k_NmCo_MyUPK2AbqsJTXTWDQXpriSdfqLNMny7rY0ya2qh4sUGT2LhnaXoPaRs_VjVS27FXBArI4IrqsF24C6tkRIgaLeZcycH1Knk4DpOenjwF7KmI7-ef2YcAwsRMM0VClcaIGRaKuQf4lBa9mj35M-y0GuX9jqmtbaWAseWEXlJWzhaGnIKElRpdGVsIGZvciBVbml0VGVzdBIXVW50ZXJ0aXRlbCBmb3IgVW5pdFRlc3QaE1p1c2F0eiBmb3IgVW5pdFRlc3QqIOzLYbUMaVyc9BDYvZ3YmOZq7JFd-EAXthKNHyylHtIWMIDrtZ3vLjiAo8_G7y4",
-            "CsgBCiD6LrfUXElqahqDxcMf_pW4OrKNjsfSSNkSdNiSb4IIzhIwNV2IGX1Jsf497oi-cNixCpJsOjJmlFQVEJUsJGwAT5Ytll7r6XVahc9-dbG05jaJGlA5bdVoAzg1ziaO5enPNTaJ3_JfakxPq6GWq4qRR5hmfS5mOz2kcA7sMaNJPA8p_Ik-mWyQ8apC7sWF-3EMxt6lhFVhADTwf92mTMCCRBaajCog7MthtQxpXJz0ENi9ndiY5mrskV34QBe2Eo0fLKUe0hYSpgEKYBepQedjPJTnNPztXtLdbdGS-8D1wFr-r7E7AVhaG-k_NmCo_MyUPK2AbqsJTXTWDQXpriSdfqLNMny7rY0ya2qh4sUGT2LhnaXoPaRs_VjVS27FXBArI4IrqsF24C6tkRIgaLeZcycH1Knk4DpOenjwF7KmI7-ef2YcAwsRMM0VClcaIGRaKuQf4lBa9mj35M-y0GuX9jqmtbaWAseWEXlJWzhaGnIKElRpdGVsIGZvciBVbml0VGVzdBIXVW50ZXJ0aXRlbCBmb3IgVW5pdFRlc3QaE1p1c2F0eiBmb3IgVW5pdFRlc3QqIOzLYbUMaVyc9BDYvZ3YmOZq7JFd-EAXthKNHyylHtIWMIDrtZ3vLjiAo8_G7y4");
-
-    for (int i = 0; i < affectedHours.size(); i++) {
-      String preTraceKeyBase64 = preTraces.get(i);
-      Integer affectedHour = affectedHours.get(i);
-
-      TraceKey traceKey = new TraceKey();
-
-      byte[] preTraceKeyBytes = Base64.getUrlDecoder().decode(preTraceKeyBase64.getBytes("UTF-8"));
-      PreTraceWithProof preTraceWithProofProto = PreTraceWithProof.parseFrom(preTraceKeyBytes);
-
-      cryptoWrapper
-          .getCryptoUtilV2()
-          .calculateSecretKeyForIdentityAndIdentity(preTraceWithProofProto, affectedHour, traceKey);
-
-      assertNotNull(traceKey.getIdentity());
-      assertNotNull(traceKey.getSecretKeyForIdentity());
-
-      byte[] notificationKey =
-          preTraceWithProofProto.getPreTrace().getNotificationKey().toByteArray();
-      assertTrue(notificationKey.length > 0);
-
-      byte[] nonce = cryptoWrapper.getCryptoUtilV2().createNonce();
-      byte[] encryptedMessage =
-          cryptoWrapper.getCryptoUtilV2().encryptMessage(notificationKey, nonce, message);
-      traceKey.setMessage(encryptedMessage);
-      traceKey.setNonce(nonce);
-    }
-  }
 
   @Test
   public void testUserUpload()
@@ -170,7 +88,7 @@ public class SodiumWrapperTest {
 
     UserUploadPayload userUpload = userUploadBuilder.build();
 
-    List<ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.v3.TraceKey> traceKeys =
+    List<TraceKey> traceKeys =
         cryptoWrapper.getCryptoUtilV3().createTraceV3ForUserUpload(userUpload.getVenueInfosList());
 
     // 1 hour checkin, should give 2 matches, as long es the test does not run
@@ -180,7 +98,7 @@ public class SodiumWrapperTest {
 
     int matchCount = 0;
 
-    for (ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.v3.TraceKey k : traceKeys) {
+    for (TraceKey k : traceKeys) {
       byte[] decryptedAssociatedData =
           cryptoWrapper
               .getCryptoUtilV3()

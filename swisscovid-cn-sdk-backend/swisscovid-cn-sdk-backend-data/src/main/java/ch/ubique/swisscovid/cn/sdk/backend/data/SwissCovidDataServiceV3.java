@@ -10,7 +10,7 @@
 
 package ch.ubique.swisscovid.cn.sdk.backend.data;
 
-import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.v3.TraceKey;
+import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.TraceKey;
 
 import java.time.Instant;
 import java.util.List;

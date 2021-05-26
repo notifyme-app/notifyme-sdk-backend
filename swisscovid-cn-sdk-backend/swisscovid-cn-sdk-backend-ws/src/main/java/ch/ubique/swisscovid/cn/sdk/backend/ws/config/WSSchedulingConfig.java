@@ -10,10 +10,11 @@
 
 package ch.ubique.swisscovid.cn.sdk.backend.ws.config;
 
+import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataServiceV3;
+import ch.ubique.swisscovid.cn.sdk.backend.ws.service.PhoneHeartbeatSilentPush;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.TimeZone;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,17 +25,12 @@ import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.CronTrigger;
 
-import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataServiceV2;
-import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataServiceV3;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.service.PhoneHeartbeatSilentPush;
-
 @Configuration
 @EnableScheduling
 public class WSSchedulingConfig implements SchedulingConfigurer {
 
     private static final Logger logger = LoggerFactory.getLogger(WSSchedulingConfig.class);
-    
-    private final SwissCovidDataServiceV2 swissCovidDataServiceV2;
+
     private final SwissCovidDataServiceV3 swissCovidDataServiceV3;
     private final PhoneHeartbeatSilentPush phoneHeartbeatSilentPush;
 
@@ -48,17 +44,14 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
     private String heartBeatSilentPushCron;
 
     protected WSSchedulingConfig(
-            final SwissCovidDataServiceV2 swissCovidDataServiceV2,
             final SwissCovidDataServiceV3 swissCovidDataServiceV3,
             PhoneHeartbeatSilentPush phoneHeartbeatSilentPush) {
-        this.swissCovidDataServiceV2 = swissCovidDataServiceV2;
         this.swissCovidDataServiceV3 = swissCovidDataServiceV3;
         this.phoneHeartbeatSilentPush = phoneHeartbeatSilentPush;
     }
 
     @Override
     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-        // remove old trace keys
         taskRegistrar.addCronTask(
                 new CronTask(
                         () -> {
@@ -66,39 +59,20 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
                                 Instant removeBefore =
                                         Instant.now().minus(removeAfterDays, ChronoUnit.DAYS);
                                 logger.info(
-                                        "removing trace keys v2 with end_time before: {}",
+                                        "removing trace keys v3 with end_time before: {}",
                                         removeBefore);
-                                int removeCount = swissCovidDataServiceV2.removeTraceKeys(removeBefore);
-                                logger.info("removed {} trace keys from db", removeCount);
+                                int removeCount =
+                                        swissCovidDataServiceV3.removeTraceKeys(removeBefore);
+                                logger.info("removed {} trace keys v3 from db", removeCount);
                             } catch (Exception e) {
-                                logger.error("Exception removing old trace keys", e);
+                                logger.error("Exception removing old trace keys v3", e);
                             }
                         },
                         new CronTrigger(cleanCron, TimeZone.getTimeZone("UTC"))));
-        
-        taskRegistrar.addCronTask(
-                        new CronTask(
-                                () -> {
-                                    try {
-                                        Instant removeBefore =
-                                                Instant.now().minus(removeAfterDays, ChronoUnit.DAYS);
-                                        logger.info(
-                                                "removing trace keys v3 with end_time before: {}",
-                                                removeBefore);
-                                        int removeCount =
-                                                swissCovidDataServiceV3.removeTraceKeys(removeBefore);
-                                        logger.info("removed {} trace keys v3 from db", removeCount);
-                                    } catch (Exception e) {
-                                        logger.error("Exception removing old trace keys v3", e);
-                                    }
-                                },
-                                new CronTrigger(cleanCron, TimeZone.getTimeZone("UTC"))));
 
         taskRegistrar.addCronTask(
                 new CronTask(
                         phoneHeartbeatSilentPush::sendHeartbeats,
                         new CronTrigger(heartBeatSilentPushCron, TimeZone.getTimeZone("UTC"))));
-        
-
     }
 }
