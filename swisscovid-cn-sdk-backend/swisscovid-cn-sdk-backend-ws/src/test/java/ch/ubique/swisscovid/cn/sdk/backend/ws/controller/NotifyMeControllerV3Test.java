@@ -10,11 +10,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV3;
-import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
-import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload;
-import ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey;
-import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass;
+import ch.ubique.swisscovid.cn.sdk.backend.data.NotifyMeDataServiceV3;
+import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
+import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload;
+import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.v3.TraceKey;
+import ch.ubique.swisscovid.cn.sdk.backend.model.v3.ProblematicEventWrapperOuterClass;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.util.TokenHelper;
 import com.google.protobuf.ByteString;
 import java.nio.charset.Charset;

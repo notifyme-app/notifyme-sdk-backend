@@ -1,8 +1,8 @@
 package ch.ubique.swisscovid.cn.sdk.backend.ws.util;
 
-import ch.ubique.notifyme.sdk.backend.model.PreTraceWithProofOuterClass;
-import ch.ubique.notifyme.sdk.backend.model.QrCodeContentOuterClass;
-import ch.ubique.notifyme.sdk.backend.model.tracekey.v2.TraceKey;
+import ch.ubique.swisscovid.cn.sdk.backend.model.PreTraceWithProofOuterClass;
+import ch.ubique.swisscovid.cn.sdk.backend.model.QrCodeContentOuterClass;
+import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.v2.TraceKey;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.goterl.lazycode.lazysodium.SodiumJava;
 import com.goterl.lazycode.lazysodium.interfaces.Box;

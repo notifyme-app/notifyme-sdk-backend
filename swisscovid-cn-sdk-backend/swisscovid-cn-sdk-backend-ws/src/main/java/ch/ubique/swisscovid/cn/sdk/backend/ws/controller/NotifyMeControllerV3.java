@@ -10,16 +10,16 @@
 
 package ch.ubique.swisscovid.cn.sdk.backend.ws.controller;
 
-import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV3;
-import ch.ubique.notifyme.sdk.backend.data.PushRegistrationDataService;
-import ch.ubique.notifyme.sdk.backend.data.UUIDDataService;
-import ch.ubique.notifyme.sdk.backend.model.PushRegistrationOuterClass.PushRegistration;
-import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload;
-import ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey;
-import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
-import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEvent;
-import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEvent.Builder;
-import ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEventWrapper;
+import ch.ubique.swisscovid.cn.sdk.backend.data.NotifyMeDataServiceV3;
+import ch.ubique.swisscovid.cn.sdk.backend.data.PushRegistrationDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.model.PushRegistrationOuterClass.PushRegistration;
+import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload;
+import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.v3.TraceKey;
+import ch.ubique.swisscovid.cn.sdk.backend.model.util.DateUtil;
+import ch.ubique.swisscovid.cn.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEvent;
+import ch.ubique.swisscovid.cn.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEvent.Builder;
+import ch.ubique.swisscovid.cn.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEventWrapper;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.InsertException;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.InsertManager;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.security.RequestValidator;

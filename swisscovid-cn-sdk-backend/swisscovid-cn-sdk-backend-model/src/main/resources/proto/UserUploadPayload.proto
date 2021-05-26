@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package ch.ubique.notifyme.sdk.backend.model;
+package ch.ubique.swisscovid.cn.sdk.backend.model;
 
-option java_package = "ch.ubique.notifyme.sdk.backend.model";
+option java_package = "ch.ubique.swisscovid.cn.sdk.backend.model";
 
 message UserUploadPayload {
   int32 version = 1;

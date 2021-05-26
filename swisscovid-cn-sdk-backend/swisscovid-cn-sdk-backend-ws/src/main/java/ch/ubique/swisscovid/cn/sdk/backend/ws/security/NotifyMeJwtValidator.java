@@ -10,7 +10,7 @@
 
 package ch.ubique.swisscovid.cn.sdk.backend.ws.security;
 
-import ch.ubique.notifyme.sdk.backend.data.UUIDDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataService;
 import java.time.Duration;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2ErrorCodes;

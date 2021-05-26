@@ -1,7 +1,7 @@
 package ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager;
 
-import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV3;
-import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
+import ch.ubique.swisscovid.cn.sdk.backend.data.NotifyMeDataServiceV3;
+import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.FakeRequestFilter;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.IntervalThresholdFilter;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.OverlappingIntervalsFilter;

@@ -10,7 +10,7 @@
 
 package ch.ubique.swisscovid.cn.sdk.backend.ws.config;
 
-import ch.ubique.notifyme.sdk.backend.data.UUIDDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.security.KeyVault;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.security.KeyVault.PublicKeyNoSuitableEncodingFoundException;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.security.NotifyMeJwtValidator;

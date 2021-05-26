@@ -1,6 +1,6 @@
 syntax = "proto3";
-package ch.ubique.notifyme.sdk.backend.model;
-option java_package = "ch.ubique.notifyme.sdk.backend.model.v3";
+package ch.ubique.swisscovid.cn.sdk.backend.model;
+option java_package = "ch.ubique.swisscovid.cn.sdk.backend.model.v3";
 
 message PreTrace {
   bytes identity = 1;

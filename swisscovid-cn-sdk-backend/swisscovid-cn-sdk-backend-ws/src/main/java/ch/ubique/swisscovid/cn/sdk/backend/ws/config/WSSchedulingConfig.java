@@ -24,8 +24,8 @@ import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.CronTrigger;
 
-import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV2;
-import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV3;
+import ch.ubique.swisscovid.cn.sdk.backend.data.NotifyMeDataServiceV2;
+import ch.ubique.swisscovid.cn.sdk.backend.data.NotifyMeDataServiceV3;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.service.PhoneHeartbeatSilentPush;
 
 @Configuration

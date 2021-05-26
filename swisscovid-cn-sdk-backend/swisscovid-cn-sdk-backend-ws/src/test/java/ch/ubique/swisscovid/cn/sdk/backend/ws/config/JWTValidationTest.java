@@ -2,7 +2,7 @@ package ch.ubique.swisscovid.cn.sdk.backend.ws.config;
 
 import static org.junit.Assert.assertThrows;
 
-import ch.ubique.notifyme.sdk.backend.data.UUIDDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.util.TokenHelper;
 
 import java.time.LocalDateTime;

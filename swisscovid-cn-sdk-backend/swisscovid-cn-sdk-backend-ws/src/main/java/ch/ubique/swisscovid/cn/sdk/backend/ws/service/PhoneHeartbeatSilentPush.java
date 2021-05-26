@@ -1,8 +1,8 @@
 package ch.ubique.swisscovid.cn.sdk.backend.ws.service;
 
-import ch.ubique.notifyme.sdk.backend.data.PushRegistrationDataService;
-import ch.ubique.notifyme.sdk.backend.model.PushRegistrationOuterClass.PushRegistration;
-import ch.ubique.notifyme.sdk.backend.model.PushRegistrationOuterClass.PushType;
+import ch.ubique.swisscovid.cn.sdk.backend.data.PushRegistrationDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.model.PushRegistrationOuterClass.PushRegistration;
+import ch.ubique.swisscovid.cn.sdk.backend.model.PushRegistrationOuterClass.PushType;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;

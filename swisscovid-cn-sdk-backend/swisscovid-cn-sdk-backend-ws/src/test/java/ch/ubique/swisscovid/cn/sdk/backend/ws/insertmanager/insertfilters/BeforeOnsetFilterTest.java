@@ -1,6 +1,6 @@
 package ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters;
 
-import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
+import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.time.*;

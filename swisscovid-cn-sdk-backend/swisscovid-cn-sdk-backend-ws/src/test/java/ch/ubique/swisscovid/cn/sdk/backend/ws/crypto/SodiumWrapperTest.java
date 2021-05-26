@@ -5,16 +5,16 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import ch.ubique.notifyme.sdk.backend.model.PreTraceWithProofOuterClass.PreTraceWithProof;
-import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
-import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload;
-import ch.ubique.notifyme.sdk.backend.model.tracekey.v2.TraceKey;
-import ch.ubique.notifyme.sdk.backend.model.v3.AssociatedDataOuterClass.AssociatedData;
-import ch.ubique.notifyme.sdk.backend.model.v3.NotifyMeAssociatedDataOuterClass.EventCriticality;
-import ch.ubique.notifyme.sdk.backend.model.v3.NotifyMeAssociatedDataOuterClass.NotifyMeAssociatedData;
-import ch.ubique.notifyme.sdk.backend.model.v3.QrCodePayload.CrowdNotifierData;
-import ch.ubique.notifyme.sdk.backend.model.v3.QrCodePayload.QRCodePayload;
-import ch.ubique.notifyme.sdk.backend.model.v3.QrCodePayload.TraceLocation;
+import ch.ubique.swisscovid.cn.sdk.backend.model.PreTraceWithProofOuterClass.PreTraceWithProof;
+import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
+import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload;
+import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.v2.TraceKey;
+import ch.ubique.swisscovid.cn.sdk.backend.model.v3.AssociatedDataOuterClass.AssociatedData;
+import ch.ubique.swisscovid.cn.sdk.backend.model.v3.NotifyMeAssociatedDataOuterClass.EventCriticality;
+import ch.ubique.swisscovid.cn.sdk.backend.model.v3.NotifyMeAssociatedDataOuterClass.NotifyMeAssociatedData;
+import ch.ubique.swisscovid.cn.sdk.backend.model.v3.QrCodePayload.CrowdNotifierData;
+import ch.ubique.swisscovid.cn.sdk.backend.model.v3.QrCodePayload.QRCodePayload;
+import ch.ubique.swisscovid.cn.sdk.backend.model.v3.QrCodePayload.TraceLocation;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.util.CryptoWrapper;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.util.CryptoUtil.IBECiphertext;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.util.CryptoUtil.NoncesAndNotificationKey;
@@ -170,7 +170,7 @@ public class SodiumWrapperTest {
 
     UserUploadPayload userUpload = userUploadBuilder.build();
 
-    List<ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey> traceKeys =
+    List<TraceKey> traceKeys =
         cryptoWrapper.getCryptoUtilV3().createTraceV3ForUserUpload(userUpload.getVenueInfosList());
 
     // 1 hour checkin, should give 2 matches, as long es the test does not run
@@ -180,7 +180,7 @@ public class SodiumWrapperTest {
 
     int matchCount = 0;
 
-    for (ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey k : traceKeys) {
+    for (TraceKey k : traceKeys) {
       byte[] decryptedAssociatedData =
           cryptoWrapper
               .getCryptoUtilV3()

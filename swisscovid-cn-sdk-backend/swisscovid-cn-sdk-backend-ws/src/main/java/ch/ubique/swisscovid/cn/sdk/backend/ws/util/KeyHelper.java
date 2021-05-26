@@ -10,7 +10,7 @@
 
 package ch.ubique.swisscovid.cn.sdk.backend.ws.util;
 
-import ch.ubique.notifyme.sdk.backend.model.keycloak.KeyCloakPublicKey;
+import ch.ubique.swisscovid.cn.sdk.backend.model.keycloak.KeyCloakPublicKey;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.net.URL;

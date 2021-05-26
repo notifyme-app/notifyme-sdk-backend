@@ -10,16 +10,16 @@
 
 package ch.ubique.swisscovid.cn.sdk.backend.ws.config;
 
-import ch.ubique.notifyme.sdk.backend.data.DiaryEntryDataService;
-import ch.ubique.notifyme.sdk.backend.data.JdbcDiaryEntryDataServiceImpl;
-import ch.ubique.notifyme.sdk.backend.data.JdbcNotifyMeDataServiceV2Impl;
-import ch.ubique.notifyme.sdk.backend.data.JdbcNotifyMeDataServiceV3Impl;
-import ch.ubique.notifyme.sdk.backend.data.JdbcPushRegistrationDataServiceImpl;
-import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV2;
-import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV3;
-import ch.ubique.notifyme.sdk.backend.data.PushRegistrationDataService;
-import ch.ubique.notifyme.sdk.backend.data.UUIDDataService;
-import ch.ubique.notifyme.sdk.backend.data.UUIDDataServiceImpl;
+import ch.ubique.swisscovid.cn.sdk.backend.data.DiaryEntryDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcDiaryEntryDataServiceImpl;
+import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcNotifyMeDataServiceV2Impl;
+import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcNotifyMeDataServiceV3Impl;
+import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcPushRegistrationDataServiceImpl;
+import ch.ubique.swisscovid.cn.sdk.backend.data.NotifyMeDataServiceV2;
+import ch.ubique.swisscovid.cn.sdk.backend.data.NotifyMeDataServiceV3;
+import ch.ubique.swisscovid.cn.sdk.backend.data.PushRegistrationDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataServiceImpl;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.controller.ConfigController;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.controller.NotifyMeControllerV2;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.controller.NotifyMeControllerV3;

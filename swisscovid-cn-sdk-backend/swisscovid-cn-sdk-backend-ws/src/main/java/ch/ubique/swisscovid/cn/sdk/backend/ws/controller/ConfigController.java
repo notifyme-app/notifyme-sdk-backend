@@ -10,7 +10,7 @@
 
 package ch.ubique.swisscovid.cn.sdk.backend.ws.controller;
 
-import ch.ubique.notifyme.sdk.backend.model.config.ConfigResponse;
+import ch.ubique.swisscovid.cn.sdk.backend.model.config.ConfigResponse;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.semver.InvalidAppVersionFormatException;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.semver.InvalidUserAgentException;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.semver.UserAgent;

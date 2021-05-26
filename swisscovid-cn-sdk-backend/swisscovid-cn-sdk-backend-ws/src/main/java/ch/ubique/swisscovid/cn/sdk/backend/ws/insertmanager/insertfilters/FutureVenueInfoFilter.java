@@ -1,6 +1,6 @@
 package ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters;
 
-import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
+import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.InsertException;
 import java.time.Instant;
 import java.time.LocalDateTime;

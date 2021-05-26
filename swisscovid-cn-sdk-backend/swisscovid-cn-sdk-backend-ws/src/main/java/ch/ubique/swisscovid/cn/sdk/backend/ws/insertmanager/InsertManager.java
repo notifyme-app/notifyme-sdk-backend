@@ -1,7 +1,8 @@
 package ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager;
 
-import ch.ubique.notifyme.sdk.backend.data.NotifyMeDataServiceV3;
-import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
+import ch.ubique.swisscovid.cn.sdk.backend.data.NotifyMeDataServiceV3;
+import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
+import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.v3.TraceKey;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.UploadInsertionFilter;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertmodifiers.UploadInsertionModifier;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.util.CryptoWrapper;
@@ -29,7 +30,7 @@ public class InsertManager {
 
     /**
      * Adds a filter to the list of filters to be applied to a {@link UploadVenueInfo} object before inserting it
-     * into the database as a {@link ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey}.
+     * into the database as a {@link TraceKey}.
      * @param filter to be added to the filter list. The filter method must return a filtered list of VenueInfo's
      */
     public void addFilter(UploadInsertionFilter filter) {
@@ -38,7 +39,7 @@ public class InsertManager {
 
     /**
      * Adds a modifer to the list of modifiers to be applied to a {@link UploadVenueInfo} object before filtering and inserting it
-     * into the database as a {@link ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey}.
+     * into the database as a {@link TraceKey}.
      * @param modifier to be added to the modifier list. The modifier method must return the a list of modified VenueInfo's
      */
     public void addModifier(UploadInsertionModifier modifier) {

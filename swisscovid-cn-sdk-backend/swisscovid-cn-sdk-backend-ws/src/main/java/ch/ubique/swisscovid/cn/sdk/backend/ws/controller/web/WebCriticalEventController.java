@@ -10,9 +10,9 @@
 
 package ch.ubique.swisscovid.cn.sdk.backend.ws.controller.web;
 
-import ch.ubique.notifyme.sdk.backend.data.DiaryEntryDataService;
-import ch.ubique.notifyme.sdk.backend.model.event.CriticalEvent;
-import ch.ubique.notifyme.sdk.backend.model.event.WebDiaryEntry;
+import ch.ubique.swisscovid.cn.sdk.backend.data.DiaryEntryDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.model.event.CriticalEvent;
+import ch.ubique.swisscovid.cn.sdk.backend.model.event.WebDiaryEntry;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Controller;

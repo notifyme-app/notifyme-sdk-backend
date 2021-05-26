@@ -2,7 +2,7 @@ package ch.ubique.swisscovid.cn.sdk.backend.ws.util;
 
 import static org.junit.Assert.*;
 
-import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass;
+import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass;
 import com.google.gson.Gson;
 import com.google.protobuf.ByteString;
 import java.io.FileInputStream;

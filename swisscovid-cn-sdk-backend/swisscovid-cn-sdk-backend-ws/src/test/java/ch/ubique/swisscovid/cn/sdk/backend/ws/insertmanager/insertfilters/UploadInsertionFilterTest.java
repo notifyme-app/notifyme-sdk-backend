@@ -1,6 +1,6 @@
 package ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters;
 
-import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
+import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.util.CryptoWrapper;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.util.TokenHelper;
 import com.google.protobuf.ByteString;

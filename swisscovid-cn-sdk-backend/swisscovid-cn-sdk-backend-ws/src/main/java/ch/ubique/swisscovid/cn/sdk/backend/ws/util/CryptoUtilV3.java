@@ -1,10 +1,10 @@
 package ch.ubique.swisscovid.cn.sdk.backend.ws.util;
 
-import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass;
-import ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey;
-import ch.ubique.notifyme.sdk.backend.model.v3.AssociatedDataOuterClass;
-import ch.ubique.notifyme.sdk.backend.model.v3.NotifyMeAssociatedDataOuterClass;
-import ch.ubique.notifyme.sdk.backend.model.v3.QrCodePayload;
+import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass;
+import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.v3.TraceKey;
+import ch.ubique.swisscovid.cn.sdk.backend.model.v3.AssociatedDataOuterClass;
+import ch.ubique.swisscovid.cn.sdk.backend.model.v3.NotifyMeAssociatedDataOuterClass;
+import ch.ubique.swisscovid.cn.sdk.backend.model.v3.QrCodePayload;
 import com.google.crypto.tink.subtle.Hkdf;
 import com.google.protobuf.ByteString;
 import com.goterl.lazycode.lazysodium.SodiumJava;
@@ -118,7 +118,7 @@ public class CryptoUtilV3 extends CryptoUtil {
                                 venueInfo.getIntervalStartMs(),
                                 venueInfo.getIntervalEndMs());
 
-                var traceKeyV3 = new ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey();
+                var traceKeyV3 = new TraceKey();
                 traceKeyV3.setVersion(4);
                 traceKeyV3.setCipherTextNonce(nonce);
                 traceKeyV3.setEncryptedAssociatedData(encryptedAssociatedData);
