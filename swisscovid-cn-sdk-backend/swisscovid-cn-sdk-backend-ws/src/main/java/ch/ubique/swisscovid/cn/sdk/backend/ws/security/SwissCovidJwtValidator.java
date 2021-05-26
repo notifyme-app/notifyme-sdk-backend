@@ -18,14 +18,14 @@ import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidatorResult;
 import org.springframework.security.oauth2.jwt.Jwt;
 
-public class NotifyMeJwtValidator implements OAuth2TokenValidator<Jwt> {
+public class SwissCovidJwtValidator implements OAuth2TokenValidator<Jwt> {
 
   public static final String UUID_CLAIM = "jti";
 
   private final UUIDDataService uuidDataService;
   private final Duration maxJwtValidity;
 
-  public NotifyMeJwtValidator(UUIDDataService uuidDataService, Duration maxJwtValidity) {
+  public SwissCovidJwtValidator(UUIDDataService uuidDataService, Duration maxJwtValidity) {
     this.uuidDataService = uuidDataService;
     this.maxJwtValidity = maxJwtValidity;
   }

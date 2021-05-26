@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class NotifyMeJwtRequestValidator implements RequestValidator {
+public class SwissCovidJwtRequestValidator implements RequestValidator {
 
     @Override
     public boolean isValid(Object authObject) throws WrongScopeException, WrongAudienceException, NotAJwtException, InvalidOnsetException {

@@ -10,84 +10,56 @@
 
 package ch.ubique.swisscovid.cn.sdk.backend.ws.controller;
 
-import ch.ubique.swisscovid.cn.sdk.backend.data.NotifyMeDataServiceV3;
+import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataServiceV2;
 import ch.ubique.swisscovid.cn.sdk.backend.data.PushRegistrationDataService;
-import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.model.ProblematicEventWrapperOuterClass.ProblematicEvent;
+import ch.ubique.swisscovid.cn.sdk.backend.model.ProblematicEventWrapperOuterClass.ProblematicEvent.Builder;
+import ch.ubique.swisscovid.cn.sdk.backend.model.ProblematicEventWrapperOuterClass.ProblematicEventWrapper;
 import ch.ubique.swisscovid.cn.sdk.backend.model.PushRegistrationOuterClass.PushRegistration;
-import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload;
-import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.v3.TraceKey;
+import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.v2.TraceKey;
 import ch.ubique.swisscovid.cn.sdk.backend.model.util.DateUtil;
-import ch.ubique.swisscovid.cn.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEvent;
-import ch.ubique.swisscovid.cn.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEvent.Builder;
-import ch.ubique.swisscovid.cn.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEventWrapper;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.InsertException;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.InsertManager;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.security.RequestValidator;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.security.RequestValidator.InvalidOnsetException;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.security.RequestValidator.NotAJwtException;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.security.RequestValidator.WrongAudienceException;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.security.RequestValidator.WrongScopeException;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.util.CryptoWrapper;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.util.DateTimeUtil;
 import ch.ubique.openapi.docannotations.Documentation;
 import com.google.protobuf.ByteString;
-import java.io.UnsupportedEncodingException;
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.CacheControl;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
-@RequestMapping("/v3")
+@RequestMapping("/v1")
 @CrossOrigin(origins = {"https://notify-me.c4dt.org", "https://notify-me-dev.c4dt.org"})
-public class NotifyMeControllerV3 {
+public class SwissCovidControllerV2 {
   private static final String HEADER_X_KEY_BUNDLE_TAG = "x-key-bundle-tag";
-  private static final Logger logger = LoggerFactory.getLogger(NotifyMeControllerV3.class);
 
-  private final NotifyMeDataServiceV3 dataService;
-  private final InsertManager insertManager;
+  private final SwissCovidDataServiceV2 dataService;
   private final PushRegistrationDataService pushRegistrationDataService;
-  private final UUIDDataService uuidDataService;
-  private final RequestValidator requestValidator;
-  private final CryptoWrapper cryptoWrapper;
 
   private final String revision;
   private final Long bucketSizeInMs;
   private final Long traceKeysCacheControlInMs;
-  private final Duration requestTime;
 
-  public NotifyMeControllerV3(
-      NotifyMeDataServiceV3 dataService,
-      InsertManager insertManager,
+  public SwissCovidControllerV2(
+      SwissCovidDataServiceV2 dataService,
       PushRegistrationDataService pushRegistrationDataService,
-      UUIDDataService uuidDataService,
-      RequestValidator requestValidator,
-      CryptoWrapper cryptoWrapper,
       String revision,
       Long bucketSizeInMs,
-      Long traceKeysCacheControlInMs,
-      Duration requestTime) {
+      Long traceKeysCacheControlInMs) {
     this.dataService = dataService;
-    this.insertManager = insertManager;
     this.pushRegistrationDataService = pushRegistrationDataService;
-    this.uuidDataService = uuidDataService;
-    this.requestValidator = requestValidator;
     this.revision = revision;
     this.bucketSizeInMs = bucketSizeInMs;
     this.traceKeysCacheControlInMs = traceKeysCacheControlInMs;
-    this.requestTime = requestTime;
-    this.cryptoWrapper = cryptoWrapper;
   }
 
   @GetMapping(value = "")
@@ -97,7 +69,7 @@ public class NotifyMeControllerV3 {
   public @ResponseBody ResponseEntity<String> hello() {
     return ResponseEntity.ok()
         .header("X-HELLO", "notifyme")
-        .body("Hello from NotifyMe WS v3.\n" + revision);
+        .body("Hello from NotifyMe WS v1.\n" + revision);
   }
 
   @GetMapping(
@@ -150,7 +122,7 @@ public class NotifyMeControllerV3 {
     List<TraceKey> traceKeys = dataService.findTraceKeys(DateUtil.toInstant(lastKeyBundleTag));
     ProblematicEventWrapper pew =
         ProblematicEventWrapper.newBuilder()
-            .setVersion(3)
+            .setVersion(1)
             .addAllEvents(mapToProblematicEvents(traceKeys))
             .build();
     return ResponseEntity.ok()
@@ -169,15 +141,15 @@ public class NotifyMeControllerV3 {
   private ProblematicEvent mapTraceKeyToProblematicEvent(TraceKey t) {
     Builder b =
         ProblematicEvent.newBuilder()
-            .setVersion(t.getVersion())
-            .setIdentity(ByteString.copyFrom(t.getIdentity()))
             .setSecretKeyForIdentity(ByteString.copyFrom(t.getSecretKeyForIdentity()))
-            .setDay(t.getDay().getEpochSecond());
-    if (t.getEncryptedAssociatedData() != null) {
-      b.setEncryptedAssociatedData(ByteString.copyFrom(t.getEncryptedAssociatedData()));
+            .setIdentity(ByteString.copyFrom(t.getIdentity()))
+            .setStartTime(DateUtil.toEpochMilli(t.getStartTime()))
+            .setEndTime(DateUtil.toEpochMilli(t.getEndTime()));
+    if (t.getMessage() != null) {
+      b.setMessage(ByteString.copyFrom(t.getMessage()));
     }
-    if (t.getCipherTextNonce() != null) {
-      b.setCipherTextNonce(ByteString.copyFrom(t.getCipherTextNonce()));
+    if (t.getNonce() != null) {
+      b.setNonce(ByteString.copyFrom(t.getNonce()));
     }
     return b.build();
   }
@@ -209,75 +181,5 @@ public class NotifyMeControllerV3 {
       @RequestBody final PushRegistration pushRegistration) {
     pushRegistrationDataService.upsertPushRegistration(pushRegistration);
     return ResponseEntity.ok().build();
-  }
-
-  /**
-   * Upload of stored identities if user tested positive and wishes to notify other visitors: -
-   * Sanity check on stored (e.g. no overlapping timestamps) - Generate traceKey = secretKey_I using
-   * an identity and the master secretkey - Store tracekey such that other user can poll for
-   * possible exposure events
-   *
-   * @param userUploadPayload Protobuf containing the identities stored locally in the app and a
-   *     version number
-   * @return Status ok if sanity check passed and tracekeys successfuly uploaded
-   * @throws UnsupportedEncodingException
-   */
-  @PostMapping(
-      value = "/userupload",
-      consumes = {"application/x-protobuf", "application/protobuf"})
-  @Documentation(
-      description = "User upload of stored identities",
-      responses = {
-              "200 => success",
-              "400 => Bad Upload Data",
-              "403 => Authentication failed"})
-  public @ResponseBody Callable<ResponseEntity<String>> userUpload(
-      @Documentation(description = "Identities to upload as protobuf") @Valid @RequestBody
-          final UserUploadPayload userUploadPayload,
-      @RequestHeader(value = "User-Agent")
-      @Documentation(
-              description =
-                      "App Identifier (PackageName/BundleIdentifier) + App-Version +"
-                              + " OS (Android/iOS) + OS-Version",
-              example = "ch.ubique.android.dp3t;1.0;iOS;13.3")
-              String userAgent,
-      @AuthenticationPrincipal
-          @Documentation(description = "JWT token that can be verified by the backend server")
-          Object principal)
-      throws WrongScopeException, WrongAudienceException, NotAJwtException, InvalidOnsetException, InsertException {
-
-    final var now = LocalDateTime.now();
-
-    requestValidator.isValid(principal);
-
-    insertManager.insertIntoDatabase(userUploadPayload.getVenueInfosList(), principal, now);
-
-    return () -> {
-      try {
-        DateTimeUtil.normalizeDuration(now, requestTime);
-      } catch (DateTimeUtil.DurationExpiredException e) {
-        logger.error("Total time spent in endpoint is longer than requestTime");
-      }
-      return ResponseEntity.ok().build();
-    };
-  }
-
-  @ExceptionHandler({
-          InsertException.class
-  })
-  @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ResponseEntity<Object> invalidArguments() {
-    return ResponseEntity.badRequest().build();
-  }
-
-  @ExceptionHandler({
-          WrongScopeException.class,
-          WrongAudienceException.class,
-          NotAJwtException.class,
-          InvalidOnsetException.class
-  })
-  @ResponseStatus(HttpStatus.FORBIDDEN)
-  public ResponseEntity<Object> forbidden() {
-    return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
   }
 }

@@ -10,7 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ch.ubique.swisscovid.cn.sdk.backend.data.NotifyMeDataServiceV3;
+import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataServiceV3;
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload;
 import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.v3.TraceKey;
@@ -50,7 +50,7 @@ import org.springframework.transaction.annotation.Transactional;
       "ws.app.jwt.publickey=classpath://generated_public_test.pem",
       "traceKey.bucketSizeInMs=1"
     })
-public class NotifyMeControllerV3Test extends BaseControllerTest {
+public class SwissCovidControllerV3Test extends BaseControllerTest {
 
   private static boolean setUpIsDone = false;
   private final Charset charset = StandardCharsets.UTF_8;
@@ -60,8 +60,10 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
   private final String cipherTextNonce = "nonce";
   private final Instant end = Instant.now();
   private final Instant start = end.minusSeconds(60 * 60);
-  @Autowired NotifyMeControllerV3 notifyMeControllerV3;
-  @Autowired NotifyMeDataServiceV3 notifyMeDataServiceV3;
+  @Autowired
+  SwissCovidControllerV3 swissCovidControllerV3;
+  @Autowired
+  SwissCovidDataServiceV3 swissCovidDataServiceV3;
 
   @Value("${traceKey.traceKeysCacheControlInMs}")
   Long traceKeysCacheControlInMs;
@@ -71,7 +73,7 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
 
   private static TokenHelper tokenHelper;
 
-  public NotifyMeControllerV3Test() {
+  public SwissCovidControllerV3Test() {
     super(true);
   }
 
@@ -93,7 +95,7 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
     tokenHelper = new TokenHelper();
     if (!setUpIsDone) {
       final TraceKey traceKey = getTraceKey();
-      notifyMeDataServiceV3.insertTraceKey(traceKey);
+      swissCovidDataServiceV3.insertTraceKey(traceKey);
       setUpIsDone = true;
     }
   }
@@ -203,7 +205,7 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
   @Transactional
   public void testUserUploadValidToken() throws Exception {
     final var now = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS);
-    final var initSize = notifyMeDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC)).size();
+    final var initSize = swissCovidDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC)).size();
     final var payload = createUserUploadPayload(now.minusDays(1), now.minusHours(23));
     final byte[] payloadBytes = payload.toByteArray();
     final var expiry = now.plusMinutes(5).toInstant(ZoneOffset.UTC);
@@ -231,7 +233,7 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
         return Instant.now(clock);
       }
     };
-    final var traceKeys = notifyMeDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC));
+    final var traceKeys = swissCovidDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC));
     assertEquals(initSize + 1, traceKeys.size());
     assertTrue(requestTime <= duration);
   }
@@ -266,7 +268,7 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
   @Transactional
   public void testUserUploadVisitFilters() throws Exception {
     final var now = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS);
-    final var initSize = notifyMeDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC)).size();
+    final var initSize = swissCovidDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC)).size();
     final var fakeUpload = getUploadVenueInfo(now.minusDays(3), now.minusHours(60), true);
     final var invalidIntervalUpload = getUploadVenueInfo(now.minusHours(59), now.minusHours(34), false);
     final var validUpload = getUploadVenueInfo(now.minusHours(12), now.minusHours(11), false);
@@ -297,7 +299,7 @@ public class NotifyMeControllerV3Test extends BaseControllerTest {
         return Instant.now(clock);
       }
     };
-    final var traceKeys = notifyMeDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC));
+    final var traceKeys = swissCovidDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC));
     assertEquals(initSize + 1, traceKeys.size());
     assertTrue(requestTime <= duration);
   }

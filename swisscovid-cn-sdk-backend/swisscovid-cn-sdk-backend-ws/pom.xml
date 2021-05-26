@@ -137,7 +137,7 @@
 
     <build>
         <finalName>
-            notifyme-sdk-backend-ws
+            swisscovid-sdk-backend-ws
         </finalName>
         <plugins>
             <plugin>
@@ -163,19 +163,18 @@
                     <apiVersion>1.1.0</apiVersion>
                     <outPath>swagger/</outPath>
                     <basePackages>java.time</basePackages>
-                    <basePackages>ch.ubique.notifyme.sdk.backend.model</basePackages>
+                    <basePackages>ch.ubique.swisscovid.sdk.backend.model</basePackages>
                     <blackListedPackages>
                         <blackListedPackage>com.google.protobuf</blackListedPackage>
                     </blackListedPackages>
                     <outFile>swagger.yaml</outFile>
                     <controllers>
                         <controller>ch.ubique.swisscovid.cn.sdk.backend.ws.controller.ConfigController</controller>
-                        <controller>ch.ubique.swisscovid.cn.sdk.backend.ws.controller.NotifyMeControllerV2</controller>
-                        <controller>ch.ubique.swisscovid.cn.sdk.backend.ws.controller.NotifyMeControllerV3</controller>
-                        <controller>ch.ubique.notifyme.sdk.backend.ws.controller.DebugController</controller>
+                        <controller>ch.ubique.swisscovid.cn.sdk.backend.ws.controller.SwissCovidControllerV2</controller>
+                        <controller>ch.ubique.swisscovid.cn.sdk.backend.ws.controller.SwissCovidControllerV3</controller>
                     </controllers>
-                    <title>NotifyMe API</title>
-                    <description>NotifyMe API</description>
+                    <title>SwissCovid CN API</title>
+                    <description>SwissCovid CN API</description>
                     <apiUrls>
                         <apiUrl>https://app-dev-ws.notify-me.ch</apiUrl>
                         <apiUrl>https://app-prod-ws.notify-me.ch</apiUrl>

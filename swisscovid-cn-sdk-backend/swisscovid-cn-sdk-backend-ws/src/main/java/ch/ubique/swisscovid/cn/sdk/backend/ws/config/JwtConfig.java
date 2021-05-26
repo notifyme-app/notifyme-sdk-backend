@@ -13,7 +13,7 @@ package ch.ubique.swisscovid.cn.sdk.backend.ws.config;
 import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.security.KeyVault;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.security.KeyVault.PublicKeyNoSuitableEncodingFoundException;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.security.NotifyMeJwtValidator;
+import ch.ubique.swisscovid.cn.sdk.backend.ws.security.SwissCovidJwtValidator;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.util.KeyHelper;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -70,8 +70,8 @@ public class JwtConfig extends WebSecurityConfigurerAdapter {
   }
 
   @Bean
-  public NotifyMeJwtValidator jwtValidator() {
-    return new NotifyMeJwtValidator(uuidDataService, Duration.ofMinutes(maxValidityMinutes));
+  public SwissCovidJwtValidator jwtValidator() {
+    return new SwissCovidJwtValidator(uuidDataService, Duration.ofMinutes(maxValidityMinutes));
   }
 
   @Bean

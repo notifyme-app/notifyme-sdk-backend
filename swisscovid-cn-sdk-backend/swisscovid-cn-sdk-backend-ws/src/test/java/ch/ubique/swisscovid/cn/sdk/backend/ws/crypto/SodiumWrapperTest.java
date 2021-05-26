@@ -10,8 +10,8 @@ import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.Upl
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload;
 import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.v2.TraceKey;
 import ch.ubique.swisscovid.cn.sdk.backend.model.v3.AssociatedDataOuterClass.AssociatedData;
-import ch.ubique.swisscovid.cn.sdk.backend.model.v3.NotifyMeAssociatedDataOuterClass.EventCriticality;
-import ch.ubique.swisscovid.cn.sdk.backend.model.v3.NotifyMeAssociatedDataOuterClass.NotifyMeAssociatedData;
+import ch.ubique.swisscovid.cn.sdk.backend.model.v3.SwissCovidAssociatedDataOuterClass.EventCriticality;
+import ch.ubique.swisscovid.cn.sdk.backend.model.v3.SwissCovidAssociatedDataOuterClass.SwissCovidAssociatedData;
 import ch.ubique.swisscovid.cn.sdk.backend.model.v3.QrCodePayload.CrowdNotifierData;
 import ch.ubique.swisscovid.cn.sdk.backend.model.v3.QrCodePayload.QRCodePayload;
 import ch.ubique.swisscovid.cn.sdk.backend.model.v3.QrCodePayload.TraceLocation;
@@ -170,7 +170,7 @@ public class SodiumWrapperTest {
 
     UserUploadPayload userUpload = userUploadBuilder.build();
 
-    List<TraceKey> traceKeys =
+    List<ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.v3.TraceKey> traceKeys =
         cryptoWrapper.getCryptoUtilV3().createTraceV3ForUserUpload(userUpload.getVenueInfosList());
 
     // 1 hour checkin, should give 2 matches, as long es the test does not run
@@ -180,7 +180,7 @@ public class SodiumWrapperTest {
 
     int matchCount = 0;
 
-    for (TraceKey k : traceKeys) {
+    for (ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.v3.TraceKey k : traceKeys) {
       byte[] decryptedAssociatedData =
           cryptoWrapper
               .getCryptoUtilV3()
@@ -190,10 +190,10 @@ public class SodiumWrapperTest {
                   k.getCipherTextNonce());
       assertFalse(decryptedAssociatedData.length == 0);
       AssociatedData associatedData = AssociatedData.parseFrom(decryptedAssociatedData);
-      NotifyMeAssociatedData notifyMeAssociatedData =
-          NotifyMeAssociatedData.parseFrom(associatedData.getCountryData().toByteArray());
+      SwissCovidAssociatedData swissCovidAssociatedData =
+          SwissCovidAssociatedData.parseFrom(associatedData.getCountryData().toByteArray());
       assertEquals("", associatedData.getMessage());
-      assertEquals(EventCriticality.LOW, notifyMeAssociatedData.getCriticality());
+      assertEquals(EventCriticality.LOW, swissCovidAssociatedData.getCriticality());
 
       if (doIntersect(
           matchStart.toEpochMilli(),
@@ -225,10 +225,10 @@ public class SodiumWrapperTest {
             .cryptoSecretboxOpenEasy(notificationKey, encryptedAssociatedData, cipherTextNonce);
     assertFalse(decryptedAssociatedData.length == 0);
     AssociatedData associatedData = AssociatedData.parseFrom(decryptedAssociatedData);
-    NotifyMeAssociatedData notifyMeAssociatedData =
-        NotifyMeAssociatedData.parseFrom(associatedData.getCountryData().toByteArray());
+    SwissCovidAssociatedData swissCovidAssociatedData =
+        SwissCovidAssociatedData.parseFrom(associatedData.getCountryData().toByteArray());
     assertEquals("", associatedData.getMessage());
-    assertEquals(EventCriticality.LOW, notifyMeAssociatedData.getCriticality());
+    assertEquals(EventCriticality.LOW, swissCovidAssociatedData.getCriticality());
 
     // verifyTrace
     G1 secretKeyForIdentityG1 = new G1();

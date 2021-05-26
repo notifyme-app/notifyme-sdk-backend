@@ -3,7 +3,7 @@ package ch.ubique.swisscovid.cn.sdk.backend.ws.util;
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass;
 import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.v3.TraceKey;
 import ch.ubique.swisscovid.cn.sdk.backend.model.v3.AssociatedDataOuterClass;
-import ch.ubique.swisscovid.cn.sdk.backend.model.v3.NotifyMeAssociatedDataOuterClass;
+import ch.ubique.swisscovid.cn.sdk.backend.model.v3.SwissCovidAssociatedDataOuterClass;
 import ch.ubique.swisscovid.cn.sdk.backend.model.v3.QrCodePayload;
 import com.google.crypto.tink.subtle.Hkdf;
 import com.google.protobuf.ByteString;
@@ -103,10 +103,10 @@ public class CryptoUtilV3 extends CryptoUtil {
                 G1 secretKeyForIdentity = keyDer(this.mskFr, identity);
 
                 byte[] nonce = createNonce();
-                NotifyMeAssociatedDataOuterClass.NotifyMeAssociatedData countryData =
-                        NotifyMeAssociatedDataOuterClass.NotifyMeAssociatedData.newBuilder()
+                SwissCovidAssociatedDataOuterClass.SwissCovidAssociatedData countryData =
+                        SwissCovidAssociatedDataOuterClass.SwissCovidAssociatedData.newBuilder()
                                 .setCriticality(
-                                        NotifyMeAssociatedDataOuterClass.EventCriticality.LOW)
+                                        SwissCovidAssociatedDataOuterClass.EventCriticality.LOW)
                                 .setVersion(4)
                                 .build();
                 byte[] encryptedAssociatedData =

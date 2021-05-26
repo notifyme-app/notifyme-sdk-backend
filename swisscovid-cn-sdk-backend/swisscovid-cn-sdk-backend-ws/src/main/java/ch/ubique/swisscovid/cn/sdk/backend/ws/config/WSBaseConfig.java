@@ -12,17 +12,17 @@ package ch.ubique.swisscovid.cn.sdk.backend.ws.config;
 
 import ch.ubique.swisscovid.cn.sdk.backend.data.DiaryEntryDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcDiaryEntryDataServiceImpl;
-import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcNotifyMeDataServiceV2Impl;
-import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcNotifyMeDataServiceV3Impl;
+import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcSwissCovidDataServiceV2Impl;
+import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcSwissCovidDataServiceV3Impl;
 import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcPushRegistrationDataServiceImpl;
-import ch.ubique.swisscovid.cn.sdk.backend.data.NotifyMeDataServiceV2;
-import ch.ubique.swisscovid.cn.sdk.backend.data.NotifyMeDataServiceV3;
+import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataServiceV2;
+import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataServiceV3;
 import ch.ubique.swisscovid.cn.sdk.backend.data.PushRegistrationDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataServiceImpl;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.controller.ConfigController;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.controller.NotifyMeControllerV2;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.controller.NotifyMeControllerV3;
+import ch.ubique.swisscovid.cn.sdk.backend.ws.controller.SwissCovidControllerV2;
+import ch.ubique.swisscovid.cn.sdk.backend.ws.controller.SwissCovidControllerV3;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.controller.web.WebController;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.controller.web.WebCriticalEventController;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.InsertManager;
@@ -31,7 +31,7 @@ import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.FakeRe
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.IntervalThresholdFilter;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.OverlappingIntervalsFilter;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertmodifiers.RemoveFinalIntervalModifier;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.security.NotifyMeJwtRequestValidator;
+import ch.ubique.swisscovid.cn.sdk.backend.ws.security.SwissCovidJwtRequestValidator;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.security.RequestValidator;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.service.PhoneHeartbeatSilentPush;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.util.CryptoWrapper;
@@ -155,13 +155,13 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
   }
 
   @Bean
-  public NotifyMeDataServiceV2 notifyMeDataServiceV2() {
-    return new JdbcNotifyMeDataServiceV2Impl(dataSource(), bucketSizeInMs);
+  public SwissCovidDataServiceV2 notifyMeDataServiceV2() {
+    return new JdbcSwissCovidDataServiceV2Impl(dataSource(), bucketSizeInMs);
   }
 
   @Bean
-  public NotifyMeDataServiceV3 notifyMeDataServiceV3() {
-    return new JdbcNotifyMeDataServiceV3Impl(dataSource(), bucketSizeInMs);
+  public SwissCovidDataServiceV3 notifyMeDataServiceV3() {
+    return new JdbcSwissCovidDataServiceV3Impl(dataSource(), bucketSizeInMs);
   }
 
   @Bean
@@ -177,9 +177,9 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
   @Bean
   public InsertManager insertManager(
           final CryptoWrapper cryptoWrapper,
-          final NotifyMeDataServiceV3 notifyMeDataServiceV3
+          final SwissCovidDataServiceV3 swissCovidDataServiceV3
   ) {
-    final var insertManager = new InsertManager(cryptoWrapper, notifyMeDataServiceV3);
+    final var insertManager = new InsertManager(cryptoWrapper, swissCovidDataServiceV3);
     insertManager.addModifier(new RemoveFinalIntervalModifier());
     insertManager.addFilter(new FakeRequestFilter());
     insertManager.addFilter(new IntervalThresholdFilter());
@@ -189,11 +189,11 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
   }
 
   @Bean
-  public NotifyMeControllerV2 notifyMeControllerV2(
-      final NotifyMeDataServiceV2 notifyMeDataService,
+  public SwissCovidControllerV2 notifyMeControllerV2(
+      final SwissCovidDataServiceV2 notifyMeDataService,
       final PushRegistrationDataService pushRegistrationDataService,
       final String revision) {
-    return new NotifyMeControllerV2(
+    return new SwissCovidControllerV2(
         notifyMeDataService,
         pushRegistrationDataService,
         revision,
@@ -202,16 +202,16 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
   }
 
   @Bean
-  public NotifyMeControllerV3 notifyMeControllerV3(
-      NotifyMeDataServiceV3 notifyMeDataServiceV3,
+  public SwissCovidControllerV3 notifyMeControllerV3(
+      SwissCovidDataServiceV3 swissCovidDataServiceV3,
       InsertManager insertManager,
       PushRegistrationDataService pushRegistrationDataService,
       UUIDDataService uuidDataService,
       RequestValidator requestValidator,
       CryptoWrapper cryptoWrapper,
       String revision) {
-    return new NotifyMeControllerV3(
-        notifyMeDataServiceV3,
+    return new SwissCovidControllerV3(
+        swissCovidDataServiceV3,
         insertManager,
         pushRegistrationDataService,
         uuidDataService,
@@ -271,7 +271,7 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
 
   @Bean
   public RequestValidator requestValidator() {
-    return new NotifyMeJwtRequestValidator();
+    return new SwissCovidJwtRequestValidator();
   }
 
   @Override

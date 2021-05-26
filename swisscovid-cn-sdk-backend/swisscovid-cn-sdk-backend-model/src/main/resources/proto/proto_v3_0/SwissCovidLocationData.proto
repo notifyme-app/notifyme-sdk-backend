@@ -3,11 +3,10 @@ syntax = "proto3";
 package ch.ubique.swisscovid.cn.sdk.backend.model;
 option java_package = "ch.ubique.swisscovid.cn.sdk.backend.model.v3";
 
-message NotifyMeAssociatedData {
-  int32 version = 1;
-  EventCriticality criticality = 2;
-}
-enum EventCriticality {
-  LOW = 0;
-  HIGH = 1;
+import "VenueType.proto";
+
+message SwissCovidLocationData {
+  uint32 version = 1;
+  VenueType type = 2;
+  string room = 3;
 }

@@ -3,7 +3,7 @@ package ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters;
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass;
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.InsertException;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.security.NotifyMeJwtRequestValidator;
+import ch.ubique.swisscovid.cn.sdk.backend.ws.security.SwissCovidJwtRequestValidator;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -22,7 +22,7 @@ public class BeforeOnsetFilter implements UploadInsertionFilter {
       List<UploadVenueInfo> uploadVenueInfoList,
       Object principal)
       throws InsertException {
-    final var notifyMeJwtRequestValidator = new NotifyMeJwtRequestValidator();
+    final var notifyMeJwtRequestValidator = new SwissCovidJwtRequestValidator();
     return uploadVenueInfoList.stream()
         .filter(
             uploadVenueInfo -> {

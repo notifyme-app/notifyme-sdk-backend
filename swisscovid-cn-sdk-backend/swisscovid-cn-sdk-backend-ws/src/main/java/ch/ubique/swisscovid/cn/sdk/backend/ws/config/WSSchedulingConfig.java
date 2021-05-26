@@ -24,8 +24,8 @@ import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.CronTrigger;
 
-import ch.ubique.swisscovid.cn.sdk.backend.data.NotifyMeDataServiceV2;
-import ch.ubique.swisscovid.cn.sdk.backend.data.NotifyMeDataServiceV3;
+import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataServiceV2;
+import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataServiceV3;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.service.PhoneHeartbeatSilentPush;
 
 @Configuration
@@ -34,8 +34,8 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
 
     private static final Logger logger = LoggerFactory.getLogger(WSSchedulingConfig.class);
     
-    private final NotifyMeDataServiceV2 notifyMeDataServiceV2;
-    private final NotifyMeDataServiceV3 notifyMeDataServiceV3;
+    private final SwissCovidDataServiceV2 swissCovidDataServiceV2;
+    private final SwissCovidDataServiceV3 swissCovidDataServiceV3;
     private final PhoneHeartbeatSilentPush phoneHeartbeatSilentPush;
 
     @Value("${db.cleanCron:0 0 3 * * ?}")
@@ -48,11 +48,11 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
     private String heartBeatSilentPushCron;
 
     protected WSSchedulingConfig(
-            final NotifyMeDataServiceV2 notifyMeDataServiceV2,
-            final NotifyMeDataServiceV3 notifyMeDataServiceV3,
+            final SwissCovidDataServiceV2 swissCovidDataServiceV2,
+            final SwissCovidDataServiceV3 swissCovidDataServiceV3,
             PhoneHeartbeatSilentPush phoneHeartbeatSilentPush) {
-        this.notifyMeDataServiceV2 = notifyMeDataServiceV2;
-        this.notifyMeDataServiceV3 = notifyMeDataServiceV3;
+        this.swissCovidDataServiceV2 = swissCovidDataServiceV2;
+        this.swissCovidDataServiceV3 = swissCovidDataServiceV3;
         this.phoneHeartbeatSilentPush = phoneHeartbeatSilentPush;
     }
 
@@ -68,7 +68,7 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
                                 logger.info(
                                         "removing trace keys v2 with end_time before: {}",
                                         removeBefore);
-                                int removeCount = notifyMeDataServiceV2.removeTraceKeys(removeBefore);
+                                int removeCount = swissCovidDataServiceV2.removeTraceKeys(removeBefore);
                                 logger.info("removed {} trace keys from db", removeCount);
                             } catch (Exception e) {
                                 logger.error("Exception removing old trace keys", e);
@@ -86,7 +86,7 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
                                                 "removing trace keys v3 with end_time before: {}",
                                                 removeBefore);
                                         int removeCount =
-                                                notifyMeDataServiceV3.removeTraceKeys(removeBefore);
+                                                swissCovidDataServiceV3.removeTraceKeys(removeBefore);
                                         logger.info("removed {} trace keys v3 from db", removeCount);
                                     } catch (Exception e) {
                                         logger.error("Exception removing old trace keys v3", e);

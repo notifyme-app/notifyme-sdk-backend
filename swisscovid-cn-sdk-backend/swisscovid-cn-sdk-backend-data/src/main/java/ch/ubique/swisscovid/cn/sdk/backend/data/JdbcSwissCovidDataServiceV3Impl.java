@@ -28,7 +28,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.transaction.annotation.Transactional;
 
-public class JdbcNotifyMeDataServiceV3Impl implements NotifyMeDataServiceV3 {
+public class JdbcSwissCovidDataServiceV3Impl implements SwissCovidDataServiceV3 {
 
   protected final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -36,7 +36,7 @@ public class JdbcNotifyMeDataServiceV3Impl implements NotifyMeDataServiceV3 {
   private final NamedParameterJdbcTemplate jt;
   private final SimpleJdbcInsert traceKeyInsert;
 
-  public JdbcNotifyMeDataServiceV3Impl(DataSource dataSource, Long bucketSizeInMs) {
+  public JdbcSwissCovidDataServiceV3Impl(DataSource dataSource, Long bucketSizeInMs) {
     this.bucketSizeInMs = bucketSizeInMs;
     this.jt = new NamedParameterJdbcTemplate(dataSource);
     this.traceKeyInsert =

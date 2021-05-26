@@ -1,11 +1,9 @@
 package ch.ubique.swisscovid.cn.sdk.backend.data.config;
 
-import ch.ubique.swisscovid.cn.sdk.backend.data.*;
-
 import ch.ubique.swisscovid.cn.sdk.backend.data.DiaryEntryDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcDiaryEntryDataServiceImpl;
-import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcNotifyMeDataServiceV3Impl;
-import ch.ubique.swisscovid.cn.sdk.backend.data.NotifyMeDataServiceV3;
+import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcSwissCovidDataServiceV3Impl;
+import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataServiceV3;
 import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataServiceImpl;
 import javax.sql.DataSource;
@@ -33,8 +31,8 @@ public class TestConfig {
     }
 
     @Bean
-    public NotifyMeDataServiceV3 notifyMeDataServiceV3() {
-        return new JdbcNotifyMeDataServiceV3Impl(dataSource, 60000L);
+    public SwissCovidDataServiceV3 notifyMeDataServiceV3() {
+        return new JdbcSwissCovidDataServiceV3Impl(dataSource, 60000L);
     }
 
     @Bean

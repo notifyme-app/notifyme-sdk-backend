@@ -10,11 +10,12 @@
 
 package ch.ubique.swisscovid.cn.sdk.backend.data;
 
-import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.v2.TraceKey;
+import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.v3.TraceKey;
+
 import java.time.Instant;
 import java.util.List;
 
-public interface NotifyMeDataServiceV2 {
+public interface SwissCovidDataServiceV3 {
 
     /**
      * Inserts the given trace key into the db
@@ -24,8 +25,7 @@ public interface NotifyMeDataServiceV2 {
     public void insertTraceKey(TraceKey traceKey);
 
     /**
-     * Returns trace keys that where submitted (/created) after the given date.
-     * Returns all trace keys if after == null.
+     * Wrapper around findTraceKeys where before is set to the end of the previous bucket
      *
      * @param after
      * @return

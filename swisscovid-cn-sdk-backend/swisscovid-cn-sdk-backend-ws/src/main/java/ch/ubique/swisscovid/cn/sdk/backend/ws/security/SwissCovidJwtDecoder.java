@@ -18,11 +18,11 @@ import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtException;
 
-public class NotifyMeJwtDecoder implements org.springframework.security.oauth2.jwt.JwtDecoder {
+public class SwissCovidJwtDecoder implements org.springframework.security.oauth2.jwt.JwtDecoder {
   private final JwtParser parser;
   private OAuth2TokenValidator<Jwt> validator;
 
-  public NotifyMeJwtDecoder(PublicKey publicKey) {
+  public SwissCovidJwtDecoder(PublicKey publicKey) {
     parser = Jwts.parserBuilder().setSigningKey(publicKey).build();
   }
 
