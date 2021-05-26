@@ -134,7 +134,7 @@ public class CryptoUtilV3 extends CryptoUtil {
                 byte[] msg_orig = createNonce(NONCE_LENGTH);
                 IBECiphertext ibeCiphertext = encryptInternal(this.mpkG2, identity, msg_orig);
                 byte[] msg_dec = decryptInternal(ibeCiphertext, secretKeyForIdentity, identity);
-                if (msg_dec == null) {
+                if (msg_dec == null || !Arrays.equals(msg_orig, msg_dec)) {
                     throw new RuntimeException("Health Authority could not verify Trace");
                 }
             }
