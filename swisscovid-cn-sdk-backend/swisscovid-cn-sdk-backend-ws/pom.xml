@@ -137,7 +137,7 @@
 
     <build>
         <finalName>
-            swisscovid-sdk-backend-ws
+            swisscovid-cn-sdk-backend-ws
         </finalName>
         <plugins>
             <plugin>
