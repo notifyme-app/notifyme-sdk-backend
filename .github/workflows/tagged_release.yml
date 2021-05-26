@@ -19,12 +19,12 @@ jobs:
         java-version: 11
     - name: Build with Maven
       run: |
-        mvn install --file notifyme-sdk-backend/pom.xml;
-        mvn springboot-swagger-3:springboot-swagger-3 -f notifyme-sdk-backend/notifyme-sdk-backend-ws/pom.xml
+        mvn install --file swisscovid-cn-sdk-backend/pom.xml;
+        mvn springboot-swagger-3:springboot-swagger-3 -f swisscovid-cn-sdk-backend/swisscovid-cn-sdk-backend-ws/pom.xml
       env:
         TESTCONTAINERS_RYUK_DISABLED: true
     - name: shasum
-      run: shasum -a 256 notifyme-sdk-backend/notifyme-sdk-backend-ws/target/notifyme-sdk-backend-ws.jar > notifyme-sdk-backend/notifyme-sdk-backend-ws/target/notifyme-sdk-backend-ws.sha256
+      run: shasum -a 256 swisscovid-cn-sdk-backend/swisscovid-cn-sdk-backend-ws/target/swisscovid-cn-sdk-backend-ws.jar > swisscovid-cn-sdk-backend/swisscovid-cn-sdk-backend-ws/target/swisscovid-cn-sdk-backend-ws.sha256
       shell: bash
     - name: "Create new release"
       uses: "marvinpinto/action-automatic-releases@latest"
@@ -32,6 +32,6 @@ jobs:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         prerelease: false
         files: |
-          notifyme-sdk-backend/notifyme-sdk-backend-ws/target/notifyme-sdk-backend-ws.jar
-          notifyme-sdk-backend/notifyme-sdk-backend-ws/target/notifyme-sdk-backend-ws.sha256
-          notifyme-sdk-backend/notifyme-sdk-backend-ws/generated/swagger/swagger.yaml
+          swisscovid-cn-sdk-backend/swisscovid-cn-sdk-backend-ws/target/swisscovid-cn-sdk-backend-ws.jar
+          swisscovid-cn-sdk-backend/swisscovid-cn-sdk-backend-ws/target/swisscovid-cn-sdk-backend-ws.sha256
+          swisscovid-cn-sdk-backend/swisscovid-cn-sdk-backend-ws/generated/swagger/swagger.yaml

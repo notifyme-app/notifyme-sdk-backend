@@ -2,10 +2,10 @@
 #      Makefile      #
 ######################
 
-PROJ_BASE_DIR = notifyme-sdk-backend
-WS_MODULE_NAME = notifyme-sdk-backend-ws
+PROJ_BASE_DIR = swisscovid-cn-sdk-backend
+WS_MODULE_NAME = swisscovid-cn-sdk-backend-ws
 WS_MODULE_DIR = $(PROJ_BASE_DIR)/$(WS_MODULE_NAME)
-DOCKER_IMG_NAME = notifyme-docker
+DOCKER_IMG_NAME = swisscovid-cn-docker
 
 FILE_NAME = documentation.tex
 
