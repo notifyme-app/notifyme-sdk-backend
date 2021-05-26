@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: MPL-2.0
  */
 
-package ch.ubique.swisscovid.cn.sdk.backend.ws.crypto;
+package ch.ubique.swisscovid.cn.sdk.backend.ws.util;
 
 import com.goterl.lazycode.lazysodium.LazySodiumJava;
 import com.goterl.lazycode.lazysodium.SodiumJava;
@@ -19,7 +19,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CryptoTest {
+public class LibDependencyTest {
 
   protected final Logger logger = LoggerFactory.getLogger(getClass());
 
