@@ -29,10 +29,10 @@
         <jackson-version>2.11.1</jackson-version>
         <jsonwebtoken-version>0.11.2</jsonwebtoken-version>
         <protobuf-java-version>3.12.1</protobuf-java-version>
-        <spring-boot-version>2.4.0</spring-boot-version>
+        <spring-boot-version>2.4.5</spring-boot-version>
         <testcontainers-version>1.15.1</testcontainers-version>
 
-        <itCoverageAgent/>
+        <itCoverageAgent></itCoverageAgent>
 
         <build-helper-maven-plugin.version>3.2.0</build-helper-maven-plugin.version>
 
@@ -41,12 +41,14 @@
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.organization>${env.SONAR_ORGANIZATION}</sonar.organization>
         <sonar.login>${env.SONAR_TOKEN}</sonar.login>
+        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../notifyme-sdk-backend-report/target/site/jacoco-aggregate/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <modules>
         <module>notifyme-sdk-backend-model</module>
         <module>notifyme-sdk-backend-data</module>
         <module>notifyme-sdk-backend-ws</module>
+        <module>notifyme-sdk-backend-report</module>
     </modules>
 
     <dependencies>
@@ -88,6 +90,11 @@
         </dependency>
 
         <!-- Testing-->
+        <dependency>
+            <groupId>org.jmockit</groupId>
+            <artifactId>jmockit</artifactId>
+            <version>1.49</version>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -221,6 +228,11 @@
             </dependency>
 
             <dependency>
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-config</artifactId>
+            </dependency>
+
+            <dependency>
                 <groupId>com.hubspot.jackson</groupId>
                 <artifactId>jackson-datatype-protobuf</artifactId>
                 <version>0.9.11-jackson2.9</version>
@@ -249,31 +261,12 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
-        <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>ubique-oss-springboot-swagger3</id>
-            <name>bintray</name>
-            <url>https://dl.bintray.com/ubique-oss/springboot-swagger3</url>
-        </repository>
         <!-- repository for lazysodium -->
         <repository>
             <id>jcenter</id>
             <url>https://jcenter.bintray.com/</url>
         </repository>
     </repositories>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>ubique-oss-springboot-swagger3</id>
-            <name>bintray</name>
-            <url>https://dl.bintray.com/ubique-oss/springboot-swagger3</url>
-        </pluginRepository>
-    </pluginRepositories>
 
     <build>
 
@@ -321,6 +314,9 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <forkCount>1</forkCount>
+                    <argLine>
+                        -javaagent:"${settings.localRepository}"/org/jmockit/jmockit/1.49/jmockit-1.49.jar
+                    </argLine>
                 </configuration>
             </plugin>
 
@@ -417,6 +413,61 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <executions>
+                    <!-- set arg line property for surefire -->
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <configuration>
+                            <propertyName>surefireArgLine</propertyName>
+                        </configuration>
+                    </execution>
+                    <!-- set arg line property for failsafe -->
+                    <execution>
+                        <id>prepare-agent-integration</id>
+                        <goals>
+                            <goal>prepare-agent-integration</goal>
+                        </goals>
+                        <configuration>
+                            <propertyName>failsafeArgLine</propertyName>
+                        </configuration>
+                    </execution>
+
+                    <!-- METHOD 1 -->
+                    <!--<execution> -->
+                    <!--<id>prepare-agent</id> -->
+                    <!--<goals> -->
+                    <!--<goal>prepare-agent</goal> -->
+                    <!--</goals> -->
+                    <!--</execution> -->
+                    <!-- prepare agent for measuring unit tests -->
+
+                    <!-- METHOD 2 -->
+                    <execution>
+                        <id>prepare-unit-tests</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+
+                    <!-- prepare agent for measuring integration tests -->
+                    <execution>
+                        <id>prepare-agent-coverage</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <phase>pre-integration-test</phase>
+                        <configuration>
+                            <propertyName>itCoverageAgent</propertyName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
         <pluginManagement>
             <plugins>
@@ -424,6 +475,11 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.8.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>0.8.5</version>
                 </plugin>
                 <plugin>
                     <groupId>org.sonarsource.scanner.maven</groupId>

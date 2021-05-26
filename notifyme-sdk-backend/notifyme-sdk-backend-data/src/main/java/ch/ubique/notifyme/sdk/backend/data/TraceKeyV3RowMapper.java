@@ -11,25 +11,23 @@
 package ch.ubique.notifyme.sdk.backend.data;
 
 import ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey;
-import org.springframework.jdbc.core.RowMapper;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import org.springframework.jdbc.core.RowMapper;
 
 public class TraceKeyV3RowMapper implements RowMapper<TraceKey> {
 
-    @Override
-    public TraceKey mapRow(ResultSet rs, int rowNum) throws SQLException {
-        TraceKey traceKey = new TraceKey();
-        traceKey.setId(rs.getInt("pk_trace_key_id"));
-        traceKey.setVersion(rs.getInt("version"));
-        traceKey.setIdentity(rs.getBytes("identity"));
-        traceKey.setSecretKeyForIdentity(rs.getBytes("secret_key_for_identity"));
-        traceKey.setStartTime(rs.getTimestamp("start_time").toInstant());
-        traceKey.setEndTime(rs.getTimestamp("end_time").toInstant());
-        traceKey.setCreatedAt(rs.getTimestamp("created_at").toInstant());
-        traceKey.setEncryptedAssociatedData(rs.getBytes("encrypted_associated_data"));
-        traceKey.setCipherTextNonce(rs.getBytes("cipher_text_nonce"));
-        return traceKey;
-    }
+  @Override
+  public TraceKey mapRow(ResultSet rs, int rowNum) throws SQLException {
+    TraceKey traceKey = new TraceKey();
+    traceKey.setId(rs.getInt("pk_trace_key_id"));
+    traceKey.setVersion(rs.getInt("version"));
+    traceKey.setIdentity(rs.getBytes("identity"));
+    traceKey.setSecretKeyForIdentity(rs.getBytes("secret_key_for_identity"));
+    traceKey.setDay(rs.getTimestamp("day").toInstant());
+    traceKey.setCreatedAt(rs.getTimestamp("created_at").toInstant());
+    traceKey.setEncryptedAssociatedData(rs.getBytes("encrypted_associated_data"));
+    traceKey.setCipherTextNonce(rs.getBytes("cipher_text_nonce"));
+    return traceKey;
+  }
 }

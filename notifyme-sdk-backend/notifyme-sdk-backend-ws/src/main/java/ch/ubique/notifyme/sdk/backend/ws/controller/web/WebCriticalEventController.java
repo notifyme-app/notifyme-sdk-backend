@@ -24,24 +24,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("")
 public class WebCriticalEventController {
 
-    private final DiaryEntryDataService diaryEntryDataService;
+  private final DiaryEntryDataService diaryEntryDataService;
 
-    public WebCriticalEventController(final DiaryEntryDataService diaryEntryDataService) {
-        this.diaryEntryDataService = diaryEntryDataService;
-    }
+  public WebCriticalEventController(final DiaryEntryDataService diaryEntryDataService) {
+    this.diaryEntryDataService = diaryEntryDataService;
+  }
 
-    @GetMapping("/criticalevent")
-    public String criticalEvent(final Model model) {
-        final List<CriticalEvent> criticalEvents = diaryEntryDataService.getCriticalEvents();
-        criticalEvents.forEach(
-                criticalEvent -> {
-                    final var webDiaryEntries =
-                            diaryEntryDataService.getDiaryEntriesForEvent(criticalEvent).stream()
-                                    .map(WebDiaryEntry::from)
-                                    .collect(Collectors.toList());
-                    criticalEvent.setWebDiaryEntries(webDiaryEntries);
-                });
-        model.addAttribute("criticalEvents", criticalEvents);
-        return "criticalEvent";
-    }
+  @GetMapping("/criticalevent")
+  public String criticalEvent(final Model model) {
+    final List<CriticalEvent> criticalEvents = diaryEntryDataService.getCriticalEvents();
+    criticalEvents.forEach(
+        criticalEvent -> {
+          final var webDiaryEntries =
+              diaryEntryDataService.getDiaryEntriesForEvent(criticalEvent).stream()
+                  .map(WebDiaryEntry::from)
+                  .collect(Collectors.toList());
+          criticalEvent.setWebDiaryEntries(webDiaryEntries);
+        });
+    model.addAttribute("criticalEvents", criticalEvents);
+    return "criticalEvent";
+  }
 }

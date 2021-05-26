@@ -9,21 +9,28 @@ import ch.ubique.notifyme.sdk.backend.ws.controller.DebugControllerTestHelper;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.test.context.ActiveProfiles;
 
+@ActiveProfiles({"dev", "enable-debug"})
 public class WebControllerTest extends BaseControllerTest {
-    private String webEndPoint;
+  private String webEndPoint;
 
-    @Before
-    public void setUp() {
-        webEndPoint = "/";
-    }
+  public WebControllerTest() {
+    super(false);
+  }
 
-    @Test
-    public void shouldReturnHtml() throws Exception {
-        final var wrapper = DebugControllerTestHelper.getTestDiaryEntryWrapper();
+  @Before
+  public void setUp() {
+    webEndPoint = "/";
+  }
 
-        mockMvc.perform(get(webEndPoint).content(wrapper.toByteArray()))
-                .andExpect(status().isOk())
-                .andExpect(content().string(Matchers.startsWith("<!DOCTYPE html>")));
-    }
+  @Test
+  public void shouldReturnHtml() throws Exception {
+    final var wrapper = DebugControllerTestHelper.getTestDiaryEntryWrapper();
+
+    mockMvc
+        .perform(get(webEndPoint).content(wrapper.toByteArray()))
+        .andExpect(status().isOk())
+        .andExpect(content().string(Matchers.startsWith("<!DOCTYPE html>")));
+  }
 }

@@ -22,29 +22,29 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 @Profile("dev")
 public class WSDevConfig extends WSBaseConfig {
 
-    @Bean
-    @Override
-    public DataSource dataSource() {
-        return new EmbeddedDatabaseBuilder()
-                .generateUniqueName(true)
-                .setType(EmbeddedDatabaseType.HSQL)
-                .build();
-    }
+  @Bean
+  @Override
+  public DataSource dataSource() {
+    return new EmbeddedDatabaseBuilder()
+        .generateUniqueName(true)
+        .setType(EmbeddedDatabaseType.HSQL)
+        .build();
+  }
 
-    @Bean
-    @Override
-    public Flyway flyway() {
-        Flyway flyWay =
-                Flyway.configure()
-                        .dataSource(dataSource())
-                        .locations("classpath:/db/migration/hsqldb")
-                        .load();
-        flyWay.migrate();
-        return flyWay;
-    }
+  @Bean
+  @Override
+  public Flyway flyway() {
+    Flyway flyWay =
+        Flyway.configure()
+            .dataSource(dataSource())
+            .locations("classpath:/db/migration/hsqldb")
+            .load();
+    flyWay.migrate();
+    return flyWay;
+  }
 
-    @Override
-    public String getDbType() {
-        return "hsqldb";
-    }
+  @Override
+  public String getDbType() {
+    return "hsqldb";
+  }
 }

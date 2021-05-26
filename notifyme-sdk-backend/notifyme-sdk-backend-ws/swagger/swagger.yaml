@@ -196,73 +196,30 @@ paths:
             schema:
               $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey'
         description: Trace key to upload as JSON
-  /v1/debug/:
-    get:
-      summary: hello
-      description: Hello return
+  /v3/register:
+    post:
+      summary: registerPush
+      description: Push registration
       responses:
         '200':
-          description: server live
+          description: success
           headers: {
             }
-          content:
-            application/json:
-              schema:
-                type: string
-  /v1/debug/traceKey:
+        '400':
+          description: Error
+          headers: {
+            }
+      requestBody:
+        required: true
+        content:
+          application/x-protobuf:
+            schema:
+              $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.PushRegistrationOuterClass.PushRegistration'
+        description: N/A
+  /v3/userupload:
     post:
-      summary: uploadTraceKey
-      description: uploadTraceKey
-      responses:
-        '200':
-          description: ''
-          content:
-            application/json:
-              schema:
-                type: string
-      parameters:
-      - name: startTime
-        in: query
-        description: ''
-        required: true
-        schema:
-          type: integer
-          format: long
-      - name: endTime
-        in: query
-        description: ''
-        required: true
-        schema:
-          type: integer
-          format: long
-      - name: preTraces
-        in: query
-        description: list of url base64 encoded pre trace keys
-        example: ''
-        required: true
-        schema:
-          type: array
-          items:
-            type: string
-      - name: affectedHours
-        in: query
-        description: list of the affected hours for the trace keys
-        example: ''
-        required: true
-        schema:
-          type: array
-          items:
-            type: integer
-      - name: message
-        in: query
-        description: ''
-        required: true
-        schema:
-          type: string
-  /v1/debug/diaryEntries:
-    post:
-      summary: postDiaryEntries
-      description: Requests upload of all diary entries
+      summary: userUpload
+      description: User upload of stored identities
       responses:
         '200':
           description: success
@@ -272,55 +229,32 @@ paths:
             application/json:
               schema:
                 type: string
+        '400':
+          description: Bad Upload Data
+          headers: {
+            }
+        '403':
+          description: Authentication failed
+          headers: {
+            }
       requestBody:
         required: true
         content:
           application/x-protobuf:
             schema:
-              $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.DiaryEntryWrapperOuterClass.DiaryEntryWrapper'
-        description: N/A
+              $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload'
+        description: Identities to upload as protobuf
+      parameters:
+      - name: User-Agent
+        in: header
+        description: App Identifier (PackageName/BundleIdentifier) + App-Version +
+          OS (Android/iOS) + OS-Version
+        example: ch.ubique.android.dp3t;1.0;iOS;13.3
+        required: true
+        schema:
+          type: string
 components:
   schemas:
-    ch.ubique.notifyme.sdk.backend.model.DiaryEntryWrapperOuterClass.DiaryEntry:
-      type: object
-      properties:
-        name_:
-          type: object
-        location_:
-          type: object
-        room_:
-          type: object
-        venueType_:
-          type: integer
-        checkinTime_:
-          type: integer
-          format: long
-        checkOutTIme_:
-          type: integer
-          format: long
-        memoizedIsInitialized:
-          allOf:
-          - $ref: '#/components/schemas/byte'
-        memoizedSize:
-          type: integer
-        memoizedHashCode:
-          type: integer
-    ch.ubique.notifyme.sdk.backend.model.DiaryEntryWrapperOuterClass.DiaryEntryWrapper:
-      type: object
-      properties:
-        version_:
-          type: integer
-        diaryEntries_:
-          type: array
-          items:
-            $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.DiaryEntryWrapperOuterClass.DiaryEntry'
-        memoizedIsInitialized:
-          allOf:
-          - $ref: '#/components/schemas/byte'
-        memoizedSize:
-          type: integer
-        memoizedHashCode:
-          type: integer
     ch.ubique.notifyme.sdk.backend.model.ProblematicEventWrapperOuterClass.ProblematicEvent:
       type: object
       properties:
@@ -371,6 +305,40 @@ components:
           type: integer
         memoizedHashCode:
           type: integer
+    ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo:
+      type: object
+      properties:
+        intervalStartMs_:
+          type: integer
+          format: long
+        intervalEndMs_:
+          type: integer
+          format: long
+        fake_:
+          type: boolean
+        memoizedIsInitialized:
+          allOf:
+          - $ref: '#/components/schemas/byte'
+        memoizedSize:
+          type: integer
+        memoizedHashCode:
+          type: integer
+    ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload:
+      type: object
+      properties:
+        version_:
+          type: integer
+        venueInfos_:
+          type: array
+          items:
+            $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo'
+        memoizedIsInitialized:
+          allOf:
+          - $ref: '#/components/schemas/byte'
+        memoizedSize:
+          type: integer
+        memoizedHashCode:
+          type: integer
     ch.ubique.notifyme.sdk.backend.model.config.ConfigResponse:
       type: object
       properties:
@@ -404,17 +372,13 @@ components:
       - version
       - identity
       - secretKeyForIdentity
-      - startTime
-      - endTime
+      - day
       properties:
         id:
           type: integer
         version:
           type: integer
-        startTime:
-          allOf:
-          - $ref: '#/components/schemas/java.time.Instant'
-        endTime:
+        day:
           allOf:
           - $ref: '#/components/schemas/java.time.Instant'
         createdAt:
@@ -425,10 +389,7 @@ components:
       properties:
         version_:
           type: integer
-        startTime_:
-          type: integer
-          format: long
-        endTime_:
+        day_:
           type: integer
           format: long
         memoizedIsInitialized:
