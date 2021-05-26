@@ -25,6 +25,12 @@ import ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeControllerV2;
 import ch.ubique.notifyme.sdk.backend.ws.controller.NotifyMeControllerV3;
 import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebController;
 import ch.ubique.notifyme.sdk.backend.ws.controller.web.WebCriticalEventController;
+import ch.ubique.notifyme.sdk.backend.ws.insertmanager.InsertManager;
+import ch.ubique.notifyme.sdk.backend.ws.insertmanager.insertfilters.BeforeOnsetFilter;
+import ch.ubique.notifyme.sdk.backend.ws.insertmanager.insertfilters.FakeRequestFilter;
+import ch.ubique.notifyme.sdk.backend.ws.insertmanager.insertfilters.IntervalThresholdFilter;
+import ch.ubique.notifyme.sdk.backend.ws.insertmanager.insertfilters.OverlappingIntervalsFilter;
+import ch.ubique.notifyme.sdk.backend.ws.insertmanager.insertmodifiers.RemoveFinalIntervalModifier;
 import ch.ubique.notifyme.sdk.backend.ws.security.NotifyMeJwtRequestValidator;
 import ch.ubique.notifyme.sdk.backend.ws.security.RequestValidator;
 import ch.ubique.notifyme.sdk.backend.ws.service.PhoneHeartbeatSilentPush;
@@ -169,6 +175,20 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
   }
 
   @Bean
+  public InsertManager insertManager(
+          final CryptoWrapper cryptoWrapper,
+          final NotifyMeDataServiceV3 notifyMeDataServiceV3
+  ) {
+    final var insertManager = new InsertManager(cryptoWrapper, notifyMeDataServiceV3);
+    insertManager.addModifier(new RemoveFinalIntervalModifier());
+    insertManager.addFilter(new FakeRequestFilter());
+    insertManager.addFilter(new IntervalThresholdFilter());
+    insertManager.addFilter(new BeforeOnsetFilter());
+    insertManager.addFilter(new OverlappingIntervalsFilter());
+    return insertManager;
+  }
+
+  @Bean
   public NotifyMeControllerV2 notifyMeControllerV2(
       final NotifyMeDataServiceV2 notifyMeDataService,
       final PushRegistrationDataService pushRegistrationDataService,
@@ -184,6 +204,7 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
   @Bean
   public NotifyMeControllerV3 notifyMeControllerV3(
       NotifyMeDataServiceV3 notifyMeDataServiceV3,
+      InsertManager insertManager,
       PushRegistrationDataService pushRegistrationDataService,
       UUIDDataService uuidDataService,
       RequestValidator requestValidator,
@@ -191,6 +212,7 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
       String revision) {
     return new NotifyMeControllerV3(
         notifyMeDataServiceV3,
+        insertManager,
         pushRegistrationDataService,
         uuidDataService,
         requestValidator,

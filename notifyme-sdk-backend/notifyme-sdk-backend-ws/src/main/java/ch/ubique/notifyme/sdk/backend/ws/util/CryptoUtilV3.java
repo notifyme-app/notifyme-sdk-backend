@@ -82,17 +82,19 @@ public class CryptoUtilV3 extends CryptoUtil {
     }
 
     public List<TraceKey>
-    createTraceV3ForUserUpload(UserUploadPayloadOuterClass.UserUploadPayload userUpload) {
+    createTraceV3ForUserUpload(List<UserUploadPayloadOuterClass.UploadVenueInfo> uploadVenueInfoList) {
         var traceKeys = new ArrayList<TraceKey>();
-        for (UserUploadPayloadOuterClass.UploadVenueInfo venueInfo : userUpload.getVenueInfosList()) {
+        for (UserUploadPayloadOuterClass.UploadVenueInfo venueInfo : uploadVenueInfoList) {
             if (!venueInfo.getFake()) {
+                final var startInSeconds = venueInfo.getIntervalStartMs() / 1000;
                 byte[] identity =
                         cryptoHashSHA256(
                                 concatenate(
                                         "CN-ID".getBytes(StandardCharsets.US_ASCII),
                                         venueInfo.getPreId().toByteArray(),
                                         intToBytes(3600),
-                                        longToBytes(venueInfo.getIntervalStartMs() / 1000),
+                                        // Round down to nearest hour
+                                        longToBytes(startInSeconds - startInSeconds % 3600),
                                         venueInfo.getTimeKey().toByteArray()));
 
                 G1 secretKeyForIdentity = keyDer(this.mskFr, identity);

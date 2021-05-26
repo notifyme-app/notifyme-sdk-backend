@@ -1,5 +1,7 @@
 package ch.ubique.notifyme.sdk.backend.ws.security;
 
+import java.time.LocalDateTime;
+
 public interface RequestValidator {
   /**
    * Checks if the authObject contains the correct scope and audience
@@ -7,19 +9,16 @@ public interface RequestValidator {
    * @throws WrongScopeException, WrongAudienceException
    */
   public boolean isValid(Object authObject)
-      throws WrongScopeException, WrongAudienceException, NotAJwtException;
+      throws WrongScopeException, WrongAudienceException, NotAJwtException, InvalidOnsetException;
 
   /**
-   * Checks if the date in the onset claim is before the request's issue date
+   * Checks if the date in the onset claim is before the given date
    *
    * @param authObject JWT containing the onset claim
-   * @param others Key containing the issue date
-   * @return onset date if successful
-   * @throws ClaimIsBeforeOnsetException
-   * @throws InvalidDateException
+   * @param dateTime Date to check
+   * @return true if onset is before dateTime, false otherwise
    */
-  public long validateKeyDate(Object authObject, Object others)
-      throws ClaimIsBeforeOnsetException, InvalidDateException;
+  public boolean isOnsetBefore(Object authObject, LocalDateTime dateTime);
 
   /**
    * Checks if the request is fake by checking both the token's fake claim and the request's "fake"
@@ -31,7 +30,7 @@ public interface RequestValidator {
    */
   public boolean isFakeRequest(Object authObject, Object others);
 
-  public class InvalidDateException extends Exception {
+  public class InvalidOnsetException extends Exception {
     private static final long serialVersionUID = 5886601055826066148L;
   }
 

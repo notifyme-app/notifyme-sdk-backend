@@ -1,22 +1,19 @@
 package ch.ubique.notifyme.sdk.backend.ws.util;
 
+import static org.junit.Assert.*;
+
 import ch.ubique.notifyme.sdk.backend.model.UserUploadPayloadOuterClass;
-import ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey;
 import com.google.gson.Gson;
 import com.google.protobuf.ByteString;
-import org.junit.Before;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CryptoUtilV3Test {
 
@@ -69,7 +66,10 @@ public class CryptoUtilV3Test {
               .setVersion(3)
               .addVenueInfos(uploadVenueInfo)
               .build();
-      final var traceKeys = cryptoWrapper.getCryptoUtilV3().createTraceV3ForUserUpload(userUpload);
+      final var traceKeys =
+          cryptoWrapper
+              .getCryptoUtilV3()
+              .createTraceV3ForUserUpload(userUpload.getVenueInfosList());
       assertNotNull(traceKeys);
       assertEquals(1, traceKeys.size());
     }

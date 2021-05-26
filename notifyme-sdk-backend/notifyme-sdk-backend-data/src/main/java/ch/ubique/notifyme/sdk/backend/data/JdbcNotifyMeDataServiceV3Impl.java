@@ -12,11 +12,16 @@ package ch.ubique.notifyme.sdk.backend.data;
 
 import ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey;
 import ch.ubique.notifyme.sdk.backend.model.util.DateUtil;
+
+import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import javax.sql.DataSource;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -24,6 +29,8 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.transaction.annotation.Transactional;
 
 public class JdbcNotifyMeDataServiceV3Impl implements NotifyMeDataServiceV3 {
+
+  protected final Logger logger = LoggerFactory.getLogger(getClass());
 
   private final Long bucketSizeInMs;
   private final NamedParameterJdbcTemplate jt;
@@ -45,15 +52,15 @@ public class JdbcNotifyMeDataServiceV3Impl implements NotifyMeDataServiceV3 {
   }
 
   @Override
-  @Transactional(readOnly = true)
   public List<TraceKey> findTraceKeys(Instant after) {
+    final var before = Instant.ofEpochMilli(DateUtil.getLastFullBucketEndEpochMilli(bucketSizeInMs));
     var sql = "select * from t_trace_key_v3";
-    final var before = DateUtil.toInstant(DateUtil.getLastFullBucketEndEpochMilli(bucketSizeInMs));
-    MapSqlParameterSource params = new MapSqlParameterSource("before", DateUtil.toDate(before));
+    MapSqlParameterSource params = new MapSqlParameterSource();
+    params.addValue("before", Timestamp.from(before));
     sql += " where created_at < :before";
     if (after != null) {
       sql += " and created_at >= :after";
-      params.addValue("after", DateUtil.toDate(after));
+      params.addValue("after", Timestamp.from(after));
     }
     return jt.query(sql, params, new TraceKeyV3RowMapper());
   }
@@ -63,7 +70,7 @@ public class JdbcNotifyMeDataServiceV3Impl implements NotifyMeDataServiceV3 {
   public int removeTraceKeys(Instant before) {
     final var sql = "delete from t_trace_key_v3 where day < :before";
     final var params = new MapSqlParameterSource();
-    params.addValue("before", DateUtil.toDate(before));
+    params.addValue("before", Timestamp.from(before));
     return jt.update(sql, params);
   }
 
@@ -80,15 +87,15 @@ public class JdbcNotifyMeDataServiceV3Impl implements NotifyMeDataServiceV3 {
   }
 
   private MapSqlParameterSource getTraceKeyParams(TraceKey traceKey) {
-    MapSqlParameterSource params = new MapSqlParameterSource();
+    var params = new MapSqlParameterSource();
     params.addValue("version", traceKey.getVersion());
     params.addValue("identity", traceKey.getIdentity());
     params.addValue("secret_key_for_identity", traceKey.getSecretKeyForIdentity());
-    params.addValue("day", DateUtil.toDate(traceKey.getDay()));
+    params.addValue("day", Date.from(traceKey.getDay()));
     if (traceKey.getCreatedAt() != null) {
-      params.addValue("created_at", DateUtil.toDate(traceKey.getCreatedAt()));
+      params.addValue("created_at", Timestamp.from(traceKey.getCreatedAt()));
     } else {
-      params.addValue("created_at", new Date());
+      params.addValue("created_at", new Timestamp(DateUtil.getCurrentBucketEndEpochMilli(bucketSizeInMs)));
     }
     params.addValue("encrypted_associated_data", traceKey.getEncryptedAssociatedData());
     params.addValue("cipher_text_nonce", traceKey.getCipherTextNonce());
