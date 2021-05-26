@@ -7,15 +7,13 @@ import ch.ubique.notifyme.sdk.backend.model.v3.NotifyMeAssociatedDataOuterClass;
 import ch.ubique.notifyme.sdk.backend.model.v3.QrCodePayload;
 import com.google.crypto.tink.subtle.Hkdf;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.goterl.lazycode.lazysodium.SodiumJava;
 import com.goterl.lazycode.lazysodium.interfaces.Box;
-import com.herumi.mcl.*;
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.herumi.mcl.Fr;
+import com.herumi.mcl.G1;
+import com.herumi.mcl.G2;
+import com.herumi.mcl.GT;
+import com.herumi.mcl.Mcl;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -27,6 +25,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CryptoUtilV3 extends CryptoUtil {
 
@@ -38,7 +40,8 @@ public class CryptoUtilV3 extends CryptoUtil {
     private final Fr mskFr;
     private final G2 mpkG2;
 
-    public CryptoUtilV3(String skHex, String pkHex, String mskHex, String mpkHex, SodiumJava sodium) {
+    public CryptoUtilV3(
+            String skHex, String pkHex, String mskHex, String mpkHex, SodiumJava sodium) {
         super(skHex, pkHex, sodium);
         try {
             this.msk = Hex.decodeHex(mskHex);
@@ -81,8 +84,8 @@ public class CryptoUtilV3 extends CryptoUtil {
         }
     }
 
-    public List<TraceKey>
-    createTraceV3ForUserUpload(List<UserUploadPayloadOuterClass.UploadVenueInfo> uploadVenueInfoList) {
+    public List<TraceKey> createTraceV3ForUserUpload(
+            List<UserUploadPayloadOuterClass.UploadVenueInfo> uploadVenueInfoList) {
         var traceKeys = new ArrayList<TraceKey>();
         for (UserUploadPayloadOuterClass.UploadVenueInfo venueInfo : uploadVenueInfoList) {
             if (!venueInfo.getFake()) {
@@ -102,15 +105,16 @@ public class CryptoUtilV3 extends CryptoUtil {
                 byte[] nonce = createNonce();
                 NotifyMeAssociatedDataOuterClass.NotifyMeAssociatedData countryData =
                         NotifyMeAssociatedDataOuterClass.NotifyMeAssociatedData.newBuilder()
-                                .setCriticality(NotifyMeAssociatedDataOuterClass.EventCriticality.LOW)
+                                .setCriticality(
+                                        NotifyMeAssociatedDataOuterClass.EventCriticality.LOW)
                                 .setVersion(1)
                                 .build();
                 byte[] encryptedAssociatedData =
                         this.encryptAssociatedData(
                                 venueInfo.getNotificationKey().toByteArray(),
+                                nonce,
                                 "",
                                 countryData.toByteArray(),
-                                nonce,
                                 venueInfo.getIntervalStartMs(),
                                 venueInfo.getIntervalEndMs());
 
@@ -119,7 +123,8 @@ public class CryptoUtilV3 extends CryptoUtil {
                 traceKeyV3.setCipherTextNonce(nonce);
                 traceKeyV3.setEncryptedAssociatedData(encryptedAssociatedData);
                 traceKeyV3.setDay(
-                        Instant.ofEpochMilli(venueInfo.getIntervalStartMs()).truncatedTo(ChronoUnit.DAYS));
+                        Instant.ofEpochMilli(venueInfo.getIntervalStartMs())
+                                .truncatedTo(ChronoUnit.DAYS));
                 traceKeyV3.setIdentity(identity);
                 traceKeyV3.setSecretKeyForIdentity(secretKeyForIdentity.serialize());
                 traceKeys.add(traceKeyV3);
@@ -138,7 +143,8 @@ public class CryptoUtilV3 extends CryptoUtil {
         return traceKeys;
     }
 
-    public NoncesAndNotificationKey getNoncesAndNotificationKey(QrCodePayload.QRCodePayload qrCodePayload) {
+    public NoncesAndNotificationKey getNoncesAndNotificationKey(
+            QrCodePayload.QRCodePayload qrCodePayload) {
         return getNoncesAndNotificationKey(qrCodePayload.toByteArray());
     }
 
@@ -238,9 +244,9 @@ public class CryptoUtilV3 extends CryptoUtil {
 
     public byte[] encryptAssociatedData(
             byte[] secretKey,
+            byte[] nonce,
             String message,
             byte[] countryData,
-            byte[] nonce,
             long startTimestampMs,
             long endTimestampMs) {
         final var associatedData =
@@ -289,7 +295,8 @@ public class CryptoUtilV3 extends CryptoUtil {
     private byte[] cryptoSecretboxEasy(byte[] secretKey, byte[] message, byte[] nonce) {
         byte[] encryptedMessage = new byte[message.length + Box.MACBYTES];
         int result =
-                sodium.crypto_secretbox_easy(encryptedMessage, message, message.length, nonce, secretKey);
+                sodium.crypto_secretbox_easy(
+                        encryptedMessage, message, message.length, nonce, secretKey);
         if (result != 0) {
             throw new RuntimeException("crypto_secretbox_easy returned a value != 0");
         }
