@@ -21,24 +21,26 @@ import org.slf4j.LoggerFactory;
 
 public class LibDependencyTest {
 
-  protected final Logger logger = LoggerFactory.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-  @Test
-  public void testDependency() throws SodiumException {
-    SodiumJava sodium = new SodiumJava();
-    LazySodiumJava lazySodium = new LazySodiumJava(sodium, StandardCharsets.UTF_8);
-    // Now you can cast and use the enhanced native
-    // Libsodium functions
-    byte[] pw = lazySodium.bytes("A cool password");
-    byte[] outputHash = new byte[PwHash.STR_BYTES];
-    PwHash.Native pwHash = (PwHash.Native) lazySodium;
-    boolean success =
-        pwHash.cryptoPwHashStr(outputHash, pw, pw.length, PwHash.OPSLIMIT_MIN, PwHash.MEMLIMIT_MIN);
+    @Test
+    public void testDependency() throws SodiumException {
+        SodiumJava sodium = new SodiumJava();
+        LazySodiumJava lazySodium = new LazySodiumJava(sodium, StandardCharsets.UTF_8);
+        // Now you can cast and use the enhanced native
+        // Libsodium functions
+        byte[] pw = lazySodium.bytes("A cool password");
+        byte[] outputHash = new byte[PwHash.STR_BYTES];
+        PwHash.Native pwHash = (PwHash.Native) lazySodium;
+        boolean success =
+                pwHash.cryptoPwHashStr(
+                        outputHash, pw, pw.length, PwHash.OPSLIMIT_MIN, PwHash.MEMLIMIT_MIN);
 
-    // ... or you can use the super-powered lazy functions.
-    // For example, this is equivalent to the above.
-    PwHash.Lazy pwHashLazy = (PwHash.Lazy) lazySodium;
-    String hash =
-        pwHashLazy.cryptoPwHashStr("A cool password", PwHash.OPSLIMIT_MIN, PwHash.MEMLIMIT_MIN);
-  }
+        // ... or you can use the super-powered lazy functions.
+        // For example, this is equivalent to the above.
+        PwHash.Lazy pwHashLazy = (PwHash.Lazy) lazySodium;
+        String hash =
+                pwHashLazy.cryptoPwHashStr(
+                        "A cool password", PwHash.OPSLIMIT_MIN, PwHash.MEMLIMIT_MIN);
+    }
 }

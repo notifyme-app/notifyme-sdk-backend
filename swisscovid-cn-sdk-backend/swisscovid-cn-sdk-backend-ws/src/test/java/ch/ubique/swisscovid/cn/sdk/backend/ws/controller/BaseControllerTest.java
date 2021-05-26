@@ -33,42 +33,36 @@ import org.springframework.web.context.WebApplicationContext;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles({"postgres", "test-config", "dev"})
-// @TestPropertySource(properties = {})
 @Transactional
 public abstract class BaseControllerTest {
 
-  protected final Logger logger = LoggerFactory.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
+    private final boolean enableSecurity;
+    protected ObjectMapper objectMapper;
+    protected MockMvc mockMvc;
+    @Autowired private WebApplicationContext webApplicationContext;
+    // !!!!! IMPORTANT: Must be added to filter-chain of mockMvc, otherwise security configs are
+    // ignored !!!!!
+    @Autowired private Filter springSecurityFilterChain;
 
-  protected ObjectMapper objectMapper;
-
-  protected MockMvc mockMvc;
-
-  @Autowired private WebApplicationContext webApplicationContext;
-
-  // !!!!! IMPORTANT: Must be added to filter-chain of mockMvc, otherwise security configs are
-  // ignored !!!!!
-  @Autowired private Filter springSecurityFilterChain;
-
-  private final boolean enableSecurity;
-
-  public BaseControllerTest(boolean enableSecurity) {
-    this.enableSecurity = enableSecurity;
-  }
-
-  @Before
-  public void setup() throws Exception {
-    DefaultMockMvcBuilder builder = MockMvcBuilders.webAppContextSetup(webApplicationContext);
-    if (enableSecurity) {
-      builder.addFilters(springSecurityFilterChain);
+    public BaseControllerTest(boolean enableSecurity) {
+        this.enableSecurity = enableSecurity;
     }
-    this.mockMvc = builder.build();
-    this.objectMapper = new ObjectMapper(new JsonFactory());
-    this.objectMapper.registerModule(new JavaTimeModule());
-    // this makes sure, that the objectmapper does not fail, when no filter is provided.
-    this.objectMapper.setFilterProvider(new SimpleFilterProvider().setFailOnUnknownId(false));
-  }
 
-  protected String json(Object o) throws IOException {
-    return objectMapper.writeValueAsString(o);
-  }
+    @Before
+    public void setup() throws Exception {
+        DefaultMockMvcBuilder builder = MockMvcBuilders.webAppContextSetup(webApplicationContext);
+        if (enableSecurity) {
+            builder.addFilters(springSecurityFilterChain);
+        }
+        this.mockMvc = builder.build();
+        this.objectMapper = new ObjectMapper(new JsonFactory());
+        this.objectMapper.registerModule(new JavaTimeModule());
+        // this makes sure, that the objectmapper does not fail, when no filter is provided.
+        this.objectMapper.setFilterProvider(new SimpleFilterProvider().setFailOnUnknownId(false));
+    }
+
+    protected String json(Object o) throws IOException {
+        return objectMapper.writeValueAsString(o);
+    }
 }

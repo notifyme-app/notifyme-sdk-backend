@@ -62,7 +62,7 @@ public class InsertManager {
         if (uploadVenueInfoList != null && !uploadVenueInfoList.isEmpty()) {
             final var modifiedVenueInfoList = modifyUpload(uploadVenueInfoList, principal, now);
             final var filteredVenueInfoList = filterUpload(modifiedVenueInfoList, principal, now);
-            final var traceKeys = cryptoWrapper.getCryptoUtilV3().createTraceV3ForUserUpload(filteredVenueInfoList);
+            final var traceKeys = cryptoWrapper.getCryptoUtil().createTraceV3ForUserUpload(filteredVenueInfoList);
             if (!traceKeys.isEmpty()) {
                 swissCovidDataServiceV3.insertTraceKey(traceKeys);
             }

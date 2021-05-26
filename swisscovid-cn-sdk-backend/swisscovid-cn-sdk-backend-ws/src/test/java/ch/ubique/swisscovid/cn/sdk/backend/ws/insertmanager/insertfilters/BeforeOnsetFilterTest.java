@@ -1,19 +1,22 @@
 package ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters;
 
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
-import org.springframework.security.oauth2.jwt.Jwt;
-
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 public class BeforeOnsetFilterTest extends UploadInsertionFilterTest {
 
-    // We don't care about the current time in the filter, we just need a common timestamp for all methods below
-    private static final LocalDateTime currentTime = LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT);
-
+    // We don't care about the current time in the filter, we just need a common timestamp for all
+    // methods below
+    private static final LocalDateTime currentTime =
+            LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT);
 
     @Override
     List<UploadVenueInfo> getValidVenueInfo() {
@@ -49,10 +52,17 @@ public class BeforeOnsetFilterTest extends UploadInsertionFilterTest {
 
     @Override
     public Jwt getToken(LocalDateTime now) throws Exception {
-        final var onset = currentTime.minusDays(2).truncatedTo(ChronoUnit.DAYS).format(DATE_FORMATTER);
+        final var onset =
+                currentTime.minusDays(2).truncatedTo(ChronoUnit.DAYS).format(DATE_FORMATTER);
         final var expiry = currentTime.plusMinutes(5).toInstant(ZoneOffset.UTC);
-        return jwtDecoder.decode(tokenHelper.createToken(
-                onset, "0", "notifyMe", "userupload", Date.from(expiry), true, currentTime.toInstant(ZoneOffset.UTC)));
+        return jwtDecoder.decode(
+                tokenHelper.createToken(
+                        onset,
+                        "0",
+                        "notifyMe",
+                        "userupload",
+                        Date.from(expiry),
+                        true,
+                        currentTime.toInstant(ZoneOffset.UTC)));
     }
 }
-
