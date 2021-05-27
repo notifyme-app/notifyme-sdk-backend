@@ -5,6 +5,7 @@
 PROJ_BASE_DIR = swisscovid-cn-sdk-backend
 WS_MODULE_NAME = swisscovid-cn-sdk-backend-ws
 WS_MODULE_DIR = $(PROJ_BASE_DIR)/$(WS_MODULE_NAME)
+WS_VERSION = 2.0.0
 DOCKER_IMG_NAME = swisscovid-cn-docker
 
 FILE_NAME = documentation.tex
@@ -48,7 +49,7 @@ show:
 	cd documentation; open $(FILE_NAME).pdf &
 
 docker:
-	cp $(WS_MODULE_DIR)/target/${WS_MODULE_NAME}*.jar swisscovid-cn-ws/ws/bin/${WS_MODULE_NAME}-2.0.0.jar
+	cp $(WS_MODULE_DIR)/target/${WS_MODULE_NAME}*.jar swisscovid-cn-ws/ws/bin/${WS_MODULE_NAME}-${WS_VERSION}.jar
 	docker build -t ${DOCKER_IMG_NAME} notifyme-ws/
 	@printf '\033[33m DO NOT USE THIS IN PRODUCTION \033[0m \n'
 	@printf "\033[32m docker run -p 8080:8080 -v $(PWD)/$(WS_MODULE_DIR)/src/main/resources/logback.xml:/home/ws/conf/${WS_MODULE_NAME}-logback.xml -v $(PWD)/$(WS_MODULE_DIR)/src/main/resources/application.properties:/home/ws/conf/${WS_MODULE_NAME}.properties ${DOCKER_IMG_NAME} \033[0m\n"

@@ -4,24 +4,6 @@
 ![Build](https://github.com/SwissCovid/swisscovid-cn-backend/workflows/Build/badge.svg?branch=develop)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=SwissCovid_swisscovid-cn-backend&metric=alert_status)](https://sonarcloud.io/dashboard?id=SwissCovid_swisscovid-cn-backend)
 
-## Introduction
-
-NotifyMe is a decentralised check-in system for meetings and events. Users can check in to a venue by scanning a QR Code. The check in is stored locally and encrypted. In case one of the visitors tests positive subsequent to a gathering, all other participants can be easily informed via the app. The implementation is based on the [CrowdNotifier White Paper](https://github.com/CrowdNotifier/documents) by Wouter Lueks (EPFL) et al. The app design, UX and implementation was done by [Ubique](https://ubique.ch/). More information can be found [here](https://notify-me.ch).
-
-## Repositories
-
-- Android SDK: [crowdnotifier-sdk-android](https://github.com/CrowdNotifier/crowdnotifier-sdk-android)
-- iOS SDK: [crowdnotifier-sdk-ios](https://github.com/CrowdNotifier/crowdnotifier-sdk-ios)
-- TypeScript Reference Implementation: [crowdnotifier-ts](https://github.com/CrowdNotifier/crowdnotifier-ts)
-- Android Demo App: [notifyme-app-android](https://github.com/notifyme-app/notifyme-app-android)
-- iOS Demo App: [notifyme-app-ios](https://github.com/notifyme-app/notifyme-app-ios)
-- Backend SDK: [notifyme-sdk-backend](https://github.com/notifyme-app/notifyme-sdk-backend)
-- Web Apps: [notifyme-webpages](https://github.com/notifyme-app/notifyme-webpages)
-
-## Work in Progress
-
-The NotifyMe SDK Backend contains alpha-quality code only and is not yet complete. It has not yet been reviewed or audited for security and compatibility. We are both continuing the development and have started a security review. This project is truly open-source and we welcome any feedback on the code regarding both the implementation and security aspects.
-
 ## Further Documentation
 
 The full set of documents for CrowdNotifier is at https://github.com/CrowdNotifier/documents. Please refer to the technical documents and whitepapers for a description of the implementation.
@@ -38,7 +20,8 @@ The full set of documents for CrowdNotifier is at https://github.com/CrowdNotifi
 For development purposes a hsqldb can be used to run the webservice locally. For production systems, it is recommended to connect to a PostgreSQL dabatase (cluster if possible). There is a table for storing submitted trace keys. The schema is the following:
 
 ![](documentation/img/t_trace_key.png)
-![](documentation/img/t_trace_key_v3.png)
+![](documentation/img/t_redeem_uuid.png)
+![](documentation/img/t_push_registration.png)
 
 ## Environments
 
@@ -71,14 +54,14 @@ We use [Springboot-Swagger-3](https://github.com/Ubique-OSS/springboot-swagger3)
 To build you need to install Maven.
 
 ```bash
-cd notifyme-sdk-backend
+cd swisscovid-cn-sdk-backend
 mvn install
 ```
 
 ## Run
 
 ```bash
-java -jar notifyme-sdk-backend-ws/target/notifyme-sdk-backend-ws-*.jar
+java -jar swisscovid-cn-sdk-backend-ws/target/swisscovid-cn-sdk-backend-ws.jar
 ```
 
 ## Dockerfiles
@@ -86,15 +69,15 @@ java -jar notifyme-sdk-backend-ws/target/notifyme-sdk-backend-ws-*.jar
 The dockerfile includes a base jdk image to run the jar. To actually build the docker container, you need to place the generated jar in the bin folder.
 
 ```bash
-cp notifyme-sdk-backend/notifyme-sdk-backend-ws/target/notifyme-sdk-backend-ws*.jar notifyme-ws/ws/bin/notifyme-sdk-backend-ws-1.0.0.jar
+cp swisscovid-cn-sdk-backend/swisscovid-cn-sdk-backend-ws/target/swisscovid-cn-sdk-backend-ws.jar swisscovid-cn-ws/ws/bin/swisscovid-cn-sdk-backend-ws-2.0.0.jar
 ```
 
 ```bash
-cd notifyme-ws && docker build -t <the-tag-we-use> .
+cd swisscovid-cn-ws && docker build -t <the-tag-we-use> .
 ```
 
 ```bash
-docker run -p 80:8080 -v <path_to_logbackxml>:/home/ws/conf/notifyme-sdk-backend-ws-logback.xml -v <path_to_application_properties>:/home/ws/conf/notifyme-sdk-backend-ws.properties <the-tag-we-use>
+docker run -p 80:8080 -v <path_to_logbackxml>:/home/ws/conf/swisscovid-cn-sdk-backend-ws-logback.xml -v <path_to_application_properties>:/home/ws/conf/swisscovid-cn-sdk-backend-ws.properties <the-tag-we-use>
 ```
 
 ## Makefile
@@ -113,10 +96,10 @@ To build the docker image run
 make docker-build
 ```
 
-This will build the jar and copy it into the `notifyme-ws/ws/bin` folder, from where it is then added to the container image.
-The image will be tagged as `notifyme-docker`.
+This will build the jar and copy it into the `swisscovid-cn-ws/ws/bin` folder, from where it is then added to the container image.
+The image will be tagged as `swisscovid-cn-docker`.
 
-An example `logback.xml` is found in the `resources` folder for the `notifyme-sdk-backend-ws` Java module.
+An example `logback.xml` is found in the `resources` folder for the `swisscovid-cn-sdk-backend-ws` Java module.
 
 An example `application.properties` file is found at the same location.
 Just make sure the configuration matches with your deployment (c.f. `WSBaseConfig` for possible properties
