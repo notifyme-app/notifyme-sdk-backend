@@ -10,8 +10,10 @@
 
 package ch.ubique.swisscovid.cn.sdk.backend.ws.config;
 
+import ch.ubique.swisscovid.cn.sdk.backend.data.InteractionDurationDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.service.PhoneHeartbeatSilentPush;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.TimeZone;
@@ -32,6 +34,7 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
     private static final Logger logger = LoggerFactory.getLogger(WSSchedulingConfig.class);
 
     private final SwissCovidDataService swissCovidDataService;
+    private final InteractionDurationDataService interactionDurationDataService;
     private final PhoneHeartbeatSilentPush phoneHeartbeatSilentPush;
 
     @Value("${db.cleanCron:0 0 3 * * ?}")
@@ -44,9 +47,11 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
     private String heartBeatSilentPushCron;
 
     protected WSSchedulingConfig(
-            final SwissCovidDataService swissCovidDataService,
-            PhoneHeartbeatSilentPush phoneHeartbeatSilentPush) {
+        final SwissCovidDataService swissCovidDataService,
+        InteractionDurationDataService interactionDurationDataService,
+        PhoneHeartbeatSilentPush phoneHeartbeatSilentPush) {
         this.swissCovidDataService = swissCovidDataService;
+        this.interactionDurationDataService = interactionDurationDataService;
         this.phoneHeartbeatSilentPush = phoneHeartbeatSilentPush;
     }
 
@@ -59,13 +64,27 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
                                 Instant removeBefore =
                                         Instant.now().minus(removeAfterDays, ChronoUnit.DAYS);
                                 logger.info(
-                                        "removing trace keys v3 with end_time before: {}",
+                                        "removing trace keys with end_time before: {}",
                                         removeBefore);
                                 int removeCount =
                                         swissCovidDataService.removeTraceKeys(removeBefore);
-                                logger.info("removed {} trace keys v3 from db", removeCount);
+                                logger.info("removed {} trace keys from db", removeCount);
                             } catch (Exception e) {
-                                logger.error("Exception removing old trace keys v3", e);
+                                logger.error("Exception removing old trace keys", e);
+                            }
+                        },
+                        new CronTrigger(cleanCron, TimeZone.getTimeZone("UTC"))));
+
+        taskRegistrar.addCronTask(
+                new CronTask(
+                        () -> {
+                            try {
+                                logger.info(
+                                        "removing interaction duration entries older than {} days",
+                                        removeAfterDays);
+                                interactionDurationDataService.removeDurations(Duration.ofDays(removeAfterDays));
+                            } catch (Exception e) {
+                                logger.error("Exception removing old interaction duration entries", e);
                             }
                         },
                         new CronTrigger(cleanCron, TimeZone.getTimeZone("UTC"))));

@@ -10,6 +10,8 @@
 
 package ch.ubique.swisscovid.cn.sdk.backend.ws.config;
 
+import ch.ubique.swisscovid.cn.sdk.backend.data.InteractionDurationDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.data.JDBCInteractionDurationDataServiceImpl;
 import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcPushRegistrationDataServiceImpl;
 import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcSwissCovidDataServiceImpl;
 import ch.ubique.swisscovid.cn.sdk.backend.data.PushRegistrationDataService;
@@ -147,7 +149,7 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public SwissCovidDataService notifyMeDataServiceV3() {
+    public SwissCovidDataService swissCovidDataService() {
         return new JdbcSwissCovidDataServiceImpl(dataSource(), bucketSizeInMs);
     }
 
@@ -157,9 +159,13 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
     }
 
     @Bean
+    public InteractionDurationDataService interactionDurationDataService(DataSource dataSource) {
+        return new JDBCInteractionDurationDataServiceImpl(dataSource);
+    }
+
+    @Bean
     public InsertManager insertManager(
-            final CryptoWrapper cryptoWrapper,
-            final SwissCovidDataService swissCovidDataService) {
+            final CryptoWrapper cryptoWrapper, final SwissCovidDataService swissCovidDataService) {
         final var insertManager = new InsertManager(cryptoWrapper, swissCovidDataService);
         insertManager.addModifier(new RemoveFinalIntervalModifier());
         insertManager.addFilter(new FakeRequestFilter());
@@ -179,7 +185,7 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
             CryptoWrapper cryptoWrapper,
             String revision) {
         return new SwissCovidControllerV3(
-            swissCovidDataService,
+                swissCovidDataService,
                 insertManager,
                 pushRegistrationDataService,
                 uuidDataService,
