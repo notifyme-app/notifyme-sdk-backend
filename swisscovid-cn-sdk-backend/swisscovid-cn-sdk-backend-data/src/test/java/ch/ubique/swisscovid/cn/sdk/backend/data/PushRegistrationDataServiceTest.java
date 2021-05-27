@@ -49,20 +49,23 @@ public class PushRegistrationDataServiceTest extends BaseDataServiceTest {
     @Test
     @Transactional
     public void removeRegistrations() {
-        final var registration = createPushRegistration(PushType.IOD);
-        pushRegistrationDataService.upsertPushRegistration(registration);
+        final var registrationIOD = createPushRegistration(PushType.IOD);
+        final var registrationAND = createPushRegistration(PushType.AND);
+        pushRegistrationDataService.upsertPushRegistration(registrationIOD);
+        pushRegistrationDataService.upsertPushRegistration(registrationAND);
         assertEquals(1, pushRegistrationDataService.getPushRegistrationByType(PushType.IOD).size());
-        pushRegistrationDataService.removeRegistrations(Collections.singletonList(registration.getPushToken()));
+        pushRegistrationDataService.removeRegistrations(Collections.singletonList(registrationIOD.getPushToken()));
         assertTrue(pushRegistrationDataService.getPushRegistrationByType(PushType.IOD).isEmpty());
+        assertEquals(1, pushRegistrationDataService.getPushRegistrationByType(PushType.AND).size());
     }
 
     private PushRegistration createPushRegistration(PushType pushType) {
         final var registration =
             PushRegistration.newBuilder()
                 .setVersion(4)
-                .setPushToken("token")
+                .setPushToken("token_" + pushType.toString())
                 .setPushType(pushType)
-                .setDeviceId("id")
+                .setDeviceId("id_" + pushType.toString())
                 .build();
         return registration;
     }
