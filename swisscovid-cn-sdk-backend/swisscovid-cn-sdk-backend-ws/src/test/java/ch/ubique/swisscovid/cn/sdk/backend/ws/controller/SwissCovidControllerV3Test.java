@@ -397,6 +397,7 @@ public class SwissCovidControllerV3Test extends BaseControllerTest {
                 UserUploadPayload.newBuilder()
                         .setVersion(3)
                         .addAllVenueInfos(Arrays.asList(venueInfo))
+                        .setUserInteractionDurationMs(0)
                         .build();
         return userUpload;
     }
