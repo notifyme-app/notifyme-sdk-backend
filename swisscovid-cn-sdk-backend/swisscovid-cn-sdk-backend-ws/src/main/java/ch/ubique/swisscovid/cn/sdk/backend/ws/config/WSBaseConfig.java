@@ -25,7 +25,7 @@ import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.Overla
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertmodifiers.RemoveFinalIntervalModifier;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.security.RequestValidator;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.security.SwissCovidJwtRequestValidator;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.service.PhoneHeartbeatSilentPush;
+import ch.ubique.swisscovid.cn.sdk.backend.ws.service.IOSHeartbeatSilentPush;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.util.CryptoWrapper;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -34,12 +34,21 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import java.util.List;
+
+import javax.net.ssl.SSLException;
 import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
@@ -47,6 +56,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -94,11 +104,18 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
     @Value("${git.commit.time}")
     private String commitTime;
 
-    @Value("${ws.push.authToken}")
-    private String pushAuthToken;
-
-    @Value("${ws.push.serverHost}")
-    private String pushServerHost;
+    // base64 encoded p8 file
+    @Value("${push.ios.signingkey}")
+    private String iosPushSigningKey;
+    
+    @Value("${push.ios.teamid}")
+    private String iosPushTeamId;
+    
+    @Value("${push.ios.keyid}")
+    private String iosPushKeyId;
+    
+    @Value("${push.ios.topic}")
+    private String iosPushTopic;
 
     @Bean
     public static PropertySourcesPlaceholderConfigurer placeholderConfigurer() {
@@ -197,9 +214,11 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public PhoneHeartbeatSilentPush phoneHeartbeatSilentPush(
-            final PushRegistrationDataService pushRegistrationDataService) {
-        return new PhoneHeartbeatSilentPush(pushRegistrationDataService);
+    @Profile("push")
+    public IOSHeartbeatSilentPush phoneHeartbeatSilentPush(
+            final PushRegistrationDataService pushRegistrationDataService) throws InvalidKeyException, SSLException, NoSuchAlgorithmException, IOException, URISyntaxException {
+    	byte[] pushSigningKey = Base64.getDecoder().decode(iosPushSigningKey);
+        return new IOSHeartbeatSilentPush(pushRegistrationDataService, new ByteArrayInputStream(pushSigningKey), iosPushTeamId, iosPushKeyId, iosPushTopic);
     }
 
     @Bean

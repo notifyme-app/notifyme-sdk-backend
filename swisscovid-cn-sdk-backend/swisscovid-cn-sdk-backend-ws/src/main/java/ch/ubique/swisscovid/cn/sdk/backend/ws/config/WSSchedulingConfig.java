@@ -10,11 +10,12 @@
 
 package ch.ubique.swisscovid.cn.sdk.backend.ws.config;
 
-import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataServiceV3;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.service.PhoneHeartbeatSilentPush;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.TimeZone;
+
+import javax.annotation.Nullable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +26,9 @@ import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.CronTrigger;
 
+import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataServiceV3;
+import ch.ubique.swisscovid.cn.sdk.backend.ws.service.IOSHeartbeatSilentPush;
+
 @Configuration
 @EnableScheduling
 public class WSSchedulingConfig implements SchedulingConfigurer {
@@ -32,9 +36,9 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
     private static final Logger logger = LoggerFactory.getLogger(WSSchedulingConfig.class);
 
     private final SwissCovidDataServiceV3 swissCovidDataServiceV3;
-    private final PhoneHeartbeatSilentPush phoneHeartbeatSilentPush;
+    private final IOSHeartbeatSilentPush phoneHeartbeatSilentPush;
 
-    @Value("${db.cleanCron:0 0 3 * * ?}")
+    @Value("${db.cleanCron:0 0 * * * ?}")
     private String cleanCron;
 
     @Value("${db.removeAfterDays:14}")
@@ -45,7 +49,7 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
 
     protected WSSchedulingConfig(
             final SwissCovidDataServiceV3 swissCovidDataServiceV3,
-            PhoneHeartbeatSilentPush phoneHeartbeatSilentPush) {
+            @Nullable IOSHeartbeatSilentPush phoneHeartbeatSilentPush) {
         this.swissCovidDataServiceV3 = swissCovidDataServiceV3;
         this.phoneHeartbeatSilentPush = phoneHeartbeatSilentPush;
     }
@@ -70,9 +74,12 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
                         },
                         new CronTrigger(cleanCron, TimeZone.getTimeZone("UTC"))));
 
-        taskRegistrar.addCronTask(
-                new CronTask(
-                        phoneHeartbeatSilentPush::sendHeartbeats,
-                        new CronTrigger(heartBeatSilentPushCron, TimeZone.getTimeZone("UTC"))));
+        // push is optional, only trigger if set
+        if (phoneHeartbeatSilentPush != null) {
+	        taskRegistrar.addCronTask(
+	                new CronTask(
+	                        phoneHeartbeatSilentPush::sendHeartbeats,
+	                        new CronTrigger(heartBeatSilentPushCron, TimeZone.getTimeZone("UTC"))));
+        }
     }
 }
