@@ -50,7 +50,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/v3")
-@CrossOrigin(origins = {"https://notify-me.c4dt.org", "https://notify-me-dev.c4dt.org"})
+@CrossOrigin(origins = {"https://www.pt-d.bfs.admin.ch", "https://www.pt1-d.bfs.admin.ch"})
 public class SwissCovidControllerV3 {
   private static final String HEADER_X_KEY_BUNDLE_TAG = "x-key-bundle-tag";
   private static final Logger logger = LoggerFactory.getLogger(SwissCovidControllerV3.class);
@@ -212,8 +212,8 @@ public class SwissCovidControllerV3 {
       description = "User upload of stored identities",
       responses = {
               "200 => success",
-              "400 => Bad Upload Data",
-              "403 => Authentication failed"})
+              "400 => Bad Upload Data: List of VenueInfo objects was null or empty",
+              "403 => Authentication failed: Invalid JWT Data"})
   public @ResponseBody Callable<ResponseEntity<String>> userUpload(
       @Documentation(description = "Identities to upload as protobuf") @Valid @RequestBody
           final UserUploadPayload userUploadPayload,

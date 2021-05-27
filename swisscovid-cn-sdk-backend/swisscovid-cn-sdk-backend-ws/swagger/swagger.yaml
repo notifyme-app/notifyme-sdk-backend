@@ -1,8 +1,8 @@
 openapi: 3.0.0
 servers:
-- url: https://app-dev-ws.notify-me.ch
+- url: https://www.pt-d.bfs.admin.ch
   description: ''
-- url: https://app-prod-ws.notify-me.ch
+- url: https://www.pt1-d.bfs.admin.ch
   description: ''
 info:
   version: 1.1.0

@@ -29,13 +29,14 @@ package:
 updateproject:
 	mvn -f $(PROJ_BASE_DIR)/pom.xml package -DskipTests
 
+# Swagger doesn't do well with protobufs - Generated documentation won't be very useful
 updatedoc:
 	mvn -f $(PROJ_BASE_DIR)/pom.xml package -Dmaven.test.skip=true
 	mvn springboot-swagger-3:springboot-swagger-3 -f $(WS_MODULE_DIR)/pom.xml
-	cp $(WS_MODULE_DIR)/generated/swagger/swagger.yaml documentation/yaml/sdk.yaml
+	cp $(WS_MODULE_DIR)/swagger/swagger.yaml documentation/yaml/sdk.yaml
 
 swagger:
-	cd documentation; $(RUSTY_SWAGGER) --file ../$(WS_MODULE_DIR)/swagger/swagger.yaml
+	cd documentation; $(RUSTY_SWAGGER) --file ./yaml/sdk.yaml
 
 la:
 	cd documentation;$(LATEX) $(FILE_NAME)
