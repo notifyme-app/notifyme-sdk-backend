@@ -1,13 +1,10 @@
 package ch.ubique.swisscovid.cn.sdk.backend.data.config;
 
-import ch.ubique.swisscovid.cn.sdk.backend.data.DiaryEntryDataService;
-import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcDiaryEntryDataServiceImpl;
 import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcSwissCovidDataServiceV3Impl;
 import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataServiceV3;
 import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataServiceImpl;
 import javax.sql.DataSource;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,11 +20,6 @@ public class TestConfig {
     @Bean
     public PlatformTransactionManager testTransactionManager() {
         return new DataSourceTransactionManager(dataSource);
-    }
-
-    @Bean
-    public DiaryEntryDataService diaryEntryDataService() {
-        return new JdbcDiaryEntryDataServiceImpl(dataSource);
     }
 
     @Bean

@@ -5,6 +5,7 @@
 PROJ_BASE_DIR = swisscovid-cn-sdk-backend
 WS_MODULE_NAME = swisscovid-cn-sdk-backend-ws
 WS_MODULE_DIR = $(PROJ_BASE_DIR)/$(WS_MODULE_NAME)
+WS_VERSION = 2.0.0
 DOCKER_IMG_NAME = swisscovid-cn-docker
 
 FILE_NAME = documentation.tex
@@ -28,13 +29,14 @@ package:
 updateproject:
 	mvn -f $(PROJ_BASE_DIR)/pom.xml package -DskipTests
 
+# Swagger doesn't do well with protobufs - Generated documentation won't be very useful
 updatedoc:
 	mvn -f $(PROJ_BASE_DIR)/pom.xml package -Dmaven.test.skip=true
 	mvn springboot-swagger-3:springboot-swagger-3 -f $(WS_MODULE_DIR)/pom.xml
-	cp $(WS_MODULE_DIR)/generated/swagger/swagger.yaml documentation/yaml/sdk.yaml
+	cp $(WS_MODULE_DIR)/swagger/swagger.yaml documentation/yaml/sdk.yaml
 
 swagger:
-	cd documentation; $(RUSTY_SWAGGER) --file ../$(WS_MODULE_DIR)/swagger/swagger.yaml
+	cd documentation; $(RUSTY_SWAGGER) --file ./yaml/sdk.yaml
 
 la:
 	cd documentation;$(LATEX) $(FILE_NAME)
@@ -48,7 +50,7 @@ show:
 	cd documentation; open $(FILE_NAME).pdf &
 
 docker:
-	cp $(WS_MODULE_DIR)/target/${WS_MODULE_NAME}*.jar swisscovid-cn-ws/ws/bin/${WS_MODULE_NAME}-2.0.0.jar
+	cp $(WS_MODULE_DIR)/target/${WS_MODULE_NAME}*.jar swisscovid-cn-ws/ws/bin/${WS_MODULE_NAME}-${WS_VERSION}.jar
 	docker build -t ${DOCKER_IMG_NAME} notifyme-ws/
 	@printf '\033[33m DO NOT USE THIS IN PRODUCTION \033[0m \n'
 	@printf "\033[32m docker run -p 8080:8080 -v $(PWD)/$(WS_MODULE_DIR)/src/main/resources/logback.xml:/home/ws/conf/${WS_MODULE_NAME}-logback.xml -v $(PWD)/$(WS_MODULE_DIR)/src/main/resources/application.properties:/home/ws/conf/${WS_MODULE_NAME}.properties ${DOCKER_IMG_NAME} \033[0m\n"

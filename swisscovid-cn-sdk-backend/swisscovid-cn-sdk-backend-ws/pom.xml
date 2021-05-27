@@ -169,15 +169,13 @@
                     </blackListedPackages>
                     <outFile>swagger.yaml</outFile>
                     <controllers>
-                        <controller>ch.ubique.swisscovid.cn.sdk.backend.ws.controller.ConfigController</controller>
-                        <controller>ch.ubique.swisscovid.cn.sdk.backend.ws.controller.SwissCovidControllerV2</controller>
                         <controller>ch.ubique.swisscovid.cn.sdk.backend.ws.controller.SwissCovidControllerV3</controller>
                     </controllers>
                     <title>SwissCovid CN API</title>
                     <description>SwissCovid CN API</description>
                     <apiUrls>
-                        <apiUrl>https://app-dev-ws.notify-me.ch</apiUrl>
-                        <apiUrl>https://app-prod-ws.notify-me.ch</apiUrl>
+                        <apiUrl>https://www.pt-d.bfs.admin.ch</apiUrl>
+                        <apiUrl>https://www.pt1-d.bfs.admin.ch</apiUrl>
                     </apiUrls>
                 </configuration>
                 <executions>

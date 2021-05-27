@@ -10,7 +10,7 @@
 
 package ch.ubique.swisscovid.cn.sdk.backend.data;
 
-import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.v3.TraceKey;
+import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.TraceKey;
 import ch.ubique.swisscovid.cn.sdk.backend.model.util.DateUtil;
 
 import java.sql.Date;
@@ -41,7 +41,7 @@ public class JdbcSwissCovidDataServiceV3Impl implements SwissCovidDataServiceV3 
     this.jt = new NamedParameterJdbcTemplate(dataSource);
     this.traceKeyInsert =
         new SimpleJdbcInsert(dataSource)
-            .withTableName("t_trace_key_v3")
+            .withTableName("t_trace_key")
             .usingGeneratedKeyColumns("pk_trace_key_id");
   }
 
@@ -54,7 +54,7 @@ public class JdbcSwissCovidDataServiceV3Impl implements SwissCovidDataServiceV3 
   @Override
   public List<TraceKey> findTraceKeys(Instant after) {
     final var before = Instant.ofEpochMilli(DateUtil.getLastFullBucketEndEpochMilli(bucketSizeInMs));
-    var sql = "select * from t_trace_key_v3";
+    var sql = "select * from t_trace_key";
     MapSqlParameterSource params = new MapSqlParameterSource();
     params.addValue("before", Timestamp.from(before));
     sql += " where created_at < :before";
@@ -68,7 +68,7 @@ public class JdbcSwissCovidDataServiceV3Impl implements SwissCovidDataServiceV3 
   @Override
   @Transactional
   public int removeTraceKeys(Instant before) {
-    final var sql = "delete from t_trace_key_v3 where day < :before";
+    final var sql = "delete from t_trace_key where day < :before";
     final var params = new MapSqlParameterSource();
     params.addValue("before", Timestamp.from(before));
     return jt.update(sql, params);

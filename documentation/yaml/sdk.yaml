@@ -1,111 +1,14 @@
 openapi: 3.0.0
 servers:
-- url: https://app-dev-ws.notify-me.ch
+- url: https://www.pt-d.bfs.admin.ch
   description: ''
-- url: https://app-prod-ws.notify-me.ch
+- url: https://www.pt1-d.bfs.admin.ch
   description: ''
 info:
   version: 1.1.0
-  description: NotifyMe API
-  title: NotifyMe API
+  description: SwissCovid CN API
+  title: SwissCovid CN API
 paths:
-  /v1/config:
-    get:
-      summary: getConfig
-      description: Read latest configuration, depending on the version of the phone
-        and the app.
-      responses:
-        '200':
-          description: ConfigResponse with config parameters
-          headers: {
-            }
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.config.ConfigResponse'
-        '400':
-          description: Invalid or improperly formatted user-agent or app-version
-          headers: {
-            }
-      parameters:
-      - name: User-Agent
-        in: header
-        description: App Identifier (PackageName/BundleIdentifier) + App-Version +
-          OS (Android/iOS) + OS-Version
-        example: ch.ubique.ios.notifyme;1.0.0;iOS;13.3
-        required: true
-        schema:
-          type: string
-  /v1/:
-    get:
-      summary: hello
-      description: Hello return
-      responses:
-        '200':
-          description: server live
-          headers: {
-            }
-          content:
-            application/json:
-              schema:
-                type: string
-  /v1/traceKeys:
-    get:
-      summary: getTraceKeysJson
-      description: getTraceKeysJson
-      responses:
-        '200':
-          description: protobuf/json of all keys in that interval. response header
-            _x-key-bundle-tag_ contains _lastKeyBundleTag_ for next request
-          headers:
-            x-key-bundle-tag:
-              description: _lastKeyBundleTag_ to send with next request
-              schema:
-                type: string
-          content:
-            application/x-protobuf:
-              schema:
-                $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.ProblematicEventWrapperOuterClass.ProblematicEventWrapper'
-        '404':
-          description: Invalid _lastKeyBundleTag_
-          headers:
-            x-key-bundle-tag:
-              description: _lastKeyBundleTag_ to send with next request
-              schema:
-                type: string
-      parameters:
-      - name: lastKeyBundleTag
-        in: query
-        description: in millis since epoch. must be aligned to a full hour, and <
-          now()
-        example: ''
-        required: false
-        schema:
-          type: integer
-          format: long
-    post:
-      summary: uploadTraceKeys
-      description: Endpoint used to upload trace keys to the backend
-      responses:
-        '200':
-          description: The trace keys have been stored in the database
-          headers: {
-            }
-          content:
-            application/json:
-              schema:
-                type: string
-        '403':
-          description: Authentication failed
-          headers: {
-            }
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.tracekey.v2.TraceKey'
-        description: Trace key to upload as JSON
   /v3/:
     get:
       summary: hello
@@ -135,7 +38,7 @@ paths:
           content:
             application/x-protobuf:
               schema:
-                $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEventWrapper'
+                $ref: '#/components/schemas/ch.ubique.swisscovid.cn.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEventWrapper'
         '404':
           description: Invalid _lastKeyBundleTag_
           headers:
@@ -153,96 +56,30 @@ paths:
         schema:
           type: integer
           format: long
+  /v3/register:
     post:
-      summary: uploadTraceKeys
-      description: Endpoint used to upload trace keys to the backend
+      summary: registerPush
+      description: Push registration
       responses:
         '200':
-          description: The trace keys have been stored in the database
+          description: success
           headers: {
             }
-          content:
-            application/json:
-              schema:
-                type: string
-        '403':
-          description: Authentication failed
+        '400':
+          description: Error
           headers: {
             }
       requestBody:
         required: true
         content:
-          application/json:
+          application/x-protobuf:
             schema:
-              $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey'
-        description: Trace key to upload as JSON
-  /v1/debug/:
-    get:
-      summary: hello
-      description: Hello return
-      responses:
-        '200':
-          description: server live
-          headers: {
-            }
-          content:
-            application/json:
-              schema:
-                type: string
-  /v1/debug/traceKey:
+              $ref: '#/components/schemas/ch.ubique.swisscovid.cn.sdk.backend.model.PushRegistrationOuterClass.PushRegistration'
+        description: N/A
+  /v3/userupload:
     post:
-      summary: uploadTraceKey
-      description: uploadTraceKey
-      responses:
-        '200':
-          description: ''
-          content:
-            application/json:
-              schema:
-                type: string
-      parameters:
-      - name: startTime
-        in: query
-        description: ''
-        required: true
-        schema:
-          type: integer
-          format: long
-      - name: endTime
-        in: query
-        description: ''
-        required: true
-        schema:
-          type: integer
-          format: long
-      - name: preTraces
-        in: query
-        description: list of url base64 encoded pre trace keys
-        example: ''
-        required: true
-        schema:
-          type: array
-          items:
-            type: string
-      - name: affectedHours
-        in: query
-        description: list of the affected hours for the trace keys
-        example: ''
-        required: true
-        schema:
-          type: array
-          items:
-            type: integer
-      - name: message
-        in: query
-        description: ''
-        required: true
-        schema:
-          type: string
-  /v1/debug/diaryEntries:
-    post:
-      summary: postDiaryEntries
-      description: Requests upload of all diary entries
+      summary: userUpload
+      description: User upload of stored identities
       responses:
         '200':
           description: success
@@ -252,167 +89,30 @@ paths:
             application/json:
               schema:
                 type: string
+        '400':
+          description: Bad Upload Data
+          headers: {
+            }
+        '403':
+          description: Authentication failed
+          headers: {
+            }
       requestBody:
         required: true
         content:
           application/x-protobuf:
             schema:
-              $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.DiaryEntryWrapperOuterClass.DiaryEntryWrapper'
-        description: N/A
+              $ref: '#/components/schemas/ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload'
+        description: Identities to upload as protobuf
+      parameters:
+      - name: User-Agent
+        in: header
+        description: App Identifier (PackageName/BundleIdentifier) + App-Version +
+          OS (Android/iOS) + OS-Version
+        example: ch.ubique.android.dp3t;1.0;iOS;13.3
+        required: true
+        schema:
+          type: string
 components:
-  schemas:
-    ch.ubique.notifyme.sdk.backend.model.DiaryEntryWrapperOuterClass.DiaryEntry:
-      type: object
-      properties:
-        name_:
-          type: object
-        location_:
-          type: object
-        room_:
-          type: object
-        venueType_:
-          type: integer
-        checkinTime_:
-          type: integer
-          format: long
-        checkOutTIme_:
-          type: integer
-          format: long
-        memoizedIsInitialized:
-          allOf:
-          - $ref: '#/components/schemas/byte'
-        memoizedSize:
-          type: integer
-        memoizedHashCode:
-          type: integer
-    ch.ubique.notifyme.sdk.backend.model.DiaryEntryWrapperOuterClass.DiaryEntryWrapper:
-      type: object
-      properties:
-        version_:
-          type: integer
-        diaryEntries_:
-          type: array
-          items:
-            $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.DiaryEntryWrapperOuterClass.DiaryEntry'
-        memoizedIsInitialized:
-          allOf:
-          - $ref: '#/components/schemas/byte'
-        memoizedSize:
-          type: integer
-        memoizedHashCode:
-          type: integer
-    ch.ubique.notifyme.sdk.backend.model.ProblematicEventWrapperOuterClass.ProblematicEvent:
-      type: object
-      properties:
-        startTime_:
-          type: integer
-          format: long
-        endTime_:
-          type: integer
-          format: long
-        memoizedIsInitialized:
-          allOf:
-          - $ref: '#/components/schemas/byte'
-        memoizedSize:
-          type: integer
-        memoizedHashCode:
-          type: integer
-    ch.ubique.notifyme.sdk.backend.model.ProblematicEventWrapperOuterClass.ProblematicEventWrapper:
-      type: object
-      properties:
-        version_:
-          type: integer
-        events_:
-          type: array
-          items:
-            $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.ProblematicEventWrapperOuterClass.ProblematicEvent'
-        memoizedIsInitialized:
-          allOf:
-          - $ref: '#/components/schemas/byte'
-        memoizedSize:
-          type: integer
-        memoizedHashCode:
-          type: integer
-    ch.ubique.notifyme.sdk.backend.model.config.ConfigResponse:
-      type: object
-      properties:
-        forceUpdate:
-          type: boolean
-          description: Blocks the app and shows a link to the app-store. The user
-            can only continue once the app is updated
-          example: ''
-    ch.ubique.notifyme.sdk.backend.model.tracekey.v2.TraceKey:
-      type: object
-      required:
-      - identity
-      - secretKeyForIdentity
-      - startTime
-      - endTime
-      properties:
-        id:
-          type: integer
-        startTime:
-          allOf:
-          - $ref: '#/components/schemas/java.time.Instant'
-        endTime:
-          allOf:
-          - $ref: '#/components/schemas/java.time.Instant'
-        createdAt:
-          allOf:
-          - $ref: '#/components/schemas/java.time.Instant'
-    ch.ubique.notifyme.sdk.backend.model.tracekey.v3.TraceKey:
-      type: object
-      required:
-      - version
-      - identity
-      - secretKeyForIdentity
-      - startTime
-      - endTime
-      properties:
-        id:
-          type: integer
-        version:
-          type: integer
-        startTime:
-          allOf:
-          - $ref: '#/components/schemas/java.time.Instant'
-        endTime:
-          allOf:
-          - $ref: '#/components/schemas/java.time.Instant'
-        createdAt:
-          allOf:
-          - $ref: '#/components/schemas/java.time.Instant'
-    ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEvent:
-      type: object
-      properties:
-        version_:
-          type: integer
-        startTime_:
-          type: integer
-          format: long
-        endTime_:
-          type: integer
-          format: long
-        memoizedIsInitialized:
-          allOf:
-          - $ref: '#/components/schemas/byte'
-        memoizedSize:
-          type: integer
-        memoizedHashCode:
-          type: integer
-    ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEventWrapper:
-      type: object
-      properties:
-        version_:
-          type: integer
-        events_:
-          type: array
-          items:
-            $ref: '#/components/schemas/ch.ubique.notifyme.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEvent'
-        memoizedIsInitialized:
-          allOf:
-          - $ref: '#/components/schemas/byte'
-        memoizedSize:
-          type: integer
-        memoizedHashCode:
-          type: integer
+  schemas: {
+    }

@@ -1,0 +1,191 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[a4paper
+]{ubarticle}
+\usepackage{graphicx}
+\usepackage{amssymb,amsmath}
+    \usepackage{parskip}
+  \usepackage{tabu}
+  \usepackage{longtable}
+\makeatother
+
+\usepackage{seqsplit}
+\usepackage{hyperref}
+\hypersetup{
+  pdftitle={SwissCovid CN API},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\title{SwissCovid CN API}
+\date{\today}
+\author{pepp-pt}
+
+\begin{document}
+\begin{titlepage}
+	%\includegraphics[width=7cm]{ubique-logo.png}
+	\hspace{4.3cm}
+ {\raggedleft
+	 \textbf{SwissCovid CN} \\
+	%\hspace{11.5cm} Niederdorfstrasse 77 \\
+%	8001 Zürich \\
+\vspace{0.3cm}
+	 
+\par}
+	\vspace{3cm}
+	{\Huge SwissCovid CN API \par}
+	\vspace{1.5cm}
+	{\huge Documentation \par}
+	\vspace{3cm}
+	{ \large \today }
+	\end{titlepage}
+\thispagestyle{empty}
+\clearpage
+\tableofcontents
+\clearpage
+\part{Web Service}
+\subsection{Introduction}
+This part of the documentation deals with the different API-Endpoints. Examples to fields are put into the models section~\ref{sec:Models} to increase readability. Every request lists all possible status codes and the reason for the status code.
+\section{ /v3/ }
+    \begin{verbatim}
+    get /v3/
+    \end{verbatim}
+Hello return
+
+\subsection{Responses}
+\subsubsection{ 200 Success }
+server live
+ 
+
+    
+        \begin{ubresponses}{\textwidth}{|Y|}
+        \ubheader{Type}\\
+        \hline
+             \hyperref[sec:string] { string } \\
+ \hline
+
+        \end{ubresponses}
+    
+\section{ /v3/traceKeys }
+    \begin{verbatim}
+    get /v3/traceKeys
+    \end{verbatim}
+getTraceKeysJson
+
+
+\subsection{ Query Parameters }
+\begin{ubparam}{\textwidth}{|H|c|Y|}
+\ubheader{Field} & \ubheader{Type} & \ubheader{Description}\\
+\hline
+\ubheader{ lastKeyBundleTag }   &  integer  & in millis since epoch. must be aligned to a full hour, and < now()
+ \\
+\hline
+\end{ubparam}
+\subsection{Responses}
+\subsubsection{ 200 Success }
+protobuf/json of all keys in that interval. response header \emph{x-key-bundle-tag} contains \emph{lastKeyBundleTag} for next request
+ 
+
+        
+    This request returns \textbf{ application/x-protobuf }. This represents protobuf/json of all keys in that interval. response header \emph{x-key-bundle-tag} contains \emph{lastKeyBundleTag} for next request
+.
+
+\subsubsection{ 500 Internal Server Error }
+Invalid \emph{lastKeyBundleTag}
+ 
+
+
+\section{ /v3/register }
+    \begin{verbatim}
+    post /v3/register
+    \end{verbatim}
+Push registration
+
+
+\subsection{ Request Body }
+\begin{ubparam}{\textwidth}{|H|c|Y|}
+\ubheader{Field} & \ubheader{Type} & \ubheader{Description}\\
+\hline
+\ubheader{  }   \textcolor{red}{\emph{*}}  &  unknown type  & N/A
+ \\
+\hline
+\end{ubparam}
+\subsection{Responses}
+\subsubsection{ 200 Success }
+success
+ 
+
+    
+        \begin{ubresponses}{\textwidth}{|Y|}
+        \ubheader{Type}\\
+        \hline
+             \hyperref[sec:] {  } \\
+ \hline
+
+        \end{ubresponses}
+    
+\subsubsection{ 400 Bad Request }
+Error
+ 
+
+
+\section{ /v3/userupload }
+    \begin{verbatim}
+    post /v3/userupload
+    \end{verbatim}
+User upload of stored identities
+
+\subsection{ Request Headers }
+\begin{ubparam}{\textwidth}{|H|c|Y|}
+\ubheader{Field} & \ubheader{Type} & \ubheader{Description}\\
+\hline
+\ubheader{ User-Agent }   \textcolor{red}{\emph{*}}  &  string  & App Identifier (PackageName/BundleIdentifier) + App-Version + OS (Android/iOS) + OS-Version
+ \\
+\hline
+\end{ubparam}
+
+\subsection{ Request Body }
+\begin{ubparam}{\textwidth}{|H|c|Y|}
+\ubheader{Field} & \ubheader{Type} & \ubheader{Description}\\
+\hline
+\ubheader{  }   \textcolor{red}{\emph{*}}  &  unknown type  & Identities to upload as protobuf
+ \\
+\hline
+\end{ubparam}
+\subsection{Responses}
+\subsubsection{ 200 Success }
+success
+ 
+
+    
+        \begin{ubresponses}{\textwidth}{|Y|}
+        \ubheader{Type}\\
+        \hline
+             \hyperref[sec:string] { string } \\
+ \hline
+
+        \end{ubresponses}
+    
+\subsubsection{ 400 Bad Request }
+Bad Upload Data
+ 
+
+
+\subsubsection{ 403 Forbidden }
+Authentication failed
+ 
+
+
+
+\part{Models}
+All Models, which are used by the Endpoints are described here. For every field we give examples, to give an overview of what the backend expects.
+\label{sec:Models}
+
+
+\end{document}

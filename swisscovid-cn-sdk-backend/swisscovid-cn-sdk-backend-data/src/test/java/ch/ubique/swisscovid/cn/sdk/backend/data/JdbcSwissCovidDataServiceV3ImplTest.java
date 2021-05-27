@@ -2,7 +2,7 @@ package ch.ubique.swisscovid.cn.sdk.backend.data;
 
 import static org.junit.Assert.*;
 
-import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.v3.TraceKey;
+import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.TraceKey;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;

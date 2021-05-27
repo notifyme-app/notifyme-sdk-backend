@@ -4,7 +4,6 @@ import static org.junit.Assert.assertThrows;
 
 import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.util.TokenHelper;
-
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
@@ -25,33 +24,45 @@ import org.springframework.test.context.junit4.SpringRunner;
 @TestPropertySource(properties = {"ws.app.jwt.publickey=classpath://generated_public_test.pem"})
 public class JWTValidationTest {
 
-  @Autowired UUIDDataService uuidDataService;
+    @Autowired UUIDDataService uuidDataService;
 
-  @Autowired JwtDecoder jwtDecoder;
-  TokenHelper tokenHelper;
+    @Autowired JwtDecoder jwtDecoder;
+    TokenHelper tokenHelper;
 
-  @Before
-  public void setup() throws Exception {
-    tokenHelper = new TokenHelper();
-  }
+    @Before
+    public void setup() throws Exception {
+        tokenHelper = new TokenHelper();
+    }
 
-  @Test
-  public void testDecoderValid() throws Exception {
-    final var now = LocalDateTime.now();
-    final var expiry = now.plusMinutes(5).toInstant(ZoneOffset.UTC);
-    final var accessToken =
-        tokenHelper.createToken(
-            "2021-04-29", "0", "checkin", "userupload", Date.from(expiry), true, now.toInstant(ZoneOffset.UTC));
-    jwtDecoder.decode(accessToken);
-  }
+    @Test
+    public void testDecoderValid() throws Exception {
+        final var now = LocalDateTime.now();
+        final var expiry = now.plusMinutes(5).toInstant(ZoneOffset.UTC);
+        final var accessToken =
+                tokenHelper.createToken(
+                        "2021-04-29",
+                        "0",
+                        "checkin",
+                        "userupload",
+                        Date.from(expiry),
+                        true,
+                        now.toInstant(ZoneOffset.UTC));
+        jwtDecoder.decode(accessToken);
+    }
 
-  @Test
-  public void testDecoderInvalid() throws Exception {
-    final var now = LocalDateTime.now();
-    final var expiry = now.plusMinutes(5).toInstant(ZoneOffset.UTC);
-    final var accessToken =
-        tokenHelper.createToken(
-            "2021-04-29", "0", "checkin", "userupload", Date.from(expiry), false, now.toInstant(ZoneOffset.UTC));
-    assertThrows(JwtException.class, () -> jwtDecoder.decode(accessToken));
-  }
+    @Test
+    public void testDecoderInvalid() throws Exception {
+        final var now = LocalDateTime.now();
+        final var expiry = now.plusMinutes(5).toInstant(ZoneOffset.UTC);
+        final var accessToken =
+                tokenHelper.createToken(
+                        "2021-04-29",
+                        "0",
+                        "checkin",
+                        "userupload",
+                        Date.from(expiry),
+                        false,
+                        now.toInstant(ZoneOffset.UTC));
+        assertThrows(JwtException.class, () -> jwtDecoder.decode(accessToken));
+    }
 }

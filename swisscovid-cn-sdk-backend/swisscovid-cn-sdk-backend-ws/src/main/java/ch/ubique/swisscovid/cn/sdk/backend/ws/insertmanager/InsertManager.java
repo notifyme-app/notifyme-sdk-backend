@@ -2,7 +2,7 @@ package ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager;
 
 import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataServiceV3;
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
-import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.v3.TraceKey;
+import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.TraceKey;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.UploadInsertionFilter;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertmodifiers.UploadInsertionModifier;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.util.CryptoWrapper;
@@ -62,7 +62,7 @@ public class InsertManager {
         if (uploadVenueInfoList != null && !uploadVenueInfoList.isEmpty()) {
             final var modifiedVenueInfoList = modifyUpload(uploadVenueInfoList, principal, now);
             final var filteredVenueInfoList = filterUpload(modifiedVenueInfoList, principal, now);
-            final var traceKeys = cryptoWrapper.getCryptoUtilV3().createTraceV3ForUserUpload(filteredVenueInfoList);
+            final var traceKeys = cryptoWrapper.getCryptoUtil().createTraceV3ForUserUpload(filteredVenueInfoList);
             if (!traceKeys.isEmpty()) {
                 swissCovidDataServiceV3.insertTraceKey(traceKeys);
             }

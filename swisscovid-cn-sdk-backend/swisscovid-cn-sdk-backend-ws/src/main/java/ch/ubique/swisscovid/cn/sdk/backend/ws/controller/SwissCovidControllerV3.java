@@ -15,7 +15,7 @@ import ch.ubique.swisscovid.cn.sdk.backend.data.PushRegistrationDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.model.PushRegistrationOuterClass.PushRegistration;
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload;
-import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.v3.TraceKey;
+import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.TraceKey;
 import ch.ubique.swisscovid.cn.sdk.backend.model.util.DateUtil;
 import ch.ubique.swisscovid.cn.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEvent;
 import ch.ubique.swisscovid.cn.sdk.backend.model.v3.ProblematicEventWrapperOuterClass.ProblematicEvent.Builder;
@@ -50,7 +50,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/v3")
-@CrossOrigin(origins = {"https://notify-me.c4dt.org", "https://notify-me-dev.c4dt.org"})
+@CrossOrigin(origins = {"https://www.pt-d.bfs.admin.ch", "https://www.pt1-d.bfs.admin.ch"})
 public class SwissCovidControllerV3 {
   private static final String HEADER_X_KEY_BUNDLE_TAG = "x-key-bundle-tag";
   private static final Logger logger = LoggerFactory.getLogger(SwissCovidControllerV3.class);
@@ -182,23 +182,6 @@ public class SwissCovidControllerV3 {
     return b.build();
   }
 
-  @PostMapping("/traceKeys")
-  @Documentation(
-      description = "Endpoint used to upload trace keys to the backend",
-      responses = {
-        "200=>The trace keys have been stored in the database",
-        "403=>Authentication failed"
-      })
-  public @ResponseBody ResponseEntity<String> uploadTraceKeys(
-      @Documentation(description = "Trace key to upload as JSON") @Valid @RequestBody
-          TraceKey traceKey,
-      @AuthenticationPrincipal
-          @Documentation(description = "JWT token that can be verified by the backend server")
-          Object principal) {
-    dataService.insertTraceKey(traceKey);
-    return ResponseEntity.ok().body("OK");
-  }
-
   @PostMapping(
       value = "/register",
       consumes = {"application/x-protobuf", "application/protobuf"})
@@ -219,8 +202,7 @@ public class SwissCovidControllerV3 {
    *
    * @param userUploadPayload Protobuf containing the identities stored locally in the app and a
    *     version number
-   * @return Status ok if sanity check passed and tracekeys successfuly uploaded
-   * @throws UnsupportedEncodingException
+   * @return Status ok if sanity check passed and trace keys successfully uploaded
    */
   @PostMapping(
       value = "/userupload",
@@ -229,8 +211,8 @@ public class SwissCovidControllerV3 {
       description = "User upload of stored identities",
       responses = {
               "200 => success",
-              "400 => Bad Upload Data",
-              "403 => Authentication failed"})
+              "400 => Bad Upload Data: List of VenueInfo objects was null or empty",
+              "403 => Authentication failed: Invalid JWT Data"})
   public @ResponseBody Callable<ResponseEntity<String>> userUpload(
       @Documentation(description = "Identities to upload as protobuf") @Valid @RequestBody
           final UserUploadPayload userUploadPayload,

@@ -16,8 +16,7 @@ public class CryptoWrapper {
 
   private static final Logger logger = LoggerFactory.getLogger(CryptoWrapper.class);
 
-  private final CryptoUtilV3 cryptoUtilV3;
-  private final CryptoUtilV2 cryptoUtilV2;
+  private final CryptoUtil cryptoUtil;
 
   public CryptoWrapper(String skHex, String pkHex, String mskHex, String mpkHex) {
     SodiumJava sodium;
@@ -54,18 +53,12 @@ public class CryptoWrapper {
       throw new RuntimeException(e);
     }
 
-    cryptoUtilV2 = new CryptoUtilV2(skHex, pkHex, sodium);
-    cryptoUtilV3 = new CryptoUtilV3(skHex, pkHex, mskHex, mpkHex, sodium);
+    cryptoUtil = new CryptoUtil(skHex, pkHex, mskHex, mpkHex, sodium);
   }
 
-  /** Contains all CrowdNotifier V2 related methods */
-  public CryptoUtilV2 getCryptoUtilV2() {
-    return cryptoUtilV2;
-  }
-
-  /** Contains all CrowdNotifier V3 related methods */
-  public CryptoUtilV3 getCryptoUtilV3() {
-    return cryptoUtilV3;
+  /** Contains all CrowdNotifier V4 related methods */
+  public CryptoUtil getCryptoUtil() {
+    return cryptoUtil;
   }
 
   /**
