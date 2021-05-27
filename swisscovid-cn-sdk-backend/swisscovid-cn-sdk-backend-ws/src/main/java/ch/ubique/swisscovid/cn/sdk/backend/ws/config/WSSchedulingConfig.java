@@ -12,6 +12,7 @@ package ch.ubique.swisscovid.cn.sdk.backend.ws.config;
 
 import ch.ubique.swisscovid.cn.sdk.backend.data.InteractionDurationDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.service.PhoneHeartbeatSilentPush;
 import java.time.Duration;
 import java.time.Instant;
@@ -35,6 +36,7 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
 
     private final SwissCovidDataService swissCovidDataService;
     private final InteractionDurationDataService interactionDurationDataService;
+    private final UUIDDataService uuidDataService;
     private final PhoneHeartbeatSilentPush phoneHeartbeatSilentPush;
 
     @Value("${db.cleanCron:0 0 3 * * ?}")
@@ -47,11 +49,13 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
     private String heartBeatSilentPushCron;
 
     protected WSSchedulingConfig(
-        final SwissCovidDataService swissCovidDataService,
-        InteractionDurationDataService interactionDurationDataService,
-        PhoneHeartbeatSilentPush phoneHeartbeatSilentPush) {
+            final SwissCovidDataService swissCovidDataService,
+            InteractionDurationDataService interactionDurationDataService,
+            UUIDDataService uuidDataService,
+            PhoneHeartbeatSilentPush phoneHeartbeatSilentPush) {
         this.swissCovidDataService = swissCovidDataService;
         this.interactionDurationDataService = interactionDurationDataService;
+        this.uuidDataService = uuidDataService;
         this.phoneHeartbeatSilentPush = phoneHeartbeatSilentPush;
     }
 
@@ -79,12 +83,26 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
                 new CronTask(
                         () -> {
                             try {
+                                logger.info("removing UUIDs older than {} days", removeAfterDays);
+                                uuidDataService.cleanDB(Duration.ofDays(removeAfterDays));
+                            } catch (Exception e) {
+                                logger.error("Exception removing old UUIDs", e);
+                            }
+                        },
+                        new CronTrigger(cleanCron, TimeZone.getTimeZone("UTC"))));
+
+        taskRegistrar.addCronTask(
+                new CronTask(
+                        () -> {
+                            try {
                                 logger.info(
                                         "removing interaction duration entries older than {} days",
                                         removeAfterDays);
-                                interactionDurationDataService.removeDurations(Duration.ofDays(removeAfterDays));
+                                interactionDurationDataService.removeDurations(
+                                        Duration.ofDays(removeAfterDays));
                             } catch (Exception e) {
-                                logger.error("Exception removing old interaction duration entries", e);
+                                logger.error(
+                                        "Exception removing old interaction duration entries", e);
                             }
                         },
                         new CronTrigger(cleanCron, TimeZone.getTimeZone("UTC"))));
