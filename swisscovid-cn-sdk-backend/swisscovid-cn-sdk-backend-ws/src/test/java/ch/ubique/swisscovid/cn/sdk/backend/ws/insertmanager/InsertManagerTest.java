@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
-import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataServiceV3;
+import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.FakeRequestFilter;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.IntervalThresholdFilter;
@@ -44,7 +44,8 @@ public class InsertManagerTest {
 
     InsertManager insertManager;
 
-    @Autowired SwissCovidDataServiceV3 swissCovidDataServiceV3;
+    @Autowired
+    SwissCovidDataService swissCovidDataService;
     @Autowired CryptoWrapper cryptoWrapper;
 
     @Autowired TransactionManager transactionManager;
@@ -57,14 +58,14 @@ public class InsertManagerTest {
     @Before
     public void setUp() throws Exception {
         tokenHelper = new TokenHelper();
-        insertManager = new InsertManager(cryptoWrapper, swissCovidDataServiceV3);
+        insertManager = new InsertManager(cryptoWrapper, swissCovidDataService);
     }
 
     @Test
     @Transactional
     public void testInsertEmptyList() throws Exception {
         final var now = Instant.now();
-        assertTrue(swissCovidDataServiceV3.findTraceKeys(now.minus(1, ChronoUnit.DAYS)).isEmpty());
+        assertTrue(swissCovidDataService.findTraceKeys(now.minus(1, ChronoUnit.DAYS)).isEmpty());
         assertThrows(
                 InsertException.class,
                 () ->
@@ -72,7 +73,7 @@ public class InsertManagerTest {
                                 new ArrayList<>(),
                                 new ArrayList<>(),
                                 LocalDateTime.ofInstant(now, TimeZone.getDefault().toZoneId())));
-        assertTrue(swissCovidDataServiceV3.findTraceKeys(now.minus(1, ChronoUnit.DAYS)).isEmpty());
+        assertTrue(swissCovidDataService.findTraceKeys(now.minus(1, ChronoUnit.DAYS)).isEmpty());
     }
 
     @Test
@@ -96,7 +97,7 @@ public class InsertManagerTest {
                 Collections.singletonList(removeAll),
                 uploadVenueInfoList,
                 LocalDateTime.ofInstant(now, TimeZone.getDefault().toZoneId()));
-        assertTrue(swissCovidDataServiceV3.findTraceKeys(now.minus(1, ChronoUnit.DAYS)).isEmpty());
+        assertTrue(swissCovidDataService.findTraceKeys(now.minus(1, ChronoUnit.DAYS)).isEmpty());
     }
 
     @Test
@@ -129,7 +130,7 @@ public class InsertManagerTest {
                 return Instant.now(clock);
             }
         };
-        final var traceKeys = swissCovidDataServiceV3.findTraceKeys(now.minus(1, ChronoUnit.DAYS));
+        final var traceKeys = swissCovidDataService.findTraceKeys(now.minus(1, ChronoUnit.DAYS));
         assertEquals(1, traceKeys.size());
     }
 
@@ -162,7 +163,7 @@ public class InsertManagerTest {
             }
         };
         assertEquals(
-                1, swissCovidDataServiceV3.findTraceKeys(now.minus(1, ChronoUnit.DAYS)).size());
+                1, swissCovidDataService.findTraceKeys(now.minus(1, ChronoUnit.DAYS)).size());
     }
 
     private void insertWith(

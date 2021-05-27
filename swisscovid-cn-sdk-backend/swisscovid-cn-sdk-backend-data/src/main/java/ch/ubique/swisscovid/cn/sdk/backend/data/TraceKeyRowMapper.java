@@ -15,7 +15,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.springframework.jdbc.core.RowMapper;
 
-public class TraceKeyV3RowMapper implements RowMapper<TraceKey> {
+public class TraceKeyRowMapper implements RowMapper<TraceKey> {
 
   @Override
   public TraceKey mapRow(ResultSet rs, int rowNum) throws SQLException {

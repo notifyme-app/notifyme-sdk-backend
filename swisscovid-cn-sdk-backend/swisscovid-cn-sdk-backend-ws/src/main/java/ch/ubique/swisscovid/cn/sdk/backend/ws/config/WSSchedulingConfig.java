@@ -10,7 +10,7 @@
 
 package ch.ubique.swisscovid.cn.sdk.backend.ws.config;
 
-import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataServiceV3;
+import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.service.PhoneHeartbeatSilentPush;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -31,7 +31,7 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
 
     private static final Logger logger = LoggerFactory.getLogger(WSSchedulingConfig.class);
 
-    private final SwissCovidDataServiceV3 swissCovidDataServiceV3;
+    private final SwissCovidDataService swissCovidDataService;
     private final PhoneHeartbeatSilentPush phoneHeartbeatSilentPush;
 
     @Value("${db.cleanCron:0 0 3 * * ?}")
@@ -44,9 +44,9 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
     private String heartBeatSilentPushCron;
 
     protected WSSchedulingConfig(
-            final SwissCovidDataServiceV3 swissCovidDataServiceV3,
+            final SwissCovidDataService swissCovidDataService,
             PhoneHeartbeatSilentPush phoneHeartbeatSilentPush) {
-        this.swissCovidDataServiceV3 = swissCovidDataServiceV3;
+        this.swissCovidDataService = swissCovidDataService;
         this.phoneHeartbeatSilentPush = phoneHeartbeatSilentPush;
     }
 
@@ -62,7 +62,7 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
                                         "removing trace keys v3 with end_time before: {}",
                                         removeBefore);
                                 int removeCount =
-                                        swissCovidDataServiceV3.removeTraceKeys(removeBefore);
+                                        swissCovidDataService.removeTraceKeys(removeBefore);
                                 logger.info("removed {} trace keys v3 from db", removeCount);
                             } catch (Exception e) {
                                 logger.error("Exception removing old trace keys v3", e);

@@ -1,6 +1,6 @@
 package ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager;
 
-import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataServiceV3;
+import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
 import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.TraceKey;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.UploadInsertionFilter;
@@ -21,11 +21,11 @@ public class InsertManager {
     private final List<UploadInsertionModifier> modifierList = new ArrayList<>();
 
     private final CryptoWrapper cryptoWrapper;
-    private final SwissCovidDataServiceV3 swissCovidDataServiceV3;
+    private final SwissCovidDataService swissCovidDataService;
 
-    public InsertManager(CryptoWrapper cryptoWrapper, SwissCovidDataServiceV3 swissCovidDataServiceV3) {
+    public InsertManager(CryptoWrapper cryptoWrapper, SwissCovidDataService swissCovidDataService) {
         this.cryptoWrapper = cryptoWrapper;
-        this.swissCovidDataServiceV3 = swissCovidDataServiceV3;
+        this.swissCovidDataService = swissCovidDataService;
     }
 
     /**
@@ -62,9 +62,10 @@ public class InsertManager {
         if (uploadVenueInfoList != null && !uploadVenueInfoList.isEmpty()) {
             final var modifiedVenueInfoList = modifyUpload(uploadVenueInfoList, principal, now);
             final var filteredVenueInfoList = filterUpload(modifiedVenueInfoList, principal, now);
+            // TODO: If not fake, insert duration
             final var traceKeys = cryptoWrapper.getCryptoUtil().createTraceV3ForUserUpload(filteredVenueInfoList);
             if (!traceKeys.isEmpty()) {
-                swissCovidDataServiceV3.insertTraceKey(traceKeys);
+                swissCovidDataService.insertTraceKey(traceKeys);
             }
         } else {
           // Invalid upload: Empty VenueInfo list

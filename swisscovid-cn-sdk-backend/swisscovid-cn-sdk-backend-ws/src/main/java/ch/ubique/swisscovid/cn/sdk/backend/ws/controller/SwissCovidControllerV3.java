@@ -10,7 +10,7 @@
 
 package ch.ubique.swisscovid.cn.sdk.backend.ws.controller;
 
-import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataServiceV3;
+import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.PushRegistrationDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.model.PushRegistrationOuterClass.PushRegistration;
@@ -31,7 +31,6 @@ import ch.ubique.swisscovid.cn.sdk.backend.ws.util.CryptoWrapper;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.util.DateTimeUtil;
 import ch.ubique.openapi.docannotations.Documentation;
 import com.google.protobuf.ByteString;
-import java.io.UnsupportedEncodingException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -56,7 +55,7 @@ public class SwissCovidControllerV3 {
   private static final String HEADER_X_KEY_BUNDLE_TAG = "x-key-bundle-tag";
   private static final Logger logger = LoggerFactory.getLogger(SwissCovidControllerV3.class);
 
-  private final SwissCovidDataServiceV3 dataService;
+  private final SwissCovidDataService dataService;
   private final InsertManager insertManager;
   private final PushRegistrationDataService pushRegistrationDataService;
   private final UUIDDataService uuidDataService;
@@ -69,7 +68,7 @@ public class SwissCovidControllerV3 {
   private final Duration requestTime;
 
   public SwissCovidControllerV3(
-      SwissCovidDataServiceV3 dataService,
+      SwissCovidDataService dataService,
       InsertManager insertManager,
       PushRegistrationDataService pushRegistrationDataService,
       UUIDDataService uuidDataService,
