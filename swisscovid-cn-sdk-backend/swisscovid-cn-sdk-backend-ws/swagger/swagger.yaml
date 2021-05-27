@@ -90,11 +90,11 @@ paths:
               schema:
                 type: string
         '400':
-          description: Bad Upload Data
+          description: 'Bad Upload Data: List of VenueInfo objects was null or empty'
           headers: {
             }
         '403':
-          description: Authentication failed
+          description: 'Authentication failed: Invalid JWT Data'
           headers: {
             }
       requestBody:

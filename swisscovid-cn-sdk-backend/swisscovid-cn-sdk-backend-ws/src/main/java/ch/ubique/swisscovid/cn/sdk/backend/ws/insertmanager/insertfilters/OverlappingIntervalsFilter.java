@@ -4,6 +4,7 @@ import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass;
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.InsertException;
 
+import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.OverlappingIntervalsException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -19,18 +20,11 @@ public class OverlappingIntervalsFilter implements UploadInsertionFilter {
       Object principal)
       throws InsertException {
     for(var i = 0; i < uploadVenueInfoList.size() - 1; i++) {
-      var hasOverlap = false;
       final var visit = uploadVenueInfoList.get(i);
       for(var j = i + 1; j < uploadVenueInfoList.size(); j++) {
         if(doOverlap(visit, uploadVenueInfoList.get(j))) {
-          hasOverlap = true;
-          uploadVenueInfoList.remove(j);
-          j--;
+          throw new OverlappingIntervalsException();
         }
-      }
-      if(hasOverlap) {
-        uploadVenueInfoList.remove(i);
-        i--;
       }
     }
     return uploadVenueInfoList;

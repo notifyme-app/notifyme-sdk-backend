@@ -8,7 +8,6 @@ import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataServiceV3;
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.FakeRequestFilter;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.IntervalThresholdFilter;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.OverlappingIntervalsFilter;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.UploadInsertionFilter;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.util.CryptoWrapper;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.util.TokenHelper;
@@ -147,23 +146,12 @@ public class InsertManagerTest {
                 createUploadVenueInfo(
                         now.minus(3, ChronoUnit.DAYS), now.minus(4, ChronoUnit.DAYS), false);
         venueInfoList.add(negativeIntervalUpload);
-        final var overlapIntervalUpload1 =
-                createUploadVenueInfo(
-                        now.minus(60, ChronoUnit.HOURS), now.minus(2, ChronoUnit.DAYS), false);
-        final var overlapIntervalUpload2 =
-                createUploadVenueInfo(
-                        now.minus(54, ChronoUnit.HOURS), now.minus(36, ChronoUnit.HOURS), false);
-        venueInfoList.add(overlapIntervalUpload1);
-        venueInfoList.add(overlapIntervalUpload2);
         final var validUpload =
                 createUploadVenueInfo(
                         now.minus(24, ChronoUnit.HOURS), now.minus(23, ChronoUnit.HOURS), false);
         venueInfoList.add(validUpload);
         insertWith(
-                Arrays.asList(
-                        new FakeRequestFilter(),
-                        new IntervalThresholdFilter(),
-                        new OverlappingIntervalsFilter()),
+                Arrays.asList(new FakeRequestFilter(), new IntervalThresholdFilter()),
                 venueInfoList,
                 LocalDateTime.ofInstant(now, TimeZone.getDefault().toZoneId()));
         Clock clock = Clock.fixed(now.plus(1, ChronoUnit.DAYS), ZoneOffset.UTC);

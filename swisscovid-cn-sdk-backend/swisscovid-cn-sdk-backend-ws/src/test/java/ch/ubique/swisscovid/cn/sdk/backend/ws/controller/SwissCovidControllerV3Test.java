@@ -62,8 +62,10 @@ public class SwissCovidControllerV3Test extends BaseControllerTest {
     private final Instant start = end.minusSeconds(60 * 60);
     @Autowired SwissCovidControllerV3 swissCovidControllerV3;
     @Autowired SwissCovidDataServiceV3 swissCovidDataServiceV3;
+
     @Value("${traceKey.traceKeysCacheControlInMs}")
     Long traceKeysCacheControlInMs;
+
     @Value("${userupload.requestTime}")
     Long requestTime;
 
@@ -268,6 +270,66 @@ public class SwissCovidControllerV3Test extends BaseControllerTest {
                         .andReturn();
         String authenticationError = result.getResponse().getHeader("www-authenticate");
         assertTrue(authenticationError.contains("Bearer"));
+    }
+
+    @Test
+    @Transactional
+    public void testUserUploadInvalidTokenScope() throws Exception {
+        final var now = LocalDateTime.now();
+        final var payload = createUserUploadPayload(now.minusDays(1), now.minusHours(12));
+        final byte[] payloadBytes = payload.toByteArray();
+        final var expiry = now.plusMinutes(5).toInstant(ZoneOffset.UTC);
+        final var token =
+                tokenHelper.createToken(
+                        "2021-04-29",
+                        "0",
+                        "checkin",
+                        "tracekeys",
+                        Date.from(expiry),
+                        true,
+                        now.toInstant(ZoneOffset.UTC));
+        final String userAgent = "ch.admin.bag.notifyMe.dev;1.0.7;1595591959493;Android;29";
+        final var result =
+                mockMvc.perform(
+                                post("/v3/userupload")
+                                        .contentType("application/x-protobuf")
+                                        .header("Authorization", "Bearer " + token)
+                                        .header("User-Agent", userAgent)
+                                        .content(payloadBytes))
+                        .andExpect(request().asyncNotStarted())
+                        .andExpect(status().is(403))
+                        .andReturn();
+    }
+
+    @Test
+    @Transactional
+    public void testUserUploadOverlappingIntervals() throws Exception {
+        final var now = LocalDateTime.now();
+        final var interval1 = getUploadVenueInfo(now.minusHours(1), now.minusMinutes(30), false);
+        final var interval2 = getUploadVenueInfo(now.minusMinutes(45), now.minusMinutes(15), false);
+        final var userUploadPayload = getUserUploadPayload(interval1, interval2);
+        final var payloadBytes = userUploadPayload.toByteArray();
+        final var expiry = now.plusMinutes(5).toInstant(ZoneOffset.UTC);
+        final var token =
+                tokenHelper.createToken(
+                        "2021-04-29",
+                        "0",
+                        "checkin",
+                        "userupload",
+                        Date.from(expiry),
+                        true,
+                        now.toInstant(ZoneOffset.UTC));
+        final String userAgent = "ch.admin.bag.notifyMe.dev;1.0.7;1595591959493;Android;29";
+        final var result =
+                mockMvc.perform(
+                                post("/v3/userupload")
+                                        .contentType("application/x-protobuf")
+                                        .header("Authorization", "Bearer " + token)
+                                        .header("User-Agent", userAgent)
+                                        .content(payloadBytes))
+                        .andExpect(request().asyncNotStarted())
+                        .andExpect(status().is(400))
+                        .andReturn();
     }
 
     @Test

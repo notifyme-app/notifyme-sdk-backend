@@ -1,9 +1,13 @@
 package ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters;
 
+import static org.junit.Assert.assertThrows;
+
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
+import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.OverlappingIntervalsException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.junit.Test;
 
 public class OverlappingIntervalsFilterTest extends UploadInsertionFilterTest {
     @Override
@@ -37,6 +41,17 @@ public class OverlappingIntervalsFilterTest extends UploadInsertionFilterTest {
         final var venueInfo3 = getVenueInfo(start, end);
         venueInfoList.add(venueInfo3);
         return venueInfoList;
+    }
+
+    @Override
+    @Test
+    public void testFilterInvalid() throws Exception {
+        LocalDateTime now = LocalDateTime.now();
+        final List<UploadVenueInfo> uploadVenueInfoList = getInvalidVenueInfo();
+        final var token = getToken(now);
+        assertThrows(
+                OverlappingIntervalsException.class,
+                () -> insertionFilter().filter(now, uploadVenueInfoList, token));
     }
 
     @Override
