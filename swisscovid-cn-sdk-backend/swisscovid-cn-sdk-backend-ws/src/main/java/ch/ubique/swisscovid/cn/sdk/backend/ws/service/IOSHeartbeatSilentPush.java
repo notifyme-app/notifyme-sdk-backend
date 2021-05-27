@@ -46,16 +46,26 @@ public class IOSHeartbeatSilentPush {
 
 	private final PushRegistrationDataService pushRegistrationDataService;
 
-	private final ApnsClient apnsClient;
-	private final ApnsClient apnsClientSandbox;
+	private ApnsClient apnsClient;
+	private ApnsClient apnsClientSandbox;
 
 	private final String topic;
+	private final InputStream signingKey;
+	private final String teamId;
+	private final String keyId;
 
 	public IOSHeartbeatSilentPush(final PushRegistrationDataService pushRegistrationDataService, InputStream signingKey,
 			String teamId, String keyId, String topic)
 			throws InvalidKeyException, SSLException, NoSuchAlgorithmException, IOException, URISyntaxException {
 		this.pushRegistrationDataService = pushRegistrationDataService;
+		this.teamId = teamId;
+		this.signingKey = signingKey;
+		this.keyId = keyId;
+		this.topic = topic;
+	}
 
+	private void initApnsClients()
+			throws InvalidKeyException, NoSuchAlgorithmException, IOException, URISyntaxException {
 		ApnsSigningKey key = ApnsSigningKey.loadFromInputStream(signingKey, teamId, keyId);
 
 		this.apnsClient = new ApnsClientBuilder().setApnsServer(ApnsClientBuilder.PRODUCTION_APNS_HOST)
@@ -67,12 +77,20 @@ public class IOSHeartbeatSilentPush {
 				.setSigningKey(key).setProxyHandlerFactory(
 						HttpProxyHandlerFactory.fromSystemProxies(ApnsClientBuilder.DEVELOPMENT_APNS_HOST))
 				.build();
-
-		this.topic = topic;
 	}
 
 	public void sendHeartbeats() {
 		logger.info("Send iOS heartbeat push");
+		
+		if (apnsClient == null) {
+			logger.info("Init apns clients");
+			try {
+				initApnsClients();
+			} catch (InvalidKeyException | NoSuchAlgorithmException | IOException | URISyntaxException e) {
+				logger.error("Exception initializing apns clients, abort.", e);
+			}
+		}
+
 		logger.info("Load tokens from database.");
 		final var iodPushTokens = pushRegistrationDataService.getPushRegistrationByType(PushType.IOD).stream()
 				.map(PushRegistration::getPushToken).collect(Collectors.toSet());
