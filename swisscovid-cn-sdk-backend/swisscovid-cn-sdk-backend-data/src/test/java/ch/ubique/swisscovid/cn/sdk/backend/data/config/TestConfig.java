@@ -1,6 +1,8 @@
 package ch.ubique.swisscovid.cn.sdk.backend.data.config;
 
+import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcPushRegistrationDataServiceImpl;
 import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcSwissCovidDataServiceV3Impl;
+import ch.ubique.swisscovid.cn.sdk.backend.data.PushRegistrationDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataServiceV3;
 import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataServiceImpl;
@@ -30,5 +32,10 @@ public class TestConfig {
     @Bean
     public UUIDDataService uuidDataService() {
         return new UUIDDataServiceImpl(dataSource);
+    }
+
+    @Bean
+    public PushRegistrationDataService pushRegistrationDataService() {
+        return new JdbcPushRegistrationDataServiceImpl(dataSource);
     }
 }
