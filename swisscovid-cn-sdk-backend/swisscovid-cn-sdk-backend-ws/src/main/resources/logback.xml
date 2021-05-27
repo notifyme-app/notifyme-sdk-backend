@@ -18,13 +18,13 @@
     </appender>
     <appender name="logfile" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <!--See also http://logback.qos.ch/manual/appenders.html#RollingFileAppender -->
-        <File>notifyme-ws.log</File>
+        <File>swisscovid-cn-ws.log</File>
         <encoder>
             <pattern>%d %p [%c] - %m%n</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
             <maxIndex>3</maxIndex>
-            <FileNamePattern>notifyme-ws.log.%i</FileNamePattern>
+            <FileNamePattern>swisscovid-cn-ws.log.%i</FileNamePattern>
         </rollingPolicy>
         <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
             <MaxFileSize>512KB</MaxFileSize>
