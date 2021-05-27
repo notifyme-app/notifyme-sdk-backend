@@ -4,8 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
+import ch.ubique.swisscovid.cn.sdk.backend.data.InteractionDurationDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
+import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.FakeRequestFilter;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.IntervalThresholdFilter;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.UploadInsertionFilter;
@@ -44,8 +46,8 @@ public class InsertManagerTest {
 
     InsertManager insertManager;
 
-    @Autowired
-    SwissCovidDataService swissCovidDataService;
+    @Autowired SwissCovidDataService swissCovidDataService;
+    @Autowired InteractionDurationDataService interactionDurationDataService;
     @Autowired CryptoWrapper cryptoWrapper;
 
     @Autowired TransactionManager transactionManager;
@@ -58,7 +60,9 @@ public class InsertManagerTest {
     @Before
     public void setUp() throws Exception {
         tokenHelper = new TokenHelper();
-        insertManager = new InsertManager(cryptoWrapper, swissCovidDataService);
+        insertManager =
+                new InsertManager(
+                        cryptoWrapper, swissCovidDataService, interactionDurationDataService);
     }
 
     @Test
@@ -162,8 +166,7 @@ public class InsertManagerTest {
                 return Instant.now(clock);
             }
         };
-        assertEquals(
-                1, swissCovidDataService.findTraceKeys(now.minus(1, ChronoUnit.DAYS)).size());
+        assertEquals(1, swissCovidDataService.findTraceKeys(now.minus(1, ChronoUnit.DAYS)).size());
     }
 
     private void insertWith(
@@ -187,7 +190,13 @@ public class InsertManagerTest {
                         Date.from(expiry),
                         true,
                         Instant.now());
-        insertManager.insertIntoDatabase(uploadVenueInfoList, token, now);
+        final var userUploadPayload =
+                UserUploadPayload.newBuilder()
+                        .addAllVenueInfos(uploadVenueInfoList)
+                        .setVersion(4)
+                        .setUserInteractionDurationMs(0)
+                        .build();
+        insertManager.insertIntoDatabase(userUploadPayload, token, now);
     }
 
     private UploadVenueInfo createUploadVenueInfo(Instant start, Instant end, boolean fake) {

@@ -165,8 +165,12 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
 
     @Bean
     public InsertManager insertManager(
-            final CryptoWrapper cryptoWrapper, final SwissCovidDataService swissCovidDataService) {
-        final var insertManager = new InsertManager(cryptoWrapper, swissCovidDataService);
+            final CryptoWrapper cryptoWrapper,
+            final SwissCovidDataService swissCovidDataService,
+            final InteractionDurationDataService interactionDurationDataService) {
+        final var insertManager =
+                new InsertManager(
+                        cryptoWrapper, swissCovidDataService, interactionDurationDataService);
         insertManager.addModifier(new RemoveFinalIntervalModifier());
         insertManager.addFilter(new FakeRequestFilter());
         insertManager.addFilter(new IntervalThresholdFilter());

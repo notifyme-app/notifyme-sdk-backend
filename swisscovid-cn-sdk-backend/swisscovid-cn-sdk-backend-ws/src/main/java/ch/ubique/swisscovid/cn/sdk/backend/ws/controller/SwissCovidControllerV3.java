@@ -235,7 +235,7 @@ public class SwissCovidControllerV3 {
 
     requestValidator.isValid(principal);
 
-    insertManager.insertIntoDatabase(userUploadPayload.getVenueInfosList(), principal, now);
+    insertManager.insertIntoDatabase(userUploadPayload, principal, now);
 
     return () -> {
       try {
