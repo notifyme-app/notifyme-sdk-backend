@@ -72,12 +72,12 @@ public class InsertManager {
         if (uploadVenueInfoList != null && !uploadVenueInfoList.isEmpty()) {
             final var modifiedVenueInfoList = modifyUpload(uploadVenueInfoList, principal, now);
             final var filteredVenueInfoList = filterUpload(modifiedVenueInfoList, principal, now);
+            final var traceKeys = cryptoWrapper.getCryptoUtil().createTraceV3ForUserUpload(filteredVenueInfoList);
             if(!requestValidator.isFakeRequest(principal)) {
                 interactionDurationDataService.insertInteraction(uploadPayload.getUserInteractionDurationMs());
-            }
-            final var traceKeys = cryptoWrapper.getCryptoUtil().createTraceV3ForUserUpload(filteredVenueInfoList);
-            if (!traceKeys.isEmpty()) {
-                swissCovidDataService.insertTraceKey(traceKeys);
+                if (!traceKeys.isEmpty()) {
+                    swissCovidDataService.insertTraceKey(traceKeys);
+                }
             }
         } else {
           // Invalid upload: Empty VenueInfo list
