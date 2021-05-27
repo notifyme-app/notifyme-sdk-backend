@@ -10,12 +10,12 @@ The full set of documents for CrowdNotifier is at https://github.com/CrowdNotifi
 
 ## Dependencies
 
-- Spring Boot 2.4.0
-- Java 11 (or higher)
-- Logback
-- [Springboot-Swagger-3](https://bintray.com/ubique-oss/springboot-swagger3)
+-   Spring Boot 2.4.0
+-   Java 11 (or higher)
+-   Logback
+-   [Springboot-Swagger-3](https://bintray.com/ubique-oss/springboot-swagger3)
 
-### Database
+## Database
 
 For development purposes a hsqldb can be used to run the webservice locally. For production systems, it is recommended to connect to a PostgreSQL dabatase (cluster if possible). There is a table for storing submitted trace keys. The schema is the following:
 
@@ -37,15 +37,17 @@ Furthermore, two non-abstract configs (`dev`, `prod`) are provided, which implem
 
 If you plan to provide new extensions or make adjustments and want to provide those to the general public, it is recommended to add a new configuration for your specific case. This can be e.g. an abstract class (e.g. WSCloudBaseConfig), which extends the base class providing certain needed keys or functions. If you provide an abstract class, please make sure to add at least one non-abstract class showing the implementation needed.
 
-## Trace Keys
+## API Requests
 
-There are two endpoints, one for uploading and one for downloading trace keys. How long trace keys are stored in the database can be configured via the `db.removeAfterDays` property in the properties file.
+There are three endpoints, one for uploading VenueInfo objects, one for downloading trace keys and one for registering for push notifications. How long trace keys are stored in the database can be configured via the `db.removeAfterDays` property in the properties file. Please check the [proto](https://github.com/SwissCovid/swisscovid-cn-backend/tree/develop/swisscovid-cn-sdk-backend/swisscovid-cn-sdk-backend-model/src/main/resources/proto) folder for the corresponding protobuf schemas.
 
-- /v1/traceKeys?lastBundleTag=\<lastSync\>: `GET` Returns a list of trace keys. The optional `lastBundleTag` is returned in each response as response header `x-key-bundle-tag` from the backend and should be used by clients for the following request. If set, only keys are retrived since the last download.
+-   /v3/traceKeys?lastBundleTag=\<lastSync\>: `GET` Returns a list of trace keys in a ProblematicEventWrapper protobuf. The optional `lastBundleTag` is returned in each response as response header `x-key-bundle-tag` from the backend and should be used by clients for the following request. If set, only keys added since the last download are retrieved.
 
-- /v1/debug/traceKeys?startTime=\<startTime\>&endTime=\<endTime\>&ctx=\<ctx\>&msg=\<msg\>: `POST` This request is used by the web app [notifyme-webpages](https://github.com/notifyme-app/notifyme-webpages) to upload an encoded trace key (`ctx`) together with start and end time of the problematic event in epoch milliseconds. Optionally, a message (`msg`) can be provided which is then shown to the clients.
+-   /v3/register: `POST` Register for push notifications. The request body should consist of a PushRegistration protobuf.
 
-## Swagger
+-   /v3/userupload: `POST` Upload a list of VenueInfo objects as a UserUploadPayload to be transformed into and stored as trace keys. Note that the request should include a valid JWT token, which can be obtained in exchange for a valid authentication code.
+
+### Swagger
 
 We use [Springboot-Swagger-3](https://github.com/Ubique-OSS/springboot-swagger3) to generate a `YAML` based on settings and controllers found in the project. We include a up-to-date version in each release. Currently they are lacking the documentation, but should provide enough information to use them in [Swagger Editor](https://editor.swagger.io).
 

@@ -202,8 +202,7 @@ public class SwissCovidControllerV3 {
    *
    * @param userUploadPayload Protobuf containing the identities stored locally in the app and a
    *     version number
-   * @return Status ok if sanity check passed and tracekeys successfuly uploaded
-   * @throws UnsupportedEncodingException
+   * @return Status ok if sanity check passed and trace keys successfully uploaded
    */
   @PostMapping(
       value = "/userupload",
