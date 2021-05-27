@@ -34,6 +34,7 @@ import com.google.protobuf.ByteString;
 import java.io.UnsupportedEncodingException;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -108,12 +109,14 @@ public class SwissCovidControllerV3 {
     if (!isValidKeyBundleTag(lastKeyBundleTag)) {
       return ResponseEntity.notFound().build();
     }
+    final var traceKeys = dataService.findTraceKeys(DateUtil.toInstant(lastKeyBundleTag));
+    Collections.shuffle(traceKeys);
     return ResponseEntity.ok()
         .cacheControl(CacheControl.maxAge(traceKeysCacheControlInMs, TimeUnit.MILLISECONDS))
         .header(
             HEADER_X_KEY_BUNDLE_TAG,
             Long.toString(DateUtil.getLastFullBucketEndEpochMilli(bucketSizeInMs)))
-        .body(dataService.findTraceKeys(DateUtil.toInstant(lastKeyBundleTag)));
+        .body(traceKeys);
   }
 
   private boolean isValidKeyBundleTag(Long lastKeyBundleTag) {
@@ -147,7 +150,8 @@ public class SwissCovidControllerV3 {
           .cacheControl(CacheControl.maxAge(traceKeysCacheControlInMs, TimeUnit.MILLISECONDS))
           .build();
     }
-    List<TraceKey> traceKeys = dataService.findTraceKeys(DateUtil.toInstant(lastKeyBundleTag));
+    final var traceKeys = dataService.findTraceKeys(DateUtil.toInstant(lastKeyBundleTag));
+    Collections.shuffle(traceKeys);
     ProblematicEventWrapper pew =
         ProblematicEventWrapper.newBuilder()
             .setVersion(3)
