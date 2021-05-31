@@ -105,7 +105,7 @@ public class SwissCovidControllerV3Test extends BaseControllerTest {
                         .andReturn()
                         .getResponse()
                         .getContentAsString();
-        assertTrue(hello.contains("Hello from NotifyMe WS v3."));
+        assertTrue(hello.contains("Hello from SwissCovid WS v3."));
     }
 
     @Test

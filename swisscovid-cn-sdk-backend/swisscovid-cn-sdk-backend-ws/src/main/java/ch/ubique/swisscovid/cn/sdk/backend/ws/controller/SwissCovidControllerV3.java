@@ -97,7 +97,7 @@ public class SwissCovidControllerV3 {
   public @ResponseBody ResponseEntity<String> hello() {
     return ResponseEntity.ok()
         .header("X-HELLO", "notifyme")
-        .body("Hello from NotifyMe WS v3.\n" + revision);
+        .body("Hello from SwissCovid WS v3.\n" + revision);
   }
 
   @GetMapping(
