@@ -25,10 +25,9 @@ public interface RequestValidator {
    * field
    *
    * @param authObject JWT containing the fake claim
-   * @param others The request
    * @return boolean indicating whether or not the request is fake
    */
-  public boolean isFakeRequest(Object authObject, Object others);
+  public boolean isFakeRequest(Object authObject);
 
   public class InvalidOnsetException extends Exception {
     private static final long serialVersionUID = 5886601055826066148L;

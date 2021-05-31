@@ -10,7 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataServiceV3;
+import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload;
 import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.TraceKey;
@@ -61,7 +61,8 @@ public class SwissCovidControllerV3Test extends BaseControllerTest {
     private final Instant end = Instant.now();
     private final Instant start = end.minusSeconds(60 * 60);
     @Autowired SwissCovidControllerV3 swissCovidControllerV3;
-    @Autowired SwissCovidDataServiceV3 swissCovidDataServiceV3;
+    @Autowired
+    SwissCovidDataService swissCovidDataService;
 
     @Value("${traceKey.traceKeysCacheControlInMs}")
     Long traceKeysCacheControlInMs;
@@ -91,7 +92,7 @@ public class SwissCovidControllerV3Test extends BaseControllerTest {
         tokenHelper = new TokenHelper();
         if (!setUpIsDone) {
             final TraceKey traceKey = getTraceKey();
-            swissCovidDataServiceV3.insertTraceKey(traceKey);
+            swissCovidDataService.insertTraceKey(traceKey);
             setUpIsDone = true;
         }
     }
@@ -104,7 +105,7 @@ public class SwissCovidControllerV3Test extends BaseControllerTest {
                         .andReturn()
                         .getResponse()
                         .getContentAsString();
-        assertTrue(hello.contains("Hello from NotifyMe WS v3."));
+        assertTrue(hello.contains("Hello from SwissCovid WS v3."));
     }
 
     @Test
@@ -200,7 +201,7 @@ public class SwissCovidControllerV3Test extends BaseControllerTest {
     public void testUserUploadValidToken() throws Exception {
         final var now = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS);
         final var initSize =
-                swissCovidDataServiceV3
+                swissCovidDataService
                         .findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC))
                         .size();
         final var payload = createUserUploadPayload(now.minusDays(1), now.minusHours(23));
@@ -236,7 +237,7 @@ public class SwissCovidControllerV3Test extends BaseControllerTest {
             }
         };
         final var traceKeys =
-                swissCovidDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC));
+                swissCovidDataService.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC));
         assertEquals(initSize + 1, traceKeys.size());
         assertTrue(requestTime <= duration);
     }
@@ -337,7 +338,7 @@ public class SwissCovidControllerV3Test extends BaseControllerTest {
     public void testUserUploadVisitFilters() throws Exception {
         final var now = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS);
         final var initSize =
-                swissCovidDataServiceV3
+                swissCovidDataService
                         .findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC))
                         .size();
         final var fakeUpload = getUploadVenueInfo(now.minusDays(3), now.minusHours(60), true);
@@ -377,7 +378,7 @@ public class SwissCovidControllerV3Test extends BaseControllerTest {
             }
         };
         final var traceKeys =
-                swissCovidDataServiceV3.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC));
+                swissCovidDataService.findTraceKeys(now.minusDays(1).toInstant(ZoneOffset.UTC));
         assertEquals(initSize + 1, traceKeys.size());
         assertTrue(requestTime <= duration);
     }

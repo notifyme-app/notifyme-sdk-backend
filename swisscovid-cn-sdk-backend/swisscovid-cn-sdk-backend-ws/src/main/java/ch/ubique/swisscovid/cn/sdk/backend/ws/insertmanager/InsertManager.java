@@ -1,10 +1,14 @@
 package ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager;
 
-import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataServiceV3;
+import ch.ubique.swisscovid.cn.sdk.backend.data.InteractionDurationDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
+import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload;
 import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.TraceKey;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.UploadInsertionFilter;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertmodifiers.UploadInsertionModifier;
+import ch.ubique.swisscovid.cn.sdk.backend.ws.security.RequestValidator;
+import ch.ubique.swisscovid.cn.sdk.backend.ws.security.SwissCovidJwtRequestValidator;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.util.CryptoWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,11 +25,16 @@ public class InsertManager {
     private final List<UploadInsertionModifier> modifierList = new ArrayList<>();
 
     private final CryptoWrapper cryptoWrapper;
-    private final SwissCovidDataServiceV3 swissCovidDataServiceV3;
+    private final SwissCovidDataService swissCovidDataService;
+    private final InteractionDurationDataService interactionDurationDataService;
 
-    public InsertManager(CryptoWrapper cryptoWrapper, SwissCovidDataServiceV3 swissCovidDataServiceV3) {
+    private final RequestValidator requestValidator = new SwissCovidJwtRequestValidator();
+
+    public InsertManager(CryptoWrapper cryptoWrapper, SwissCovidDataService swissCovidDataService,
+        InteractionDurationDataService interactionDurationDataService) {
         this.cryptoWrapper = cryptoWrapper;
-        this.swissCovidDataServiceV3 = swissCovidDataServiceV3;
+        this.swissCovidDataService = swissCovidDataService;
+        this.interactionDurationDataService = interactionDurationDataService;
     }
 
     /**
@@ -49,22 +58,26 @@ public class InsertManager {
     /**
      * Applies the stored list of filters, transforms any remaining venueInfo's into trace keys, and stores them to the
      * database.
-     * @param uploadVenueInfoList List of UploadVenueInfo objects to be stored to the database
+     * @param uploadPayload upload payload containing list of VenueInfo objects to be stored to the database
      * @param principal the authorization context which belongs to the uploaded keys. This will usually be a JWT token.
      * @param now Current timestamp
      * @throws InsertException
      */
     public void insertIntoDatabase(
-        List<UploadVenueInfo> uploadVenueInfoList,
+        UserUploadPayload uploadPayload,
         Object principal,
         LocalDateTime now
     ) throws InsertException {
+        final var uploadVenueInfoList = uploadPayload.getVenueInfosList();
         if (uploadVenueInfoList != null && !uploadVenueInfoList.isEmpty()) {
             final var modifiedVenueInfoList = modifyUpload(uploadVenueInfoList, principal, now);
             final var filteredVenueInfoList = filterUpload(modifiedVenueInfoList, principal, now);
             final var traceKeys = cryptoWrapper.getCryptoUtil().createTraceV3ForUserUpload(filteredVenueInfoList);
-            if (!traceKeys.isEmpty()) {
-                swissCovidDataServiceV3.insertTraceKey(traceKeys);
+            if(!requestValidator.isFakeRequest(principal)) {
+                interactionDurationDataService.insertInteraction(uploadPayload.getUserInteractionDurationMs());
+                if (!traceKeys.isEmpty()) {
+                    swissCovidDataService.insertTraceKey(traceKeys);
+                }
             }
         } else {
           // Invalid upload: Empty VenueInfo list

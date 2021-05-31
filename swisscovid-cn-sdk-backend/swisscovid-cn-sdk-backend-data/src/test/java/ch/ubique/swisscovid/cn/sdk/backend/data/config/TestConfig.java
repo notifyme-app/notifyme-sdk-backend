@@ -1,9 +1,11 @@
 package ch.ubique.swisscovid.cn.sdk.backend.data.config;
 
-import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcPushRegistrationDataServiceImpl;
-import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcSwissCovidDataServiceV3Impl;
+import ch.ubique.swisscovid.cn.sdk.backend.data.InteractionDurationDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.data.JDBCInteractionDurationDataServiceImpl;
+import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcSwissCovidDataServiceImpl;
 import ch.ubique.swisscovid.cn.sdk.backend.data.PushRegistrationDataService;
-import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataServiceV3;
+import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcPushRegistrationDataServiceImpl;
 import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataServiceImpl;
 import javax.sql.DataSource;
@@ -25,13 +27,18 @@ public class TestConfig {
     }
 
     @Bean
-    public SwissCovidDataServiceV3 notifyMeDataServiceV3() {
-        return new JdbcSwissCovidDataServiceV3Impl(dataSource, 60000L);
+    public SwissCovidDataService swissCovidDataService() {
+        return new JdbcSwissCovidDataServiceImpl(dataSource, 60000L);
     }
 
     @Bean
     public UUIDDataService uuidDataService() {
         return new UUIDDataServiceImpl(dataSource);
+    }
+
+    @Bean
+    public InteractionDurationDataService interactionDurationDataService() {
+        return new JDBCInteractionDurationDataServiceImpl(dataSource);
     }
 
     @Bean

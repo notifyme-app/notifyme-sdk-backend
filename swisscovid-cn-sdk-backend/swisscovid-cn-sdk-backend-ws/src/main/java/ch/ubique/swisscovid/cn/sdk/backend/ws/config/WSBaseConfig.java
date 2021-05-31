@@ -10,10 +10,12 @@
 
 package ch.ubique.swisscovid.cn.sdk.backend.ws.config;
 
+import ch.ubique.swisscovid.cn.sdk.backend.data.InteractionDurationDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.data.JDBCInteractionDurationDataServiceImpl;
 import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcPushRegistrationDataServiceImpl;
-import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcSwissCovidDataServiceV3Impl;
+import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcSwissCovidDataServiceImpl;
 import ch.ubique.swisscovid.cn.sdk.backend.data.PushRegistrationDataService;
-import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataServiceV3;
+import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataServiceImpl;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.controller.SwissCovidControllerV3;
@@ -164,8 +166,8 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public SwissCovidDataServiceV3 notifyMeDataServiceV3() {
-        return new JdbcSwissCovidDataServiceV3Impl(dataSource(), bucketSizeInMs);
+    public SwissCovidDataService swissCovidDataService() {
+        return new JdbcSwissCovidDataServiceImpl(dataSource(), bucketSizeInMs);
     }
 
     @Bean
@@ -174,10 +176,18 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
     }
 
     @Bean
+    public InteractionDurationDataService interactionDurationDataService(DataSource dataSource) {
+        return new JDBCInteractionDurationDataServiceImpl(dataSource);
+    }
+
+    @Bean
     public InsertManager insertManager(
             final CryptoWrapper cryptoWrapper,
-            final SwissCovidDataServiceV3 swissCovidDataServiceV3) {
-        final var insertManager = new InsertManager(cryptoWrapper, swissCovidDataServiceV3);
+            final SwissCovidDataService swissCovidDataService,
+            final InteractionDurationDataService interactionDurationDataService) {
+        final var insertManager =
+                new InsertManager(
+                        cryptoWrapper, swissCovidDataService, interactionDurationDataService);
         insertManager.addModifier(new RemoveFinalIntervalModifier());
         insertManager.addFilter(new FakeRequestFilter());
         insertManager.addFilter(new IntervalThresholdFilter());
@@ -188,7 +198,7 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
 
     @Bean
     public SwissCovidControllerV3 notifyMeControllerV3(
-            SwissCovidDataServiceV3 swissCovidDataServiceV3,
+            SwissCovidDataService swissCovidDataService,
             InsertManager insertManager,
             PushRegistrationDataService pushRegistrationDataService,
             UUIDDataService uuidDataService,
@@ -196,7 +206,7 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
             CryptoWrapper cryptoWrapper,
             String revision) {
         return new SwissCovidControllerV3(
-                swissCovidDataServiceV3,
+                swissCovidDataService,
                 insertManager,
                 pushRegistrationDataService,
                 uuidDataService,

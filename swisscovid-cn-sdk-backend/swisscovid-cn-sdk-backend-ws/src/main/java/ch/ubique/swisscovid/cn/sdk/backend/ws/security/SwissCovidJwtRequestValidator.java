@@ -42,7 +42,7 @@ public class SwissCovidJwtRequestValidator implements RequestValidator {
 
 
     @Override
-    public boolean isFakeRequest(Object authObject, Object others) {
+    public boolean isFakeRequest(Object authObject) {
         if (authObject instanceof Jwt) {
             Jwt token = (Jwt) authObject;
             return Boolean.TRUE.equals(token.containsClaim("fake")) && "1".equals(token.getClaim("fake"));
