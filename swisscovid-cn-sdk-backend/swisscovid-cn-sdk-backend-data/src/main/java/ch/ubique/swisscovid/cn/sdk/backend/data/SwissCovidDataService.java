@@ -15,7 +15,7 @@ import ch.ubique.swisscovid.cn.sdk.backend.model.tracekey.TraceKey;
 import java.time.Instant;
 import java.util.List;
 
-public interface SwissCovidDataServiceV3 {
+public interface SwissCovidDataService {
 
     /**
      * Inserts the given trace key into the db

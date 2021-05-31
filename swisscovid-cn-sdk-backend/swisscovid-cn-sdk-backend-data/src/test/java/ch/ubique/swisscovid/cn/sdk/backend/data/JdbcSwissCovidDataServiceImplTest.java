@@ -14,9 +14,9 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-public class JdbcSwissCovidDataServiceV3ImplTest extends BaseDataServiceTest {
+public class JdbcSwissCovidDataServiceImplTest extends BaseDataServiceTest {
 
-  @Autowired private SwissCovidDataServiceV3 swissCovidDataServiceV3;
+  @Autowired private SwissCovidDataService swissCovidDataService;
 
   private final Charset charset = StandardCharsets.UTF_8;
   private final String identityString = "identity";
@@ -52,7 +52,7 @@ public class JdbcSwissCovidDataServiceV3ImplTest extends BaseDataServiceTest {
 
   @Test
   public void contextLoadsTest() {
-    assertNotNull(swissCovidDataServiceV3);
+    assertNotNull(swissCovidDataService);
   }
 
   @Test
@@ -61,13 +61,13 @@ public class JdbcSwissCovidDataServiceV3ImplTest extends BaseDataServiceTest {
     final TraceKey keyToRemove = getTraceKey();
     keyToRemove.setDay(keyToRemove.getDay().minus(2, ChronoUnit.DAYS));
     TraceKey keyToKeep = getTraceKey();
-    swissCovidDataServiceV3.insertTraceKey(keyToRemove);
-    swissCovidDataServiceV3.insertTraceKey(keyToKeep);
-    swissCovidDataServiceV3.removeTraceKeys(keyToKeep.getDay().minus(1, ChronoUnit.DAYS));
-    List<TraceKey> traceKeyList = swissCovidDataServiceV3.findTraceKeys(null);
+    swissCovidDataService.insertTraceKey(keyToRemove);
+    swissCovidDataService.insertTraceKey(keyToKeep);
+    swissCovidDataService.removeTraceKeys(keyToKeep.getDay().minus(1, ChronoUnit.DAYS));
+    List<TraceKey> traceKeyList = swissCovidDataService.findTraceKeys(null);
     assertEquals(1, traceKeyList.size());
-    swissCovidDataServiceV3.removeTraceKeys(start);
-    traceKeyList = swissCovidDataServiceV3.findTraceKeys(null);
+    swissCovidDataService.removeTraceKeys(start);
+    traceKeyList = swissCovidDataService.findTraceKeys(null);
     assertTrue(traceKeyList.isEmpty());
   }
 
@@ -75,10 +75,10 @@ public class JdbcSwissCovidDataServiceV3ImplTest extends BaseDataServiceTest {
   @Transactional
   public void insertTraceKeyTest() {
     final TraceKey actualKey = getTraceKey();
-    swissCovidDataServiceV3.insertTraceKey(actualKey);
-    swissCovidDataServiceV3.insertTraceKey(actualKey);
-    swissCovidDataServiceV3.insertTraceKey(actualKey);
-    final List<TraceKey> traceKeyList = swissCovidDataServiceV3.findTraceKeys(null);
+    swissCovidDataService.insertTraceKey(actualKey);
+    swissCovidDataService.insertTraceKey(actualKey);
+    swissCovidDataService.insertTraceKey(actualKey);
+    final List<TraceKey> traceKeyList = swissCovidDataService.findTraceKeys(null);
     assertEquals(3, traceKeyList.size());
     final TraceKey storedKey = traceKeyList.get(0);
     verifyStored(storedKey);
@@ -91,8 +91,8 @@ public class JdbcSwissCovidDataServiceV3ImplTest extends BaseDataServiceTest {
     actualTraceKeyList.add(getTraceKey());
     actualTraceKeyList.add(getTraceKey());
     actualTraceKeyList.add(getTraceKey());
-    swissCovidDataServiceV3.insertTraceKey(actualTraceKeyList);
-    final List<TraceKey> storedTraceKeyList = swissCovidDataServiceV3.findTraceKeys(null);
+    swissCovidDataService.insertTraceKey(actualTraceKeyList);
+    final List<TraceKey> storedTraceKeyList = swissCovidDataService.findTraceKeys(null);
     assertEquals(3, storedTraceKeyList.size());
     verifyStored(storedTraceKeyList.get(0));
   }

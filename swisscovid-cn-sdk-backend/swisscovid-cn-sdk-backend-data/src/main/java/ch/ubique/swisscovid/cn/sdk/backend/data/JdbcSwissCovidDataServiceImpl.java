@@ -28,7 +28,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.transaction.annotation.Transactional;
 
-public class JdbcSwissCovidDataServiceV3Impl implements SwissCovidDataServiceV3 {
+public class JdbcSwissCovidDataServiceImpl implements SwissCovidDataService {
 
   protected final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -36,7 +36,7 @@ public class JdbcSwissCovidDataServiceV3Impl implements SwissCovidDataServiceV3 
   private final NamedParameterJdbcTemplate jt;
   private final SimpleJdbcInsert traceKeyInsert;
 
-  public JdbcSwissCovidDataServiceV3Impl(DataSource dataSource, Long bucketSizeInMs) {
+  public JdbcSwissCovidDataServiceImpl(DataSource dataSource, Long bucketSizeInMs) {
     this.bucketSizeInMs = bucketSizeInMs;
     this.jt = new NamedParameterJdbcTemplate(dataSource);
     this.traceKeyInsert =
@@ -62,7 +62,7 @@ public class JdbcSwissCovidDataServiceV3Impl implements SwissCovidDataServiceV3 
       sql += " and created_at >= :after";
       params.addValue("after", Timestamp.from(after));
     }
-    return jt.query(sql, params, new TraceKeyV3RowMapper());
+    return jt.query(sql, params, new TraceKeyRowMapper());
   }
 
   @Override
