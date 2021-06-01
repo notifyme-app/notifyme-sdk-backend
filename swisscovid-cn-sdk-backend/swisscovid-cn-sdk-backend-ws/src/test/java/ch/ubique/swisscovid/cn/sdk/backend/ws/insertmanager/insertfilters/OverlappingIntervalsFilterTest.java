@@ -18,7 +18,7 @@ public class OverlappingIntervalsFilterTest extends UploadInsertionFilterTest {
         final var venueInfo1 = getVenueInfo(start, end);
         venueInfoList.add(venueInfo1);
         start = end.plusMinutes(1);
-        end = start.plusHours(1);
+        end = start;
         final var venueInfo2 = getVenueInfo(start, end);
         venueInfoList.add(venueInfo2);
         return venueInfoList;
