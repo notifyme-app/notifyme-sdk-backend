@@ -46,8 +46,8 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
     @Value("${db.cleanCron:0 0 * * * ?}")
     private String cleanCron;
 
-    @Value("${db.removeAfterDays:14}")
-    private Integer removeAfterDays;
+    @Value("${traceKey.retentionDays:14}")
+    private Integer retentionDays;
 
     @Value("${ws.heartBeatSilentPushCron}")
     private String heartBeatSilentPushCron;
@@ -70,7 +70,7 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
                         () -> {
                             try {
                                 Instant removeBefore =
-                                        Instant.now().minus(removeAfterDays, ChronoUnit.DAYS);
+                                        Instant.now().minus(retentionDays, ChronoUnit.DAYS);
                                 logger.info(
                                         "removing trace keys with end_time before: {}",
                                         removeBefore);
@@ -87,8 +87,8 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
                 new CronTask(
                         () -> {
                             try {
-                                logger.info("removing UUIDs older than {} days", removeAfterDays);
-                                uuidDataService.cleanDB(Duration.ofDays(removeAfterDays));
+                                logger.info("removing UUIDs older than {} days", retentionDays);
+                                uuidDataService.cleanDB(Duration.ofDays(retentionDays));
                             } catch (Exception e) {
                                 logger.error("Exception removing old UUIDs", e);
                             }
@@ -101,9 +101,9 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
                             try {
                                 logger.info(
                                         "removing interaction duration entries older than {} days",
-                                        removeAfterDays);
+                                        retentionDays);
                                 interactionDurationDataService.removeDurations(
-                                        Duration.ofDays(removeAfterDays));
+                                        Duration.ofDays(retentionDays));
                             } catch (Exception e) {
                                 logger.error(
                                         "Exception removing old interaction duration entries", e);

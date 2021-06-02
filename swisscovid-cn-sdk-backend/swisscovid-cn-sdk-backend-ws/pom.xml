@@ -17,181 +17,186 @@
 	<name>SwissCovid CN SDK Backend WS</name>
 	<packaging>jar</packaging>
 
-    <properties>
-        <start-class>ch.ubique.swisscovid.cn.sdk.backend.ws.Application</start-class>
-        <sonar.projectKey>${env.SONAR_PROJECTKEY}</sonar.projectKey>
-    </properties>
+	<properties>
+		<start-class>ch.ubique.swisscovid.cn.sdk.backend.ws.Application</start-class>
+		<sonar.projectKey>${env.SONAR_PROJECTKEY}</sonar.projectKey>
+		<sonar.cpd.exclusions>**/*Config.java</sonar.cpd.exclusions>
+	</properties>
 
-    <dependencies>
-        <!-- swisscovid cn models -->
-        <dependency>
-            <groupId>ch.ubique</groupId>
-            <artifactId>swisscovid-cn-sdk-backend-model</artifactId>
-            <version>2.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.ubique</groupId>
-            <artifactId>swisscovid-cn-sdk-backend-data</artifactId>
-            <version>2.0.0</version>
-        </dependency>
+	<dependencies>
+		<!-- swisscovid cn models -->
+		<dependency>
+			<groupId>ch.ubique</groupId>
+			<artifactId>swisscovid-cn-sdk-backend-model</artifactId>
+			<version>2.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>ch.ubique</groupId>
+			<artifactId>swisscovid-cn-sdk-backend-data</artifactId>
+			<version>2.0.0</version>
+		</dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-thymeleaf</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+		</dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-cloud-connectors</artifactId>
-            <version>2.0.7.RELEASE</version>
-        </dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-cloud-connectors</artifactId>
+			<version>2.0.7.RELEASE</version>
+		</dependency>
 
-        <dependency>
-            <groupId>ch.ubique.openapi</groupId>
-            <artifactId>doc-annotations</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>ch.ubique.openapi</groupId>
+			<artifactId>doc-annotations</artifactId>
+		</dependency>
 
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-test</artifactId>
-            <scope>test</scope>
-        </dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<scope>test</scope>
+		</dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
 
 
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-jackson</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt-impl</artifactId>
-            <scope>runtime</scope>
-        </dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<scope>runtime</scope>
+		</dependency>
 
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcpkix-jdk15on</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security.oauth</groupId>
-            <artifactId>spring-security-oauth2</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-devtools</artifactId>
-            <optional>true</optional>
-        </dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcpkix-jdk15on</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security.oauth</groupId>
+			<artifactId>spring-security-oauth2</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<optional>true</optional>
+		</dependency>
 
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>42.2.14</version>
-        </dependency>
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>42.2.14</version>
+		</dependency>
 
-        <dependency>
-            <groupId>com.google.crypto.tink</groupId>
-            <artifactId>tink</artifactId>
-            <version>1.5.0</version>
-        </dependency>
+		<dependency>
+			<groupId>com.google.crypto.tink</groupId>
+			<artifactId>tink</artifactId>
+			<version>1.5.0</version>
+		</dependency>
 
 		<dependency>
 			<groupId>com.eatthepath</groupId>
 			<artifactId>pushy</artifactId>
 			<version>0.14.2</version>
 		</dependency>
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-tcnative-boringssl-static</artifactId>
+		</dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.micrometer</groupId>
-            <artifactId>micrometer-registry-prometheus</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
+		</dependency>
 
-        <dependency>
-            <groupId>com.hubspot.jackson</groupId>
-            <artifactId>jackson-datatype-protobuf</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>com.hubspot.jackson</groupId>
+			<artifactId>jackson-datatype-protobuf</artifactId>
+		</dependency>
 
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+		</dependency>
 
-    </dependencies>
+	</dependencies>
 
-    <build>
-        <finalName>
+	<build>
+		<finalName>
             swisscovid-cn-sdk-backend-ws
         </finalName>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <mainClass>${start-class}</mainClass>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>repackage</goal>
-                            <goal>build-info</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>ch.ubique.openapi</groupId>
-                <artifactId>springboot-swagger-3</artifactId>
-                <version>1.3.3</version>
-                <configuration>
-                    <apiVersion>1.1.0</apiVersion>
-                    <outPath>swagger/</outPath>
-                    <basePackages>java.time</basePackages>
-                    <basePackages>ch.ubique.swisscovid.sdk.backend.model</basePackages>
-                    <blackListedPackages>
-                        <blackListedPackage>com.google.protobuf</blackListedPackage>
-                    </blackListedPackages>
-                    <outFile>swagger.yaml</outFile>
-                    <controllers>
-                        <controller>ch.ubique.swisscovid.cn.sdk.backend.ws.controller.SwissCovidControllerV3</controller>
-                    </controllers>
-                    <title>SwissCovid CN API</title>
-                    <description>SwissCovid CN API</description>
-                    <apiUrls>
-                        <apiUrl>https://www.pt-d.bfs.admin.ch</apiUrl>
-                        <apiUrl>https://www.pt1-d.bfs.admin.ch</apiUrl>
-                    </apiUrls>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>all</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>springboot-swagger-3</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<mainClass>${start-class}</mainClass>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+							<goal>build-info</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>ch.ubique.openapi</groupId>
+				<artifactId>springboot-swagger-3</artifactId>
+				<version>1.3.3</version>
+				<configuration>
+					<apiVersion>1.1.0</apiVersion>
+					<outPath>swagger/</outPath>
+					<basePackages>java.time</basePackages>
+					<basePackages>ch.ubique.swisscovid.sdk.backend.model</basePackages>
+					<blackListedPackages>
+						<blackListedPackage>com.google.protobuf</blackListedPackage>
+					</blackListedPackages>
+					<outFile>swagger.yaml</outFile>
+					<controllers>
+						<controller>ch.ubique.swisscovid.cn.sdk.backend.ws.controller.SwissCovidControllerV3</controller>
+					</controllers>
+					<title>SwissCovid CN API</title>
+					<description>SwissCovid CN API</description>
+					<apiUrls>
+						<apiUrl>https://www.pt-d.bfs.admin.ch</apiUrl>
+						<apiUrl>https://www.pt1-d.bfs.admin.ch</apiUrl>
+					</apiUrls>
+				</configuration>
+				<executions>
+					<execution>
+						<id>all</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>springboot-swagger-3</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>
