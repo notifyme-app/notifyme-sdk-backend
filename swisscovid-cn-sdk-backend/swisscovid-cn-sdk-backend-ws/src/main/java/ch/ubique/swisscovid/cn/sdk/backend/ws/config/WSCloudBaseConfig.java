@@ -11,19 +11,22 @@
 package ch.ubique.swisscovid.cn.sdk.backend.ws.config;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.security.KeyFactory;
 import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Security;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Map;
-
 import javax.sql.DataSource;
-
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
@@ -38,71 +41,74 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public abstract class WSCloudBaseConfig extends WSBaseConfig {
 
-	@Value("${datasource.maximumPoolSize:5}")
-	int dataSourceMaximumPoolSize;
+    @Value("${datasource.maximumPoolSize:5}")
+    int dataSourceMaximumPoolSize;
 
-	@Value("${datasource.connectionTimeout:30000}")
-	int dataSourceConnectionTimeout;
+    @Value("${datasource.connectionTimeout:30000}")
+    int dataSourceConnectionTimeout;
 
-	@Value("${datasource.leakDetectionThreshold:0}")
-	int dataSourceLeakDetectionThreshold;
+    @Value("${datasource.leakDetectionThreshold:0}")
+    int dataSourceLeakDetectionThreshold;
 
-	abstract String getSignaturePublicKey();
+    abstract String getSignaturePublicKey();
 
-	abstract String getSignaturePrivateKey();
+    abstract String getSignaturePrivateKey();
 
-	@Bean
-	@Override
-	public DataSource dataSource() {
-		PoolConfig poolConfig = new PoolConfig(dataSourceMaximumPoolSize, dataSourceConnectionTimeout);
-		DataSourceConfig dbConfig = new DataSourceConfig(poolConfig, null, null,
-				Map.of("leakDetectionThreshold", dataSourceLeakDetectionThreshold));
-		CloudFactory factory = new CloudFactory();
-		return factory.getCloud().getSingletonServiceConnector(DataSource.class, dbConfig);
-	}
+    @Bean
+    @Override
+    public DataSource dataSource() {
+        PoolConfig poolConfig =
+                new PoolConfig(dataSourceMaximumPoolSize, dataSourceConnectionTimeout);
+        DataSourceConfig dbConfig =
+                new DataSourceConfig(
+                        poolConfig,
+                        null,
+                        null,
+                        Map.of("leakDetectionThreshold", dataSourceLeakDetectionThreshold));
+        CloudFactory factory = new CloudFactory();
+        return factory.getCloud().getSingletonServiceConnector(DataSource.class, dbConfig);
+    }
 
-	@Bean
-	@Override
-	public Flyway flyway() {
-		Flyway flyWay = Flyway.configure().dataSource(dataSource()).locations("classpath:/db/migration/pgsql_cluster")
-				.load();
-		flyWay.migrate();
-		return flyWay;
-	}
+    @Bean
+    @Override
+    public Flyway flyway() {
+        Flyway flyWay =
+                Flyway.configure()
+                        .dataSource(dataSource())
+                        .locations("classpath:/db/migration/pgsql_cluster")
+                        .load();
+        flyWay.migrate();
+        return flyWay;
+    }
 
-	@Override
-	public String getDbType() {
-		return "pgsql";
-	}
+    @Override
+    public String getDbType() {
+        return "pgsql";
+    }
 
-	protected KeyPair getSignatureKeyPair() {
-		Security.addProvider(new BouncyCastleProvider());
-		Security.setProperty("crypto.policy", "unlimited");
-		return new KeyPair(loadPublicKeyFromString(), loadPrivateKeyFromString());
-	}
+    protected KeyPair getSignatureKeyPair()
+            throws CertificateException, IOException, NoSuchAlgorithmException,
+                    InvalidKeySpecException, NoSuchProviderException {
+        Security.addProvider(new BouncyCastleProvider());
+        Security.setProperty("crypto.policy", "unlimited");
+        return new KeyPair(loadPublicKeyFromString(), loadPrivateKeyFromString());
+    }
 
-	private PrivateKey loadPrivateKeyFromString() {
-		try {
-			String privateKey = getSignaturePrivateKey();
-			Reader reader = new StringReader(privateKey);
-			PemReader readerPem = new PemReader(reader);
-			PemObject obj = readerPem.readPemObject();
-			PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(obj.getContent());
-			KeyFactory kf = KeyFactory.getInstance("ECDSA", "BC");
-			return (PrivateKey) kf.generatePrivate(pkcs8KeySpec);
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			throw new RuntimeException();
-		}
-	}
+    private PrivateKey loadPrivateKeyFromString()
+            throws IOException, NoSuchAlgorithmException, NoSuchProviderException,
+                    InvalidKeySpecException {
+        String privateKey = getSignaturePrivateKey();
+        Reader reader = new StringReader(privateKey);
+        PemReader readerPem = new PemReader(reader);
+        PemObject obj = readerPem.readPemObject();
+        PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(obj.getContent());
+        KeyFactory kf = KeyFactory.getInstance("ECDSA", "BC");
+        return kf.generatePrivate(pkcs8KeySpec);
+    }
 
-	private PublicKey loadPublicKeyFromString() {
-		try {
-			return CertificateFactory.getInstance("X.509")
-					.generateCertificate(new ByteArrayInputStream(getSignaturePublicKey().getBytes())).getPublicKey();
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			throw new RuntimeException();
-		}
-	}
+    private PublicKey loadPublicKeyFromString() throws CertificateException {
+        return CertificateFactory.getInstance("X.509")
+                .generateCertificate(new ByteArrayInputStream(getSignaturePublicKey().getBytes()))
+                .getPublicKey();
+    }
 }

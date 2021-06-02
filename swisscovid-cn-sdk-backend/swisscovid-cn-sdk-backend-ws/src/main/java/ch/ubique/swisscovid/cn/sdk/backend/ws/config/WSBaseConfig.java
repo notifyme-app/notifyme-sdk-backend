@@ -10,51 +10,6 @@
 
 package ch.ubique.swisscovid.cn.sdk.backend.ws.config;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.security.InvalidKeyException;
-import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Base64;
-import java.util.List;
-import java.util.Map;
-
-import javax.net.ssl.SSLException;
-import javax.sql.DataSource;
-
-import org.flywaydb.core.Flyway;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.http.converter.protobuf.ProtobufHttpMessageConverter;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
-
 import ch.ubique.swisscovid.cn.sdk.backend.data.InteractionDurationDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.JDBCInteractionDurationDataServiceImpl;
 import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcPushRegistrationDataServiceImpl;
@@ -76,80 +31,98 @@ import ch.ubique.swisscovid.cn.sdk.backend.ws.security.RequestValidator;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.security.SwissCovidJwtRequestValidator;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.service.IOSHeartbeatSilentPush;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.util.CryptoWrapper;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.cert.CertificateException;
+import java.security.spec.InvalidKeySpecException;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
+import javax.net.ssl.SSLException;
+import javax.sql.DataSource;
+import org.flywaydb.core.Flyway;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.protobuf.ProtobufHttpMessageConverter;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableScheduling
 public abstract class WSBaseConfig implements WebMvcConfigurer {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
-
+    final SignatureAlgorithm algorithm = SignatureAlgorithm.ES256;
     @Value("${healthAuthority.skHex}")
     String healthAuthoritySkHex;
-
     @Value("${healthAuthority.pkHex}")
     String healthAuthorityPkHex;
-
     @Value("${userupload.mpkHex}")
     String useruploadMpkHex;
-
     @Value("${userupload.mskHex}")
     String useruploadMskHex;
-
     @Value("${traceKey.bucketSizeInMs}")
     Long bucketSizeInMs;
-
     @Value("${userupload.requestTime}")
     Long requestTime;
-
     @Value("${traceKey.traceKeysCacheControlInMs}")
     Long traceKeysCacheControlInMs;
-
+    @Value("${ws.headers.protected:}")
+    List<String> protectedHeaders;
+    @Value("${ws.headers.debug: false}")
+    boolean setDebugHeaders;
+    @Value(
+            "#{${ws.security.headers: {'X-Content-Type-Options':'nosniff', 'X-Frame-Options':'DENY','X-Xss-Protection':'1; mode=block'}}}")
+    Map<String, String> additionalHeaders;
     @Value("${git.commit.id}")
     private String commitId;
-
     @Value("${git.commit.id.abbrev}")
     private String commitIdAbbrev;
-
     @Value("${git.commit.time}")
     private String commitTime;
-
     // base64 encoded p8 file
     @Value("${push.ios.signingkey}")
     private String iosPushSigningKey;
-    
     @Value("${push.ios.teamid}")
     private String iosPushTeamId;
-    
     @Value("${push.ios.keyid}")
     private String iosPushKeyId;
-    
     @Value("${push.ios.topic}")
     private String iosPushTopic;
-    
     @Value("${traceKey.retentionDays:14}")
     private Integer retentionDays;
-    
-    @Value("${ws.headers.protected:}")
-    List<String> protectedHeaders;
-    
-    @Value("${ws.headers.debug: false}")
-    boolean setDebugHeaders;
-    
-    @Value("#{${ws.security.headers: {'X-Content-Type-Options':'nosniff', 'X-Frame-Options':'DENY','X-Xss-Protection':'1; mode=block'}}}")
-    Map<String, String> additionalHeaders;
-    
-    final SignatureAlgorithm algorithm = SignatureAlgorithm.ES256;
-    
-    public KeyPair getKeyPair(SignatureAlgorithm algorithm) {
-        logger.warn(
-            "USING FALLBACK KEYPAIR. WONT'T PERSIST APP RESTART AND PROBABLY DOES NOT HAVE ENOUGH"
-                + " ENTROPY.");
 
-        return Keys.keyPairFor(algorithm);
-     }
-    
     @Bean
     public static PropertySourcesPlaceholderConfigurer placeholderConfigurer() {
         PropertySourcesPlaceholderConfigurer propsConfig =
@@ -160,6 +133,14 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
         return propsConfig;
     }
 
+    public KeyPair getKeyPair(SignatureAlgorithm algorithm) {
+        logger.warn(
+                "USING FALLBACK KEYPAIR. WONT'T PERSIST APP RESTART AND PROBABLY DOES NOT HAVE ENOUGH"
+                        + " ENTROPY.");
+
+        return Keys.keyPairFor(algorithm);
+    }
+
     public abstract DataSource dataSource();
 
     public abstract Flyway flyway();
@@ -167,23 +148,27 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
     public abstract String getDbType();
 
     @Bean
-    public ResponseWrapperFilter hashFilter() {
-      return new ResponseWrapperFilter(
-          getSignatureKeyPair(), retentionDays, protectedHeaders, setDebugHeaders);
+    public ResponseWrapperFilter hashFilter()
+            throws CertificateException, IOException, NoSuchAlgorithmException,
+                    InvalidKeySpecException, NoSuchProviderException {
+        return new ResponseWrapperFilter(
+                getSignatureKeyPair(), retentionDays, protectedHeaders, setDebugHeaders);
     }
-    
+
     /**
      * Get keypair for the response signature.
-     * 
+     *
      * @return
      */
-    protected abstract KeyPair getSignatureKeyPair();
+    protected abstract KeyPair getSignatureKeyPair()
+            throws CertificateException, IOException, NoSuchAlgorithmException,
+                    InvalidKeySpecException, NoSuchProviderException;
 
-	@Bean
+    @Bean
     public HeaderInjector securityHeaderInjector() {
-      return new HeaderInjector(additionalHeaders);
+        return new HeaderInjector(additionalHeaders);
     }
-    
+
     @Bean
     public MappingJackson2HttpMessageConverter converter() {
         ObjectMapper mapper =
@@ -275,9 +260,16 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
     @Bean
     @Profile("push")
     public IOSHeartbeatSilentPush phoneHeartbeatSilentPush(
-            final PushRegistrationDataService pushRegistrationDataService) throws InvalidKeyException, SSLException, NoSuchAlgorithmException, IOException, URISyntaxException {
-    	byte[] pushSigningKey = Base64.getDecoder().decode(iosPushSigningKey);
-        return new IOSHeartbeatSilentPush(pushRegistrationDataService, new ByteArrayInputStream(pushSigningKey), iosPushTeamId, iosPushKeyId, iosPushTopic);
+            final PushRegistrationDataService pushRegistrationDataService)
+            throws InvalidKeyException, SSLException, NoSuchAlgorithmException, IOException,
+                    URISyntaxException {
+        byte[] pushSigningKey = Base64.getDecoder().decode(iosPushSigningKey);
+        return new IOSHeartbeatSilentPush(
+                pushRegistrationDataService,
+                new ByteArrayInputStream(pushSigningKey),
+                iosPushTeamId,
+                iosPushKeyId,
+                iosPushTopic);
     }
 
     @Bean
@@ -322,9 +314,9 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
                         .disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
         return new MappingJackson2HttpMessageConverter(mapper);
     }
-    
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-      registry.addInterceptor(securityHeaderInjector());
+        registry.addInterceptor(securityHeaderInjector());
     }
 }
