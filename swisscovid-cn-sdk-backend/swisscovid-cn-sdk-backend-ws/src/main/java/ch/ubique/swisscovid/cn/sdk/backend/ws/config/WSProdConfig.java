@@ -10,12 +10,24 @@
 
 package ch.ubique.swisscovid.cn.sdk.backend.ws.config;
 
+import java.io.ByteArrayInputStream;
+import java.io.Reader;
+import java.io.StringReader;
+import java.security.KeyFactory;
 import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Security;
+import java.security.cert.CertificateFactory;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
 import java.util.Properties;
 
 import javax.sql.DataSource;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemReader;
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -24,10 +36,6 @@ import org.springframework.context.annotation.Profile;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-
-import ch.ubique.swisscovid.cn.sdk.backend.ws.security.KeyVault;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.security.KeyVault.PrivateKeyNoSuitableEncodingFoundException;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.security.KeyVault.PublicKeyNoSuitableEncodingFoundException;
 
 @Configuration
 @Profile("prod")
@@ -97,25 +105,32 @@ public class WSProdConfig extends WSBaseConfig {
 
 	@Override
 	protected KeyPair getSignatureKeyPair() {
-		return keyVault().get("hashFilter");
+		Security.addProvider(new BouncyCastleProvider());
+		Security.setProperty("crypto.policy", "unlimited");
+		return new KeyPair(loadPublicKeyFromString(), loadPrivateKeyFromString());
 	}
 
-	@Bean
-	KeyVault keyVault() {
-		var privateKey = getPrivateKey();
-		var publicKey = getPublicKey();
-
-		if (privateKey.isEmpty() || publicKey.isEmpty()) {
-			var kp = super.getKeyPair(algorithm);
-			var hashFilterKp = new KeyVault.KeyVaultKeyPair("hashFilter", kp);
-			return new KeyVault(hashFilterKp);
-		}
-		var hashFilter = new KeyVault.KeyVaultEntry("hashFilter", getPrivateKey(), getPublicKey(), "EC");
-
+	private PrivateKey loadPrivateKeyFromString() {
 		try {
-			return new KeyVault(hashFilter);
-		} catch (PrivateKeyNoSuitableEncodingFoundException | PublicKeyNoSuitableEncodingFoundException e) {
-			throw new RuntimeException(e);
+			Reader reader = new StringReader(getPrivateKey());
+			var readerPem = new PemReader(reader);
+			var obj = readerPem.readPemObject();
+			var pkcs8KeySpec = new PKCS8EncodedKeySpec(obj.getContent());
+			var kf = KeyFactory.getInstance("ECDSA", "BC");
+			return kf.generatePrivate(pkcs8KeySpec);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			throw new RuntimeException();
+		}
+	}
+
+	private PublicKey loadPublicKeyFromString() {
+		try {
+			return CertificateFactory.getInstance("X.509")
+					.generateCertificate(new ByteArrayInputStream(getPublicKey().getBytes())).getPublicKey();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			throw new RuntimeException();
 		}
 	}
 
