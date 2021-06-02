@@ -10,14 +10,13 @@
 
 package ch.ubique.swisscovid.cn.sdk.backend.ws.config;
 
-import ch.ubique.swisscovid.cn.sdk.backend.data.InteractionDurationDataService;
-import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataService;
-import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataService;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.service.PhoneHeartbeatSilentPush;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.TimeZone;
+
+import javax.annotation.Nullable;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +27,11 @@ import org.springframework.scheduling.config.CronTask;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.CronTrigger;
 
+import ch.ubique.swisscovid.cn.sdk.backend.data.InteractionDurationDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.ws.service.IOSHeartbeatSilentPush;
+
 @Configuration
 @EnableScheduling
 public class WSSchedulingConfig implements SchedulingConfigurer {
@@ -37,9 +41,9 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
     private final SwissCovidDataService swissCovidDataService;
     private final InteractionDurationDataService interactionDurationDataService;
     private final UUIDDataService uuidDataService;
-    private final PhoneHeartbeatSilentPush phoneHeartbeatSilentPush;
+    private final IOSHeartbeatSilentPush phoneHeartbeatSilentPush;
 
-    @Value("${db.cleanCron:0 0 3 * * ?}")
+    @Value("${db.cleanCron:0 0 * * * ?}")
     private String cleanCron;
 
     @Value("${db.removeAfterDays:14}")
@@ -51,8 +55,8 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
     protected WSSchedulingConfig(
             final SwissCovidDataService swissCovidDataService,
             InteractionDurationDataService interactionDurationDataService,
-            UUIDDataService uuidDataService,
-            PhoneHeartbeatSilentPush phoneHeartbeatSilentPush) {
+            UUIDDataService uuidDataService,            
+            @Nullable IOSHeartbeatSilentPush phoneHeartbeatSilentPush) {
         this.swissCovidDataService = swissCovidDataService;
         this.interactionDurationDataService = interactionDurationDataService;
         this.uuidDataService = uuidDataService;
@@ -107,9 +111,12 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
                         },
                         new CronTrigger(cleanCron, TimeZone.getTimeZone("UTC"))));
 
-        taskRegistrar.addCronTask(
-                new CronTask(
-                        phoneHeartbeatSilentPush::sendHeartbeats,
-                        new CronTrigger(heartBeatSilentPushCron, TimeZone.getTimeZone("UTC"))));
+        // push is optional, only trigger if set
+        if (phoneHeartbeatSilentPush != null) {
+	        taskRegistrar.addCronTask(
+	                new CronTask(
+	                        phoneHeartbeatSilentPush::sendHeartbeats,
+	                        new CronTrigger(heartBeatSilentPushCron, TimeZone.getTimeZone("UTC"))));
+        }
     }
 }

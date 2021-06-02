@@ -61,4 +61,12 @@ public class JdbcPushRegistrationDataServiceImpl implements PushRegistrationData
         params.addValue("device_id", pushRegistration.getDeviceId());
         return params;
     }
+
+	@Override
+	@Transactional(readOnly = false)
+	public void removeRegistrations(List<String> tokensToRemove) {
+		if (tokensToRemove != null && !tokensToRemove.isEmpty()) {
+			jt.update("delete from t_push_registration where push_token in (:tokensToRemove)", new MapSqlParameterSource("tokensToRemove", tokensToRemove));
+		}
+	}
 }

@@ -16,17 +16,24 @@ import java.util.List;
 
 public interface PushRegistrationDataService {
 
-    /**
-     * Inserts the given pushRegistration into the db
-     *
-     * @param pushRegistration
-     */
-    void upsertPushRegistration(final PushRegistration pushRegistration);
+	/**
+	 * Inserts the given pushRegistration into the db
+	 *
+	 * @param pushRegistration
+	 */
+	void upsertPushRegistration(final PushRegistration pushRegistration);
 
-    /**
-     * retrieves all pushRegistrations for a given pushType
-     *
-     * @param pushType
-     */
-    List<PushRegistration> getPushRegistrationByType(final PushType pushType);
+	/**
+	 * retrieves all pushRegistrations for a given pushType
+	 *
+	 * @param pushType
+	 */
+	List<PushRegistration> getPushRegistrationByType(final PushType pushType);
+
+	/**
+	 * remove entries for given list of tokens
+	 * 
+	 * @param tokensToRemove
+	 */
+	void removeRegistrations(List<String> tokensToRemove);
 }
