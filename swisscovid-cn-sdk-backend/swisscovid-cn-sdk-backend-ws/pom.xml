@@ -20,6 +20,7 @@
 	<properties>
 		<start-class>ch.ubique.swisscovid.cn.sdk.backend.ws.Application</start-class>
 		<sonar.projectKey>${env.SONAR_PROJECTKEY}</sonar.projectKey>
+		<sonar.cpd.exclusions>**/*Config.java</sonar.cpd.exclusions>
 	</properties>
 
 	<dependencies>
