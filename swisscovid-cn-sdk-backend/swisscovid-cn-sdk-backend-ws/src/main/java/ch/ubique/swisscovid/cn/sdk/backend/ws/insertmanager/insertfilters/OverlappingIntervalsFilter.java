@@ -35,6 +35,6 @@ public class OverlappingIntervalsFilter implements UploadInsertionFilter {
       UserUploadPayloadOuterClass.UploadVenueInfo visit2) {
     final var validInterval1 = visit1.getIntervalStartMs() <= visit1.getIntervalEndMs();
     final var validInterval2 = visit2.getIntervalStartMs() <= visit2.getIntervalEndMs();
-    return validInterval1 && validInterval2 && !(visit1.getIntervalEndMs() < visit2.getIntervalStartMs() || visit2.getIntervalEndMs() < visit1.getIntervalStartMs());
+    return validInterval1 && validInterval2 && !(visit1.getIntervalEndMs() <= visit2.getIntervalStartMs() || visit2.getIntervalEndMs() <= visit1.getIntervalStartMs());
   }
 }
