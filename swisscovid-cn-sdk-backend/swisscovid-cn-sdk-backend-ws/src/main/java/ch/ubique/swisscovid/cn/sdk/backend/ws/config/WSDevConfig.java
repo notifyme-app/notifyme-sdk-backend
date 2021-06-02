@@ -10,6 +10,8 @@
 
 package ch.ubique.swisscovid.cn.sdk.backend.ws.config;
 
+import java.security.KeyPair;
+
 import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
 import org.springframework.context.annotation.Bean;
@@ -17,6 +19,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
+
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 
 @Configuration
 @Profile("dev")
@@ -46,5 +51,10 @@ public class WSDevConfig extends WSBaseConfig {
   @Override
   public String getDbType() {
     return "hsqldb";
+  }
+
+  @Override
+  protected KeyPair getSignatureKeyPair() {
+	  return super.getKeyPair(algorithm);
   }
 }

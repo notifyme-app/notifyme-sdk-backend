@@ -10,37 +10,11 @@
 
 package ch.ubique.swisscovid.cn.sdk.backend.ws.config;
 
-import ch.ubique.swisscovid.cn.sdk.backend.data.InteractionDurationDataService;
-import ch.ubique.swisscovid.cn.sdk.backend.data.JDBCInteractionDurationDataServiceImpl;
-import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcPushRegistrationDataServiceImpl;
-import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcSwissCovidDataServiceImpl;
-import ch.ubique.swisscovid.cn.sdk.backend.data.PushRegistrationDataService;
-import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataService;
-import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataService;
-import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataServiceImpl;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.controller.SwissCovidControllerV3;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.InsertManager;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.BeforeOnsetFilter;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.FakeRequestFilter;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.IntervalThresholdFilter;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.OverlappingIntervalsFilter;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertmodifiers.RemoveFinalIntervalModifier;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.security.RequestValidator;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.security.SwissCovidJwtRequestValidator;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.service.IOSHeartbeatSilentPush;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.util.CryptoWrapper;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
+import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -49,9 +23,11 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 
 import javax.net.ssl.SSLException;
 import javax.sql.DataSource;
+
 import org.flywaydb.core.Flyway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +44,40 @@ import org.springframework.http.converter.protobuf.ProtobufHttpMessageConverter;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
+
+import ch.ubique.swisscovid.cn.sdk.backend.data.InteractionDurationDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.data.JDBCInteractionDurationDataServiceImpl;
+import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcPushRegistrationDataServiceImpl;
+import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcSwissCovidDataServiceImpl;
+import ch.ubique.swisscovid.cn.sdk.backend.data.PushRegistrationDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataServiceImpl;
+import ch.ubique.swisscovid.cn.sdk.backend.ws.controller.SwissCovidControllerV3;
+import ch.ubique.swisscovid.cn.sdk.backend.ws.filter.ResponseWrapperFilter;
+import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.InsertManager;
+import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.BeforeOnsetFilter;
+import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.FakeRequestFilter;
+import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.IntervalThresholdFilter;
+import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.OverlappingIntervalsFilter;
+import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertmodifiers.RemoveFinalIntervalModifier;
+import ch.ubique.swisscovid.cn.sdk.backend.ws.interceptor.HeaderInjector;
+import ch.ubique.swisscovid.cn.sdk.backend.ws.security.RequestValidator;
+import ch.ubique.swisscovid.cn.sdk.backend.ws.security.SwissCovidJwtRequestValidator;
+import ch.ubique.swisscovid.cn.sdk.backend.ws.service.IOSHeartbeatSilentPush;
+import ch.ubique.swisscovid.cn.sdk.backend.ws.util.CryptoWrapper;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 
 @Configuration
 @EnableScheduling
@@ -118,7 +127,29 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
     
     @Value("${push.ios.topic}")
     private String iosPushTopic;
+    
+    @Value("${traceKey.retentionDays:14}")
+    private Integer retentionDays;
+    
+    @Value("${ws.headers.protected:}")
+    List<String> protectedHeaders;
+    
+    @Value("${ws.headers.debug: false}")
+    boolean setDebugHeaders;
+    
+    @Value("#{${ws.security.headers: {'X-Content-Type-Options':'nosniff', 'X-Frame-Options':'DENY','X-Xss-Protection':'1; mode=block'}}}")
+    Map<String, String> additionalHeaders;
+    
+    final SignatureAlgorithm algorithm = SignatureAlgorithm.ES256;
+    
+    public KeyPair getKeyPair(SignatureAlgorithm algorithm) {
+        logger.warn(
+            "USING FALLBACK KEYPAIR. WONT'T PERSIST APP RESTART AND PROBABLY DOES NOT HAVE ENOUGH"
+                + " ENTROPY.");
 
+        return Keys.keyPairFor(algorithm);
+     }
+    
     @Bean
     public static PropertySourcesPlaceholderConfigurer placeholderConfigurer() {
         PropertySourcesPlaceholderConfigurer propsConfig =
@@ -135,6 +166,24 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
 
     public abstract String getDbType();
 
+    @Bean
+    public ResponseWrapperFilter hashFilter() {
+      return new ResponseWrapperFilter(
+          getSignatureKeyPair(), retentionDays, protectedHeaders, setDebugHeaders);
+    }
+    
+    /**
+     * Get keypair for the response signature.
+     * 
+     * @return
+     */
+    protected abstract KeyPair getSignatureKeyPair();
+
+	@Bean
+    public HeaderInjector securityHeaderInjector() {
+      return new HeaderInjector(additionalHeaders);
+    }
+    
     @Bean
     public MappingJackson2HttpMessageConverter converter() {
         ObjectMapper mapper =
@@ -272,5 +321,10 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
                         .enable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                         .disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
         return new MappingJackson2HttpMessageConverter(mapper);
+    }
+    
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+      registry.addInterceptor(securityHeaderInjector());
     }
 }

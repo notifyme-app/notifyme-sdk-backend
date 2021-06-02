@@ -10,8 +10,23 @@
 
 package ch.ubique.swisscovid.cn.sdk.backend.ws.config;
 
+import java.io.ByteArrayInputStream;
+import java.io.Reader;
+import java.io.StringReader;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Security;
+import java.security.cert.CertificateFactory;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Map;
+
 import javax.sql.DataSource;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemReader;
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.CloudFactory;
@@ -23,43 +38,71 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public abstract class WSCloudBaseConfig extends WSBaseConfig {
 
-  @Value("${datasource.maximumPoolSize:5}")
-  int dataSourceMaximumPoolSize;
+	@Value("${datasource.maximumPoolSize:5}")
+	int dataSourceMaximumPoolSize;
 
-  @Value("${datasource.connectionTimeout:30000}")
-  int dataSourceConnectionTimeout;
+	@Value("${datasource.connectionTimeout:30000}")
+	int dataSourceConnectionTimeout;
 
-  @Value("${datasource.leakDetectionThreshold:0}")
-  int dataSourceLeakDetectionThreshold;
+	@Value("${datasource.leakDetectionThreshold:0}")
+	int dataSourceLeakDetectionThreshold;
 
-  @Bean
-  @Override
-  public DataSource dataSource() {
-    PoolConfig poolConfig = new PoolConfig(dataSourceMaximumPoolSize, dataSourceConnectionTimeout);
-    DataSourceConfig dbConfig =
-        new DataSourceConfig(
-            poolConfig,
-            null,
-            null,
-            Map.of("leakDetectionThreshold", dataSourceLeakDetectionThreshold));
-    CloudFactory factory = new CloudFactory();
-    return factory.getCloud().getSingletonServiceConnector(DataSource.class, dbConfig);
-  }
+	abstract String getSignaturePublicKey();
 
-  @Bean
-  @Override
-  public Flyway flyway() {
-    Flyway flyWay =
-        Flyway.configure()
-            .dataSource(dataSource())
-            .locations("classpath:/db/migration/pgsql_cluster")
-            .load();
-    flyWay.migrate();
-    return flyWay;
-  }
+	abstract String getSignaturePrivateKey();
 
-  @Override
-  public String getDbType() {
-    return "pgsql";
-  }
+	@Bean
+	@Override
+	public DataSource dataSource() {
+		PoolConfig poolConfig = new PoolConfig(dataSourceMaximumPoolSize, dataSourceConnectionTimeout);
+		DataSourceConfig dbConfig = new DataSourceConfig(poolConfig, null, null,
+				Map.of("leakDetectionThreshold", dataSourceLeakDetectionThreshold));
+		CloudFactory factory = new CloudFactory();
+		return factory.getCloud().getSingletonServiceConnector(DataSource.class, dbConfig);
+	}
+
+	@Bean
+	@Override
+	public Flyway flyway() {
+		Flyway flyWay = Flyway.configure().dataSource(dataSource()).locations("classpath:/db/migration/pgsql_cluster")
+				.load();
+		flyWay.migrate();
+		return flyWay;
+	}
+
+	@Override
+	public String getDbType() {
+		return "pgsql";
+	}
+
+	protected KeyPair getSignatureKeyPair() {
+		Security.addProvider(new BouncyCastleProvider());
+		Security.setProperty("crypto.policy", "unlimited");
+		return new KeyPair(loadPublicKeyFromString(), loadPrivateKeyFromString());
+	}
+
+	private PrivateKey loadPrivateKeyFromString() {
+		try {
+			String privateKey = getSignaturePrivateKey();
+			Reader reader = new StringReader(privateKey);
+			PemReader readerPem = new PemReader(reader);
+			PemObject obj = readerPem.readPemObject();
+			PKCS8EncodedKeySpec pkcs8KeySpec = new PKCS8EncodedKeySpec(obj.getContent());
+			KeyFactory kf = KeyFactory.getInstance("ECDSA", "BC");
+			return (PrivateKey) kf.generatePrivate(pkcs8KeySpec);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			throw new RuntimeException();
+		}
+	}
+
+	private PublicKey loadPublicKeyFromString() {
+		try {
+			return CertificateFactory.getInstance("X.509")
+					.generateCertificate(new ByteArrayInputStream(getSignaturePublicKey().getBytes())).getPublicKey();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			throw new RuntimeException();
+		}
+	}
 }
