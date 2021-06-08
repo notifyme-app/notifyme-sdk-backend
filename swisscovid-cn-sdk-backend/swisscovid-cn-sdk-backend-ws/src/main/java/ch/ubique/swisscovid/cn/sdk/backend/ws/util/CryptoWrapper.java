@@ -18,7 +18,7 @@ public class CryptoWrapper {
 
   private final CryptoUtil cryptoUtil;
 
-  public CryptoWrapper(String skHex, String pkHex, String mskHex, String mpkHex) {
+  public CryptoWrapper(String mskHex, String mpkHex) {
     SodiumJava sodium;
     // Do custom loading for the libsodium lib, as it does not work out of the box
     // with spring boot bundled jars. To get a path to the full file, we copy
@@ -53,7 +53,7 @@ public class CryptoWrapper {
       throw new RuntimeException(e);
     }
 
-    cryptoUtil = new CryptoUtil(skHex, pkHex, mskHex, mpkHex, sodium);
+    cryptoUtil = new CryptoUtil(mskHex, mpkHex, sodium);
   }
 
   /** Contains all CrowdNotifier V4 related methods */

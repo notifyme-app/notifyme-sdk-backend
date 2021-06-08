@@ -42,28 +42,13 @@ public class CryptoUtil {
     static final int QR_CODE_VERSION_4 = 4;
     final SodiumJava sodium;
 
-    private final byte[] sk;
-    private final byte[] pk;
-
     private final byte[] msk;
     private final byte[] mpk;
 
     private final Fr mskFr;
     private final G2 mpkG2;
 
-    public CryptoUtil(String skHex, String pkHex, String mskHex, String mpkHex, SodiumJava sodium) {
-        try {
-            this.sk = Hex.decodeHex(skHex);
-        } catch (DecoderException e) {
-            logger.error("unable to parse sk hexstring", e);
-            throw new RuntimeException(e);
-        }
-        try {
-            this.pk = Hex.decodeHex(pkHex);
-        } catch (DecoderException e) {
-            logger.error("unable to parse pk hexstring", e);
-            throw new RuntimeException(e);
-        }
+    public CryptoUtil(String mskHex, String mpkHex, SodiumJava sodium) {
         this.sodium = sodium;
         try {
             this.msk = Hex.decodeHex(mskHex);
@@ -81,14 +66,6 @@ public class CryptoUtil {
             logger.error("unable to parse pk hexstring", e);
             throw new RuntimeException(e);
         }
-    }
-
-    public byte[] getSk() {
-        return sk.clone();
-    }
-
-    public byte[] getPk() {
-        return pk.clone();
     }
 
     public void genKeys() throws UnsupportedEncodingException {

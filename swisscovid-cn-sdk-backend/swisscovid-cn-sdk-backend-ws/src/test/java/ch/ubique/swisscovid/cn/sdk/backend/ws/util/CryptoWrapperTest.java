@@ -36,10 +36,7 @@ public class CryptoWrapperTest {
     private static final int CRYPTOGRAPHIC_SEED_BYTES = 32;
 
     private final CryptoWrapper cryptoWrapper =
-            new CryptoWrapper(
-                    "36b3b80a1cd2cc98d84b4ed2c109b74e7026f00c0d40a0b12a936b1814aa5e39",
-                    "e4d2e06641730ce7c9986b1e7e91bf41bb3b8cc1d76d249fa99d0d8925e87a5c",
-                    "ce23ca6a3fd0d1307d3d0b2578784750b3f0e20b64e0c24e4cafb35561a0af35",
+            new CryptoWrapper("ce23ca6a3fd0d1307d3d0b2578784750b3f0e20b64e0c24e4cafb35561a0af35",
                     "956e6fa1345547e8e060c8962ddd38863bf2c85406ed03b204bc340fb5db01296a960d00be240caa08db001664f4f7028a9dbbb33aea172bffd58b4a644f1ecb3b7bbed378a8a7c9756ac8b4b47346d8dbf37a62377703b7fc8da3bb22a21415");
 
     public static byte[] fromBase64(String base64) throws UnsupportedEncodingException {

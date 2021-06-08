@@ -84,10 +84,7 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
     final SignatureAlgorithm algorithm = SignatureAlgorithm.ES256;
-    @Value("${healthAuthority.skHex}")
-    String healthAuthoritySkHex;
-    @Value("${healthAuthority.pkHex}")
-    String healthAuthorityPkHex;
+
     @Value("${userupload.mpkHex}")
     String useruploadMpkHex;
     @Value("${userupload.mskHex}")
@@ -287,8 +284,7 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
 
     @Bean
     CryptoWrapper cryptoWrapper() {
-        return new CryptoWrapper(
-                healthAuthoritySkHex, healthAuthorityPkHex, useruploadMskHex, useruploadMpkHex);
+        return new CryptoWrapper(useruploadMskHex, useruploadMpkHex);
     }
 
     @Bean
