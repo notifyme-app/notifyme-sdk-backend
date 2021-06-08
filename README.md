@@ -10,9 +10,10 @@ The full set of documents for CrowdNotifier is at https://github.com/CrowdNotifi
 
 ## Dependencies
 
--   Spring Boot 2.4.0
+-   Spring Boot 2.4.x
 -   Java 11 (or higher)
 -   Logback
+-   Postgresql
 -   [Springboot-Swagger-3](https://bintray.com/ubique-oss/springboot-swagger3)
 
 ## Database
@@ -36,6 +37,19 @@ Furthermore, two non-abstract configs (`dev`, `prod`) are provided, which implem
 > Note that the `dev` config uses a HSQLDB, which is non-persistent, whereas `prod` needs a running instance of PostgreSQL, either in a docker (a [docker-compose file](docker-compose/stack.yml) is provided) or native.
 
 If you plan to provide new extensions or make adjustments and want to provide those to the general public, it is recommended to add a new configuration for your specific case. This can be e.g. an abstract class (e.g. WSCloudBaseConfig), which extends the base class providing certain needed keys or functions. If you provide an abstract class, please make sure to add at least one non-abstract class showing the implementation needed.
+
+#### Configuration Properties
+- `userupload.mpkHex`: the master public key used for user upload hex encoded. *REQUIRED* 
+- `userupload.mskHex`: the master secret key used for user upload hex encoded. *REQUIRED*
+- `traceKey.bucketSizeInMs`: trace keys are served in buckets. the bucket size can be configured by this property. For production two hours is a reasonable value *REQUIRED*
+- `userupload.requestTime`: uploads times are normalized for privacy purposes. *REQUIRED*
+- `traceKey.traceKeysCacheControlInMs`: cache control (max-age) for trace key request. *REQUIRED*
+- `push.ios.signingkey`: apns signing key, .p8 base64 encoded. *OPTIONAL* (if not configured, background push notifications are disabled)
+- `push.ios.teamid`: apns teamid
+- `push.ios.keyid`: apns keyid
+- `push.ios.topic`: apns push topic
+- `traceKey.retentionDays`: the retention period, e.g. how long are keys stored in the database. *DEFAULT: 14 days*
+
 
 ## API Requests
 
