@@ -1,4 +1,4 @@
-# NotifyMe SDK Backend
+# SwissCovid CrowdNotifier Backend
 
 [![License: MPL 2.0](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)](https://github.com/SwissCovid/swisscovid-cn-backend/blob/develop/LICENSE)
 ![Build](https://github.com/SwissCovid/swisscovid-cn-backend/workflows/Build/badge.svg?branch=develop)
