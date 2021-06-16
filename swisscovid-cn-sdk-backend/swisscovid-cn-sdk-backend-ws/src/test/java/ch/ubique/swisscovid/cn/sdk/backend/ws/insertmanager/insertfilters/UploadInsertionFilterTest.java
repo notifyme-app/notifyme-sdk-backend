@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.junit.Before;
@@ -38,9 +37,9 @@ public abstract class UploadInsertionFilterTest {
     @Autowired CryptoWrapper cryptoWrapper;
     @Autowired JwtDecoder jwtDecoder;
 
-    abstract List<UploadVenueInfo> getValidVenueInfo();
+    abstract List<List<UploadVenueInfo>> getValidVenueInfo();
 
-    abstract List<UploadVenueInfo> getInvalidVenueInfo();
+    abstract List<List<UploadVenueInfo>> getInvalidVenueInfo();
 
     abstract UploadInsertionFilter insertionFilter();
 
@@ -66,19 +65,23 @@ public abstract class UploadInsertionFilterTest {
     @Test
     public void testFilterValid() throws Exception {
         LocalDateTime now = LocalDateTime.now();
-        final List<UploadVenueInfo> uploadVenueInfoList = getValidVenueInfo();
+        final List<List<UploadVenueInfo>> testcaseList = getValidVenueInfo();
         final var token = getToken(now);
-        assertEquals(
-                uploadVenueInfoList.size(),
-                insertionFilter().filter(now, uploadVenueInfoList, token).size());
+        for (List<UploadVenueInfo> uploadVenueInfoList : testcaseList) {
+            assertEquals(
+                    uploadVenueInfoList.size(),
+                    insertionFilter().filter(now, uploadVenueInfoList, token).size());
+        }
     }
 
     @Test
     public void testFilterInvalid() throws Exception {
         LocalDateTime now = LocalDateTime.now();
-        final List<UploadVenueInfo> uploadVenueInfoList = getInvalidVenueInfo();
+        final List<List<UploadVenueInfo>> testcaseList = getInvalidVenueInfo();
         final var token = getToken(now);
-        assertTrue(insertionFilter().filter(now, uploadVenueInfoList, token).isEmpty());
+        for (List<UploadVenueInfo> uploadVenueInfoList : testcaseList) {
+            assertTrue(insertionFilter().filter(now, uploadVenueInfoList, token).isEmpty());
+        }
     }
 
     public UploadVenueInfo getVenueInfo(LocalDateTime start, LocalDateTime end) {
@@ -92,12 +95,13 @@ public abstract class UploadInsertionFilterTest {
     }
 
     public UploadVenueInfo getVenueInfo(
-        LocalDateTime start, LocalDateTime end, boolean fake,
-        NoncesAndNotificationKey noncesAndNotificationKey) {
+            LocalDateTime start,
+            LocalDateTime end,
+            boolean fake,
+            NoncesAndNotificationKey noncesAndNotificationKey) {
         final var crypto = cryptoWrapper.getCryptoUtil();
-        if(noncesAndNotificationKey == null) {
-            noncesAndNotificationKey =
-                crypto.getNoncesAndNotificationKey(crypto.createNonce(256));
+        if (noncesAndNotificationKey == null) {
+            noncesAndNotificationKey = crypto.getNoncesAndNotificationKey(crypto.createNonce(256));
         }
         byte[] preid =
                 crypto.cryptoHashSHA256(

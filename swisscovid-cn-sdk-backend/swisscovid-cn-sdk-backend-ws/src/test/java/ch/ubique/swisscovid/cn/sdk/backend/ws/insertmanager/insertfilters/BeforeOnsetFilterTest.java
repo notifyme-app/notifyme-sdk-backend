@@ -19,7 +19,7 @@ public class BeforeOnsetFilterTest extends UploadInsertionFilterTest {
             LocalDateTime.of(LocalDate.now(), LocalTime.MIDNIGHT);
 
     @Override
-    List<UploadVenueInfo> getValidVenueInfo() {
+    List<List<UploadVenueInfo>> getValidVenueInfo() {
         final List<UploadVenueInfo> venueInfoList = new ArrayList<>();
         LocalDateTime start = currentTime.minusDays(1);
         LocalDateTime end = start.plusHours(1);
@@ -31,18 +31,18 @@ public class BeforeOnsetFilterTest extends UploadInsertionFilterTest {
         // venue visit same day as onset
         final var venueInfoCase2 = getVenueInfo(start, end);
         venueInfoList.add(venueInfoCase2);
-        return venueInfoList;
+        return List.of(venueInfoList);
     }
 
     @Override
-    List<UploadVenueInfo> getInvalidVenueInfo() {
+    List<List<UploadVenueInfo>> getInvalidVenueInfo() {
         final List<UploadVenueInfo> venueInfoList = new ArrayList<>();
         LocalDateTime start = currentTime.minusDays(3);
         LocalDateTime end = start.plusHours(1);
         // venue visit one day before onset
         final var venueInfo = getVenueInfo(start, end);
         venueInfoList.add(venueInfo);
-        return venueInfoList;
+        return List.of(venueInfoList);
     }
 
     @Override

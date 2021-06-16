@@ -7,7 +7,7 @@ import java.util.List;
 
 public class IntervalThresholdFilterTest extends UploadInsertionFilterTest {
     @Override
-    List<UploadVenueInfo> getValidVenueInfo() {
+    List<List<UploadVenueInfo>> getValidVenueInfo() {
         final var venueInfoList = new ArrayList<UploadVenueInfo>();
         LocalDateTime start = LocalDateTime.now();
         LocalDateTime end = start.plusMinutes(30);
@@ -19,11 +19,11 @@ public class IntervalThresholdFilterTest extends UploadInsertionFilterTest {
         // Exactly 1 hour
         final var venueInfoCase2 = getVenueInfo(start, end);
         venueInfoList.add(venueInfoCase2);
-        return venueInfoList;
+        return List.of(venueInfoList);
     }
 
     @Override
-    List<UploadVenueInfo> getInvalidVenueInfo() {
+    List<List<UploadVenueInfo>> getInvalidVenueInfo() {
         final var venueInfoList = new ArrayList<UploadVenueInfo>();
         LocalDateTime start = LocalDateTime.now();
         LocalDateTime end = start.plusHours(-1);
@@ -35,7 +35,7 @@ public class IntervalThresholdFilterTest extends UploadInsertionFilterTest {
         // End - Start > 24
         final var venueInfoCase2 = getVenueInfo(start, end);
         venueInfoList.add(venueInfoCase2);
-        return venueInfoList;
+        return List.of(venueInfoList);
     }
 
     @Override
