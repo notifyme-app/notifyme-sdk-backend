@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
+import ch.ubique.swisscovid.cn.sdk.backend.ws.util.CryptoUtil.NoncesAndNotificationKey;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.util.CryptoWrapper;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.util.TokenHelper;
 import com.google.protobuf.ByteString;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.junit.Before;
@@ -80,19 +82,23 @@ public abstract class UploadInsertionFilterTest {
     }
 
     public UploadVenueInfo getVenueInfo(LocalDateTime start, LocalDateTime end) {
-        return getVenueInfo(start, end, false);
+        return getVenueInfo(start, end, false, null);
     }
 
     public UploadVenueInfo getVenueInfo(boolean fake) {
         LocalDateTime start = LocalDateTime.now();
         LocalDateTime end = start.plusMinutes(30);
-        return getVenueInfo(start, end, fake);
+        return getVenueInfo(start, end, fake, null);
     }
 
-    public UploadVenueInfo getVenueInfo(LocalDateTime start, LocalDateTime end, boolean fake) {
+    public UploadVenueInfo getVenueInfo(
+        LocalDateTime start, LocalDateTime end, boolean fake,
+        NoncesAndNotificationKey noncesAndNotificationKey) {
         final var crypto = cryptoWrapper.getCryptoUtil();
-        final var noncesAndNotificationKey =
+        if(noncesAndNotificationKey == null) {
+            noncesAndNotificationKey =
                 crypto.getNoncesAndNotificationKey(crypto.createNonce(256));
+        }
         byte[] preid =
                 crypto.cryptoHashSHA256(
                         crypto.concatenate(

@@ -13,33 +13,57 @@ public class OverlappingIntervalsFilterTest extends UploadInsertionFilterTest {
     @Override
     List<UploadVenueInfo> getValidVenueInfo() {
         final var venueInfoList = new ArrayList<UploadVenueInfo>();
+        // Stayed at venue A for 1.5h
+        final var noncesAndNotificationKey =
+                cryptoWrapper
+                        .getCryptoUtil()
+                        .getNoncesAndNotificationKey(
+                                cryptoWrapper.getCryptoUtil().createNonce(256));
         LocalDateTime start = LocalDateTime.now();
-        LocalDateTime end = start.plusHours(1);
-        final var venueInfo1 = getVenueInfo(start, end);
+        LocalDateTime end = start.plusHours(2);
+        final var venueInfo1 = getVenueInfo(start, end, false, noncesAndNotificationKey);
         venueInfoList.add(venueInfo1);
-        start = end.plusMinutes(1);
-        end = start;
+        // Stayed at venue B for 15min
+        start = end.minusMinutes(30);
+        end = start.plusMinutes(45);
         final var venueInfo2 = getVenueInfo(start, end);
         venueInfoList.add(venueInfo2);
+        // Stayed at venue A for 30 minutes
+        start = end.minusMinutes(30);
+        end = start.plusHours(1);
+        final var venueInfo3 = getVenueInfo(start, end, false, noncesAndNotificationKey);
+        venueInfoList.add(venueInfo3);
         return venueInfoList;
     }
 
     @Override
     List<UploadVenueInfo> getInvalidVenueInfo() {
         final var venueInfoList = new ArrayList<UploadVenueInfo>();
-        final var now = LocalDateTime.now();
-        LocalDateTime start = now;
-        LocalDateTime end = start.plusHours(1);
-        final var venueInfo1 = getVenueInfo(start, end);
-        venueInfoList.add(venueInfo1);
-        start = end.minusMinutes(1);
-        end = start.plusHours(1);
-        final var venueInfo2 = getVenueInfo(start, end);
-        venueInfoList.add(venueInfo2);
-        start = now.minusMinutes(59);
-        end = start.plusHours(1);
+        // Stayed at venue A for 1h
+        final var noncesAndNotificationKey =
+            cryptoWrapper
+                .getCryptoUtil()
+                .getNoncesAndNotificationKey(
+                    cryptoWrapper.getCryptoUtil().createNonce(256));
+        LocalDateTime start = LocalDateTime.now();
+        LocalDateTime end = start.plusMinutes(30);
+        final var venueInfo1 = getVenueInfo(start, end, false, noncesAndNotificationKey);
+        start = end;
+        end = start.plusMinutes(60);
+        final var venueInfo2 = getVenueInfo(start, end, false, noncesAndNotificationKey);
+        // Stayed at venue B for 15min concurrently
+        start = end.minusMinutes(45);
+        end = start.plusMinutes(45);
         final var venueInfo3 = getVenueInfo(start, end);
+        // Stayed at venue A for another 15min
+        start = end.minusMinutes(30);
+        end = start.plusMinutes(45);
+        final var venueInfo4 = getVenueInfo(start, end, false, noncesAndNotificationKey);
+        // Request arrives with correct order
+        venueInfoList.add(venueInfo1);
+        venueInfoList.add(venueInfo2);
         venueInfoList.add(venueInfo3);
+        venueInfoList.add(venueInfo4);
         return venueInfoList;
     }
 
