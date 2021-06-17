@@ -10,12 +10,12 @@ public class FutureVenueInfoFilterTest extends UploadInsertionFilterTest {
 
     @Override
     List<List<UploadVenueInfo>> getValidVenueInfo() {
-        return List.of(List.of((getVenueInfo(now.minusHours(2), now.minusHours(1)))));
+        return List.of((getVenueInfo(now.minusHours(2), now.minusHours(1))));
     }
 
     @Override
     List<List<UploadVenueInfo>> getInvalidVenueInfo() {
-        return List.of(List.of(getVenueInfo(now, now.plusHours(1))));
+        return List.of(getVenueInfo(now, now.plusHours(1)));
     }
 
     @Override

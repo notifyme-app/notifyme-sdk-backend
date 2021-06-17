@@ -13,8 +13,7 @@ import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.Interv
 import ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters.UploadInsertionFilter;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.util.CryptoWrapper;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.util.TokenHelper;
-import com.google.protobuf.ByteString;
-import java.nio.charset.StandardCharsets;
+import ch.ubique.swisscovid.cn.sdk.backend.ws.util.VenueInfoHelper;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -56,10 +55,12 @@ public class InsertManagerTest {
     Long bucketSizeinMs;
 
     private TokenHelper tokenHelper;
+    private VenueInfoHelper venueInfoHelper;
 
     @Before
     public void setUp() throws Exception {
         tokenHelper = new TokenHelper();
+        venueInfoHelper = new VenueInfoHelper(cryptoWrapper);
         insertManager =
                 new InsertManager(
                         cryptoWrapper, swissCovidDataService, interactionDurationDataService);
@@ -95,8 +96,8 @@ public class InsertManagerTest {
                         return new ArrayList<>();
                     }
                 };
-        final List<UploadVenueInfo> uploadVenueInfoList = new ArrayList<>();
-        uploadVenueInfoList.add(createUploadVenueInfo(now, now.plus(1, ChronoUnit.HOURS), false));
+        final List<UploadVenueInfo> uploadVenueInfoList = new ArrayList<>(
+            createUploadVenueInfo(now, now.plus(1, ChronoUnit.HOURS), false));
         insertWith(
                 Collections.singletonList(removeAll),
                 uploadVenueInfoList,
@@ -119,10 +120,8 @@ public class InsertManagerTest {
                         return uploadVenueInfoList;
                     }
                 };
-        final List<UploadVenueInfo> uploadVenueInfoList = new ArrayList<>();
-        uploadVenueInfoList.add(
-                createUploadVenueInfo(
-                        now.minus(2, ChronoUnit.HOURS), now.minus(1, ChronoUnit.HOURS), false));
+        final List<UploadVenueInfo> uploadVenueInfoList = new ArrayList<>(createUploadVenueInfo(
+            now.minus(2, ChronoUnit.HOURS), now.minus(1, ChronoUnit.HOURS), false));
         insertWith(
                 Collections.singletonList(removeNone),
                 uploadVenueInfoList,
@@ -135,26 +134,25 @@ public class InsertManagerTest {
             }
         };
         final var traceKeys = swissCovidDataService.findTraceKeys(now.minus(1, ChronoUnit.DAYS));
-        assertEquals(1, traceKeys.size());
+        assertEquals(uploadVenueInfoList.size(), traceKeys.size());
     }
 
     @Test
     @Transactional
     public void testAddRequestFilters() throws Exception {
         final var now = Instant.now();
-        final var venueInfoList = new ArrayList<UploadVenueInfo>();
         final var fakeUpload =
                 createUploadVenueInfo(
                         now.minus(6, ChronoUnit.DAYS), now.minus(6, ChronoUnit.DAYS), true);
-        venueInfoList.add(fakeUpload);
+        final var venueInfoList = new ArrayList<UploadVenueInfo>(fakeUpload);
         final var negativeIntervalUpload =
                 createUploadVenueInfo(
                         now.minus(3, ChronoUnit.DAYS), now.minus(4, ChronoUnit.DAYS), false);
-        venueInfoList.add(negativeIntervalUpload);
+        venueInfoList.addAll(negativeIntervalUpload);
         final var validUpload =
                 createUploadVenueInfo(
                         now.minus(24, ChronoUnit.HOURS), now.minus(23, ChronoUnit.HOURS), false);
-        venueInfoList.add(validUpload);
+        venueInfoList.addAll(validUpload);
         insertWith(
                 Arrays.asList(new FakeRequestFilter(), new IntervalThresholdFilter()),
                 venueInfoList,
@@ -166,7 +164,7 @@ public class InsertManagerTest {
                 return Instant.now(clock);
             }
         };
-        assertEquals(1, swissCovidDataService.findTraceKeys(now.minus(1, ChronoUnit.DAYS)).size());
+        assertEquals(validUpload.size(), swissCovidDataService.findTraceKeys(now.minus(1, ChronoUnit.DAYS)).size());
     }
 
     private void insertWith(
@@ -199,30 +197,11 @@ public class InsertManagerTest {
         insertManager.insertIntoDatabase(userUploadPayload, token, now);
     }
 
-    private UploadVenueInfo createUploadVenueInfo(Instant start, Instant end, boolean fake) {
-        final var crypto = cryptoWrapper.getCryptoUtil();
-        final var noncesAndNotificationKey =
-                crypto.getNoncesAndNotificationKey(crypto.createNonce(256));
-        byte[] preid =
-                crypto.cryptoHashSHA256(
-                        crypto.concatenate(
-                                "CN-PREID".getBytes(StandardCharsets.US_ASCII),
-                                "payload".getBytes(StandardCharsets.US_ASCII),
-                                noncesAndNotificationKey.noncePreId));
-        byte[] timekey =
-                crypto.cryptoHashSHA256(
-                        crypto.concatenate(
-                                "CN-TIMEKEY".getBytes(StandardCharsets.US_ASCII),
-                                crypto.longToBytes(3600L),
-                                crypto.longToBytes(start.getEpochSecond()),
-                                noncesAndNotificationKey.nonceTimekey));
-        return UploadVenueInfo.newBuilder()
-                .setPreId(ByteString.copyFrom(preid))
-                .setTimeKey(ByteString.copyFrom(timekey))
-                .setIntervalStartMs(start.toEpochMilli())
-                .setIntervalEndMs(end.toEpochMilli())
-                .setNotificationKey(ByteString.copyFrom(noncesAndNotificationKey.notificationKey))
-                .setFake(fake)
-                .build();
+    private List<UploadVenueInfo> createUploadVenueInfo(Instant start, Instant end, boolean fake) {
+        return venueInfoHelper.getVenueInfo(
+                LocalDateTime.ofInstant(start, ZoneOffset.UTC),
+                LocalDateTime.ofInstant(end, ZoneOffset.UTC),
+                fake,
+                null);
     }
 }

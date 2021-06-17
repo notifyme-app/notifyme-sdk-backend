@@ -7,12 +7,14 @@ import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.Upl
 import ch.ubique.swisscovid.cn.sdk.backend.ws.util.CryptoUtil.NoncesAndNotificationKey;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.util.CryptoWrapper;
 import ch.ubique.swisscovid.cn.sdk.backend.ws.util.TokenHelper;
+import ch.ubique.swisscovid.cn.sdk.backend.ws.util.VenueInfoHelper;
 import com.google.protobuf.ByteString;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.junit.Before;
@@ -34,6 +36,7 @@ public abstract class UploadInsertionFilterTest {
     protected static final DateTimeFormatter DATE_FORMATTER =
             DateTimeFormatter.ofPattern("YYYY-MM-dd");
     protected TokenHelper tokenHelper;
+    protected VenueInfoHelper venueInfoHelper;
     @Autowired CryptoWrapper cryptoWrapper;
     @Autowired JwtDecoder jwtDecoder;
 
@@ -60,6 +63,7 @@ public abstract class UploadInsertionFilterTest {
     @Before
     public void setUp() throws Exception {
         tokenHelper = new TokenHelper();
+        venueInfoHelper = new VenueInfoHelper(cryptoWrapper);
     }
 
     @Test
@@ -84,46 +88,13 @@ public abstract class UploadInsertionFilterTest {
         }
     }
 
-    public UploadVenueInfo getVenueInfo(LocalDateTime start, LocalDateTime end) {
-        return getVenueInfo(start, end, false, null);
+    public List<UploadVenueInfo> getVenueInfo(LocalDateTime start, LocalDateTime end) {
+        return venueInfoHelper.getVenueInfo(start, end, false, null);
     }
 
-    public UploadVenueInfo getVenueInfo(boolean fake) {
+    public List<UploadVenueInfo> getVenueInfo(boolean fake) {
         LocalDateTime start = LocalDateTime.now();
         LocalDateTime end = start.plusMinutes(30);
-        return getVenueInfo(start, end, fake, null);
-    }
-
-    public UploadVenueInfo getVenueInfo(
-            LocalDateTime start,
-            LocalDateTime end,
-            boolean fake,
-            NoncesAndNotificationKey noncesAndNotificationKey) {
-        final var crypto = cryptoWrapper.getCryptoUtil();
-        if (noncesAndNotificationKey == null) {
-            noncesAndNotificationKey = crypto.getNoncesAndNotificationKey(crypto.createNonce(256));
-        }
-        byte[] preid =
-                crypto.cryptoHashSHA256(
-                        crypto.concatenate(
-                                "CN-PREID".getBytes(StandardCharsets.US_ASCII),
-                                "payload".getBytes(StandardCharsets.US_ASCII),
-                                noncesAndNotificationKey.noncePreId));
-        byte[] timekey =
-                crypto.cryptoHashSHA256(
-                        crypto.concatenate(
-                                "CN-TIMEKEY".getBytes(StandardCharsets.US_ASCII),
-                                crypto.longToBytes(3600L),
-                                crypto.longToBytes(
-                                        start.toInstant(ZoneOffset.UTC).getEpochSecond()),
-                                noncesAndNotificationKey.nonceTimekey));
-        return UploadVenueInfo.newBuilder()
-                .setPreId(ByteString.copyFrom(preid))
-                .setTimeKey(ByteString.copyFrom(timekey))
-                .setIntervalStartMs(start.toInstant(ZoneOffset.UTC).toEpochMilli())
-                .setIntervalEndMs(end.toInstant(ZoneOffset.UTC).toEpochMilli())
-                .setNotificationKey(ByteString.copyFrom(noncesAndNotificationKey.notificationKey))
-                .setFake(fake)
-                .build();
+        return venueInfoHelper.getVenueInfo(start, end, fake, null);
     }
 }

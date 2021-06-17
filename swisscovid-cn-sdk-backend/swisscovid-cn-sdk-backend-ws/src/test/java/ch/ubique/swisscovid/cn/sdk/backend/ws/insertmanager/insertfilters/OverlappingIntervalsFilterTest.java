@@ -28,18 +28,18 @@ public class OverlappingIntervalsFilterTest extends UploadInsertionFilterTest {
         // Stayed at venue A for 1.5h
         LocalDateTime start = LocalDateTime.now();
         LocalDateTime end = start.plusHours(2);
-        final var venueInfo1 = getVenueInfo(start, end, false, noncesAndNotificationKey);
-        venueInfoList.add(venueInfo1);
+        final var venueInfo1 = venueInfoHelper.getVenueInfo(start, end, false, noncesAndNotificationKey);
         // Stayed at venue B for 15min
         start = end.minusMinutes(30);
         end = start.plusMinutes(45);
         final var venueInfo2 = getVenueInfo(start, end);
-        venueInfoList.add(venueInfo2);
         // Stayed at venue A for 30 minutes
         start = end.minusMinutes(30);
         end = start.plusHours(1);
-        final var venueInfo3 = getVenueInfo(start, end, false, noncesAndNotificationKey);
-        venueInfoList.add(venueInfo3);
+        final var venueInfo3 = venueInfoHelper.getVenueInfo(start, end, false, noncesAndNotificationKey);
+        venueInfoList.addAll(venueInfo1);
+        venueInfoList.addAll(venueInfo2);
+        venueInfoList.addAll(venueInfo3);
         return venueInfoList;
     }
 
@@ -53,23 +53,23 @@ public class OverlappingIntervalsFilterTest extends UploadInsertionFilterTest {
         // Stayed at venue A for 1.5h
         LocalDateTime start = LocalDateTime.now();
         LocalDateTime end = start.plusHours(2);
-        final var venueInfo1 = getVenueInfo(start, end, false, noncesAndNotificationKey);
-        venueInfoList.add(venueInfo1);
+        final var venueInfo1 = venueInfoHelper.getVenueInfo(start, end, false, noncesAndNotificationKey);
         // Checked out and back in at venue A for another 1h
         start = end.minusMinutes(30);
         end = start.plusHours(1);
-        final var venueInfo2 = getVenueInfo(start, end, false, noncesAndNotificationKey);
-        venueInfoList.add(venueInfo2);
+        final var venueInfo2 = venueInfoHelper.getVenueInfo(start, end, false, noncesAndNotificationKey);
         // Stayed at venue B for 15min
         start = end.minusMinutes(30);
         end = start.plusMinutes(45);
         final var venueInfo3 = getVenueInfo(start, end);
-        venueInfoList.add(venueInfo3);
         // Stayed at venue A for 30 minutes
         start = end.minusMinutes(30);
         end = start.plusHours(1);
-        final var venueInfo4 = getVenueInfo(start, end, false, noncesAndNotificationKey);
-        venueInfoList.add(venueInfo4);
+        final var venueInfo4 = venueInfoHelper.getVenueInfo(start, end, false, noncesAndNotificationKey);
+        venueInfoList.addAll(venueInfo1);
+        venueInfoList.addAll(venueInfo2);
+        venueInfoList.addAll(venueInfo3);
+        venueInfoList.addAll(venueInfo4);
         return venueInfoList;
     }
 
@@ -92,10 +92,10 @@ public class OverlappingIntervalsFilterTest extends UploadInsertionFilterTest {
         // Stayed at venue A for 1h
         LocalDateTime start = LocalDateTime.now();
         LocalDateTime end = start.plusMinutes(30);
-        final var venueInfo1 = getVenueInfo(start, end, false, noncesAndNotificationKey);
+        final var venueInfo1 = venueInfoHelper.getVenueInfo(start, end, false, noncesAndNotificationKey);
         start = end;
         end = start.plusMinutes(60);
-        final var venueInfo2 = getVenueInfo(start, end, false, noncesAndNotificationKey);
+        final var venueInfo2 = venueInfoHelper.getVenueInfo(start, end, false, noncesAndNotificationKey);
         // Overlapping checkin at venue B for 15min
         start = end.minusMinutes(45);
         end = start.plusMinutes(45);
@@ -103,12 +103,12 @@ public class OverlappingIntervalsFilterTest extends UploadInsertionFilterTest {
         // Stayed at venue A for another 15min
         start = end.minusMinutes(30);
         end = start.plusMinutes(45);
-        final var venueInfo4 = getVenueInfo(start, end, false, noncesAndNotificationKey);
+        final var venueInfo4 = venueInfoHelper.getVenueInfo(start, end, false, noncesAndNotificationKey);
         // Request arrives with correct order
-        venueInfoList.add(venueInfo1);
-        venueInfoList.add(venueInfo2);
-        venueInfoList.add(venueInfo3);
-        venueInfoList.add(venueInfo4);
+        venueInfoList.addAll(venueInfo1);
+        venueInfoList.addAll(venueInfo2);
+        venueInfoList.addAll(venueInfo3);
+        venueInfoList.addAll(venueInfo4);
         return venueInfoList;
     }
 
@@ -122,11 +122,11 @@ public class OverlappingIntervalsFilterTest extends UploadInsertionFilterTest {
         // Two overlapping checkins at venue A for 30min
         LocalDateTime start = LocalDateTime.now();
         LocalDateTime end = start.plusMinutes(60);
-        final var venueInfo1 = getVenueInfo(start, end, false, noncesAndNotificationKey);
-        final var venueInfo2 = getVenueInfo(start, end, false, noncesAndNotificationKey);
+        final var venueInfo1 = venueInfoHelper.getVenueInfo(start, end, false, noncesAndNotificationKey);
+        final var venueInfo2 = venueInfoHelper.getVenueInfo(start, end, false, noncesAndNotificationKey);
         // Request arrives with correct order
-        venueInfoList.add(venueInfo1);
-        venueInfoList.add(venueInfo2);
+        venueInfoList.addAll(venueInfo1);
+        venueInfoList.addAll(venueInfo2);
         return venueInfoList;
     }
 
@@ -144,15 +144,15 @@ public class OverlappingIntervalsFilterTest extends UploadInsertionFilterTest {
         // Stayed at venue A for 15min
         start = end.minusMinutes(30);
         end = start.plusMinutes(45);
-        final var venueInfo2 = getVenueInfo(start, end, false, noncesAndNotificationKey);
+        final var venueInfo2 = venueInfoHelper.getVenueInfo(start, end, false, noncesAndNotificationKey);
         // Overlapping checkin at venue A for 15min
         start = start.minusMinutes(15);
         end = start.plusMinutes(45);
-        final var venueInfo3 = getVenueInfo(start, end, false, noncesAndNotificationKey);
+        final var venueInfo3 = venueInfoHelper.getVenueInfo(start, end, false, noncesAndNotificationKey);
         // Request arrives with correct order
-        venueInfoList.add(venueInfo1);
-        venueInfoList.add(venueInfo2);
-        venueInfoList.add(venueInfo3);
+        venueInfoList.addAll(venueInfo1);
+        venueInfoList.addAll(venueInfo2);
+        venueInfoList.addAll(venueInfo3);
         return venueInfoList;
     }
 

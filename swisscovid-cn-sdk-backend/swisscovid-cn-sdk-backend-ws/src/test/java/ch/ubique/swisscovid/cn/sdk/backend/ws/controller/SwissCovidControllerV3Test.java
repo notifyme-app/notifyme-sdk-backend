@@ -303,7 +303,7 @@ public class SwissCovidControllerV3Test extends BaseControllerTest {
     }
 
     @Test
-//    @Transactional
+    @Transactional
     public void testUserUploadOverlappingIntervals() throws Exception {
         final var now = LocalDateTime.now();
         final var interval1 = getUploadVenueInfo(now.minusMinutes(90), now.minusMinutes(30), false);
