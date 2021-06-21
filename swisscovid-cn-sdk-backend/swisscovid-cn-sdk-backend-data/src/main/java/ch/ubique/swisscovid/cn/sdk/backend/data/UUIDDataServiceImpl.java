@@ -51,7 +51,7 @@ public class UUIDDataServiceImpl implements UUIDDataService {
     @Transactional(readOnly = false)
     public void cleanDB(Duration retentionPeriod) {
         var retentionTime = LocalDate.now().minus(retentionPeriod.toDays(), ChronoUnit.DAYS).atStartOfDay();
-        logger.info("Cleanup DB entries before: " + retentionTime);
+        logger.info("Cleanup UUID entries before: " + retentionTime);
         MapSqlParameterSource params =
                 new MapSqlParameterSource("retention_time", Date.from(retentionTime.toInstant(ZoneOffset.UTC)));
         String sqlRedeem = "delete from t_redeem_uuid where received_at < :retention_time";
