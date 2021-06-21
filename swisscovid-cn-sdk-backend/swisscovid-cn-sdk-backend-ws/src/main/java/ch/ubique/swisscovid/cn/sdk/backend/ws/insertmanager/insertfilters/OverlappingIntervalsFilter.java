@@ -23,6 +23,10 @@ import java.util.List;
  * </ol>
  */
 public class OverlappingIntervalsFilter implements UploadInsertionFilter {
+
+    // Time added to end of interval upon upload to account for aerosols remaining in the area
+    private final long INTERVAL_APPENDIX = 30 * 60 * 1000L;
+
     @Override
     public List<UserUploadPayloadOuterClass.UploadVenueInfo> filter(
             LocalDateTime now, List<UploadVenueInfo> uploadVenueInfoList, Object principal)
@@ -51,14 +55,14 @@ public class OverlappingIntervalsFilter implements UploadInsertionFilter {
             final var venueInfo = uploadVenueInfoList.get(i);
             timeInterval.setIntervalEndMs(venueInfo.getIntervalEndMs());
             if (i == uploadVenueInfoList.size() - 1) {
-                timeInterval.setIntervalEndMs(timeInterval.getIntervalEndMs() - 30 * 60 * 1000L);
+                timeInterval.setIntervalEndMs(timeInterval.getIntervalEndMs() - INTERVAL_APPENDIX);
                 timeIntervals.add(timeInterval);
             } else {
                 final var nextVenueInfo = uploadVenueInfoList.get(i + 1);
                 if (!venueInfo.getPreId().equals(nextVenueInfo.getPreId())
                         || venueInfo.getIntervalEndMs() != nextVenueInfo.getIntervalStartMs()) {
                     timeInterval.setIntervalEndMs(
-                            timeInterval.getIntervalEndMs() - 30 * 60 * 1000L);
+                            timeInterval.getIntervalEndMs() - INTERVAL_APPENDIX);
                     timeIntervals.add(timeInterval);
                     timeInterval =
                             new TimeInterval(
