@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class IntervalThresholdFilterTest extends UploadInsertionFilterTest {
+
     @Override
     List<List<UploadVenueInfo>> getValidVenueInfo() {
         LocalDateTime start = LocalDateTime.now();
