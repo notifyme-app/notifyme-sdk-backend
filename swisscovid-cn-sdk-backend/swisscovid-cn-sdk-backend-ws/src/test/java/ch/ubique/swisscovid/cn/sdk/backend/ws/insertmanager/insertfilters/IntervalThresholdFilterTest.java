@@ -2,6 +2,7 @@ package ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters;
 
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,9 +15,9 @@ public class IntervalThresholdFilterTest extends UploadInsertionFilterTest {
         // Not an edge case
         final var venueInfoCase1 = getVenueInfo(start, end);
         final var venueInfoList = new ArrayList<>(venueInfoCase1);
-        start = LocalDateTime.now();
+        // Exactly 1 hour, spanning across midnight
+        start = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS).minusMinutes(30);
         end = start.plusHours(1);
-        // Exactly 1 hour
         final var venueInfoCase2 = getVenueInfo(start, end);
         venueInfoList.addAll(venueInfoCase2);
         return List.of(venueInfoList);
