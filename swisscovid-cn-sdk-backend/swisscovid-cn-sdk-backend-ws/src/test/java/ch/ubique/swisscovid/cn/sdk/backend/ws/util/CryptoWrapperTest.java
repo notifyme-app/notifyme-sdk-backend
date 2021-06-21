@@ -79,7 +79,7 @@ public class CryptoWrapperTest {
 
             userUploadBuilder.addVenueInfos(
                     UploadVenueInfo.newBuilder()
-                            .setFake(false)
+                            .setFake(ByteString.copyFrom(new byte[] {0}))
                             .setPreId(ByteString.copyFrom(preIdAndTimeKey.preId))
                             .setNotificationKey(ByteString.copyFrom(venueInfo.getNotificationKey()))
                             .setTimeKey(ByteString.copyFrom(preIdAndTimeKey.timeKey))

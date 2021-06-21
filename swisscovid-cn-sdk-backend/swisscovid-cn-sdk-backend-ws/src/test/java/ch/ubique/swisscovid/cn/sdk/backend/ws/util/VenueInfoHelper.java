@@ -28,6 +28,7 @@ public class VenueInfoHelper {
         final var endTimestamp = end.toInstant(ZoneOffset.UTC).toEpochMilli();
         final var crypto = cryptoWrapper.getCryptoUtil();
         final var uploadVenueInfoList = new ArrayList<UploadVenueInfo>();
+        final var fakeBytes = fake ? new byte[] {1} : new byte[] {0};
 
         if (noncesAndNotificationKey == null) {
             noncesAndNotificationKey = crypto.getNoncesAndNotificationKey(crypto.createNonce(256));
@@ -60,7 +61,7 @@ public class VenueInfoHelper {
                                             (intervalStart + INTERVAL_LENGTH) * 1000, endTimestamp))
                             .setNotificationKey(
                                     ByteString.copyFrom(noncesAndNotificationKey.notificationKey))
-                            .setFake(fake)
+                            .setFake(ByteString.copyFrom(fakeBytes))
                             .build());
         }
         return uploadVenueInfoList;

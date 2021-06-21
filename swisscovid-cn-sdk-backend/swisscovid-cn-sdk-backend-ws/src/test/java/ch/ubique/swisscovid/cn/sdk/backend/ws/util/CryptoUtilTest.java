@@ -59,7 +59,7 @@ public class CryptoUtilTest {
                             .setIntervalStartMs(uploadTest.intervalStartMs)
                             .setIntervalEndMs(uploadTest.intervalEndMs)
                             .setNotificationKey(ByteString.copyFrom(uploadTest.notificationKey))
-                            .setFake(uploadTest.fake)
+                            .setFake(ByteString.copyFrom(uploadTest.fake ? new byte[] {1} : new byte[] {0}))
                             .build();
             final var userUpload =
                     UserUploadPayloadOuterClass.UserUploadPayload.newBuilder()
