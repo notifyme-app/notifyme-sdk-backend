@@ -20,7 +20,7 @@ public class FakeRequestFilter implements UploadInsertionFilter {
       Object principal)
       throws InsertException {
     return uploadVenueInfoList.stream()
-        .filter(uploadVenueInfo -> !uploadVenueInfo.getFake())
+        .filter(uploadVenueInfo -> (uploadVenueInfo.getFake().toByteArray()[0] == 0)) // only collect real venue infos.
         .collect(Collectors.toList());
   }
 }

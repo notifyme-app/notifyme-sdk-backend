@@ -407,9 +407,11 @@ public class SwissCovidControllerV3Test extends BaseControllerTest {
             LocalDateTime start, LocalDateTime end, boolean fake) {
         final var from = start.toInstant(ZoneOffset.UTC);
         final var to = end.toInstant(ZoneOffset.UTC);
+        final var fakeBytes = fake ? new byte[] {1} : new byte[] {0};
+
         var venueInfo =
                 UploadVenueInfo.newBuilder()
-                        .setFake(fake)
+                        .setFake(ByteString.copyFrom(fakeBytes))
                         .setPreId(ByteString.copyFromUtf8("preId"))
                         .setNotificationKey(ByteString.copyFromUtf8("notificationKey"))
                         .setTimeKey(ByteString.copyFromUtf8("timeKey"))
