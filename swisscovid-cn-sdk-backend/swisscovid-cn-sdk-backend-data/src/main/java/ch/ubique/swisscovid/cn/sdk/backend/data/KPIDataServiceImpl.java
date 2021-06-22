@@ -13,14 +13,14 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
-public class PKIDataServiceImpl implements PKIDataService {
+public class KPIDataServiceImpl implements KPIDataService {
 
-    private static final Logger logger = LoggerFactory.getLogger(PKIDataServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(KPIDataServiceImpl.class);
 
     private final NamedParameterJdbcTemplate jt;
     private final SimpleJdbcInsert pkiInsert;
 
-    public PKIDataServiceImpl(DataSource dataSource) {
+    public KPIDataServiceImpl(DataSource dataSource) {
         this.jt = new NamedParameterJdbcTemplate(dataSource);
         this.pkiInsert =
                 new SimpleJdbcInsert(dataSource)

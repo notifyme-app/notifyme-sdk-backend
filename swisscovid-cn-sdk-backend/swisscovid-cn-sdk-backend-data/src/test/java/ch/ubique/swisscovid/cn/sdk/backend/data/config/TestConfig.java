@@ -4,8 +4,8 @@ import ch.ubique.swisscovid.cn.sdk.backend.data.InteractionDurationDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.JDBCInteractionDurationDataServiceImpl;
 import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcPushRegistrationDataServiceImpl;
 import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcSwissCovidDataServiceImpl;
-import ch.ubique.swisscovid.cn.sdk.backend.data.PKIDataService;
-import ch.ubique.swisscovid.cn.sdk.backend.data.PKIDataServiceImpl;
+import ch.ubique.swisscovid.cn.sdk.backend.data.KPIDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.data.KPIDataServiceImpl;
 import ch.ubique.swisscovid.cn.sdk.backend.data.PushRegistrationDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataService;
@@ -49,7 +49,7 @@ public class TestConfig {
     }
 
     @Bean
-    public PKIDataService pkiDataService() {
-        return new PKIDataServiceImpl(dataSource);
+    public KPIDataService kpiDataService() {
+        return new KPIDataServiceImpl(dataSource);
     }
 }

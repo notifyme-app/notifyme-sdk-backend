@@ -5,7 +5,7 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import ch.ubique.swisscovid.cn.sdk.backend.data.InteractionDurationDataService;
-import ch.ubique.swisscovid.cn.sdk.backend.data.PKIDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.data.KPIDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload;
@@ -48,7 +48,7 @@ public class InsertManagerTest {
 
     @Autowired SwissCovidDataService swissCovidDataService;
     @Autowired InteractionDurationDataService interactionDurationDataService;
-    @Autowired PKIDataService pkiDataService;
+    @Autowired KPIDataService kpiDataService;
     @Autowired CryptoWrapper cryptoWrapper;
 
     @Autowired TransactionManager transactionManager;
@@ -68,7 +68,7 @@ public class InsertManagerTest {
                         cryptoWrapper,
                         swissCovidDataService,
                         interactionDurationDataService,
-                        pkiDataService);
+                    kpiDataService);
     }
 
     @Test

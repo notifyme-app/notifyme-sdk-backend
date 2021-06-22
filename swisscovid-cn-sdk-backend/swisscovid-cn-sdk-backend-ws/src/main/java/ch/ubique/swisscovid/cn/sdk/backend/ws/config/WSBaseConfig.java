@@ -14,8 +14,8 @@ import ch.ubique.swisscovid.cn.sdk.backend.data.InteractionDurationDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.JDBCInteractionDurationDataServiceImpl;
 import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcPushRegistrationDataServiceImpl;
 import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcSwissCovidDataServiceImpl;
-import ch.ubique.swisscovid.cn.sdk.backend.data.PKIDataService;
-import ch.ubique.swisscovid.cn.sdk.backend.data.PKIDataServiceImpl;
+import ch.ubique.swisscovid.cn.sdk.backend.data.KPIDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.data.KPIDataServiceImpl;
 import ch.ubique.swisscovid.cn.sdk.backend.data.PushRegistrationDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataService;
@@ -232,13 +232,13 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
             final CryptoWrapper cryptoWrapper,
             final SwissCovidDataService swissCovidDataService,
             final InteractionDurationDataService interactionDurationDataService,
-            final PKIDataService pkiDataService) {
+            final KPIDataService kpiDataService) {
         final var insertManager =
                 new InsertManager(
                         cryptoWrapper,
                         swissCovidDataService,
                         interactionDurationDataService,
-                        pkiDataService);
+                        kpiDataService);
         insertManager.addModifier(new RemoveFinalIntervalModifier());
         insertManager.addFilter(new FakeRequestFilter());
         insertManager.addFilter(new IntervalThresholdFilter());
@@ -275,8 +275,8 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public PKIDataService pkiDataService(final DataSource dataSource) {
-        return new PKIDataServiceImpl(dataSource);
+    public KPIDataService pkiDataService(final DataSource dataSource) {
+        return new KPIDataServiceImpl(dataSource);
     }
 
     @Bean

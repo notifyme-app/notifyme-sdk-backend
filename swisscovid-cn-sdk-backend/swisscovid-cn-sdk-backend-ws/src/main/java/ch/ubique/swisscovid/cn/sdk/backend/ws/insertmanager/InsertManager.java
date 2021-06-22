@@ -1,7 +1,7 @@
 package ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager;
 
 import ch.ubique.swisscovid.cn.sdk.backend.data.InteractionDurationDataService;
-import ch.ubique.swisscovid.cn.sdk.backend.data.PKIDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.data.KPIDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload;
@@ -27,7 +27,7 @@ public class InsertManager {
     private final CryptoWrapper cryptoWrapper;
     private final SwissCovidDataService swissCovidDataService;
     private final InteractionDurationDataService interactionDurationDataService;
-    private final PKIDataService pkiDataService;
+    private final KPIDataService kpiDataService;
 
     private final RequestValidator requestValidator = new SwissCovidJwtRequestValidator();
 
@@ -35,11 +35,11 @@ public class InsertManager {
             CryptoWrapper cryptoWrapper,
             SwissCovidDataService swissCovidDataService,
             InteractionDurationDataService interactionDurationDataService,
-            PKIDataService pkiDataService) {
+            KPIDataService kpiDataService) {
         this.cryptoWrapper = cryptoWrapper;
         this.swissCovidDataService = swissCovidDataService;
         this.interactionDurationDataService = interactionDurationDataService;
-        this.pkiDataService = pkiDataService;
+        this.kpiDataService = kpiDataService;
     }
 
     /**
@@ -82,7 +82,7 @@ public class InsertManager {
         if (uploadVenueInfoList != null && !uploadVenueInfoList.isEmpty()) {
             final var modifiedVenueInfoList = modifyUpload(uploadVenueInfoList, principal, now);
             final var filteredVenueInfoList = filterUpload(modifiedVenueInfoList, principal, now);
-            pkiDataService.insertCheckinCount(now, getNoOfCheckins(filteredVenueInfoList));
+            kpiDataService.insertCheckinCount(now, getNoOfCheckins(filteredVenueInfoList));
             final var traceKeys =
                     cryptoWrapper.getCryptoUtil().createTraceV3ForUserUpload(filteredVenueInfoList);
             if (!requestValidator.isFakeRequest(principal)) {

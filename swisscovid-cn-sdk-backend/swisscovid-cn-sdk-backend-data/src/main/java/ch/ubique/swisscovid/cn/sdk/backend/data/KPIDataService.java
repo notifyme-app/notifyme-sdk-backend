@@ -3,7 +3,7 @@ package ch.ubique.swisscovid.cn.sdk.backend.data;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-public interface PKIDataService {
+public interface KPIDataService {
 
     /**
      * Insert the number of checkins in a particular upload
