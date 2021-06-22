@@ -82,12 +82,12 @@ public class InsertManager {
         if (uploadVenueInfoList != null && !uploadVenueInfoList.isEmpty()) {
             final var modifiedVenueInfoList = modifyUpload(uploadVenueInfoList, principal, now);
             final var filteredVenueInfoList = filterUpload(modifiedVenueInfoList, principal, now);
-            kpiDataService.insertCheckinCount(now, getNoOfCheckins(filteredVenueInfoList));
             final var traceKeys =
                     cryptoWrapper.getCryptoUtil().createTraceV3ForUserUpload(filteredVenueInfoList);
             if (!requestValidator.isFakeRequest(principal)) {
                 interactionDurationDataService.insertInteraction(
                         uploadPayload.getUserInteractionDurationMs());
+                kpiDataService.insertCheckinCount(now, getNoOfCheckins(filteredVenueInfoList));
                 if (!traceKeys.isEmpty()) {
                     swissCovidDataService.insertTraceKey(traceKeys);
                 }
