@@ -22,7 +22,7 @@ public abstract class BaseDataServiceTest {
     protected ObjectMapper objectMapper;
 
     @Before
-    public void setup() throws Exception {
+    public void setup() {
         this.objectMapper = new ObjectMapper(new JsonFactory());
         this.objectMapper.registerModule(new JavaTimeModule());
         // this makes sure, that the objectmapper does not fail, when no filter is provided.

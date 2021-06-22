@@ -2,10 +2,12 @@ package ch.ubique.swisscovid.cn.sdk.backend.data.config;
 
 import ch.ubique.swisscovid.cn.sdk.backend.data.InteractionDurationDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.JDBCInteractionDurationDataServiceImpl;
+import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcPushRegistrationDataServiceImpl;
 import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcSwissCovidDataServiceImpl;
+import ch.ubique.swisscovid.cn.sdk.backend.data.KPIDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.data.KPIDataServiceImpl;
 import ch.ubique.swisscovid.cn.sdk.backend.data.PushRegistrationDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataService;
-import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcPushRegistrationDataServiceImpl;
 import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataServiceImpl;
 import javax.sql.DataSource;
@@ -44,5 +46,10 @@ public class TestConfig {
     @Bean
     public PushRegistrationDataService pushRegistrationDataService() {
         return new JdbcPushRegistrationDataServiceImpl(dataSource);
+    }
+
+    @Bean
+    public KPIDataService kpiDataService() {
+        return new KPIDataServiceImpl(dataSource);
     }
 }
