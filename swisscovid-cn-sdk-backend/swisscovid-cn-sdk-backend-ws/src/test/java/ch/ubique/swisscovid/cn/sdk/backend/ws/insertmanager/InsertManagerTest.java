@@ -68,7 +68,7 @@ public class InsertManagerTest {
                         cryptoWrapper,
                         swissCovidDataService,
                         interactionDurationDataService,
-                    kpiDataService);
+                        kpiDataService);
     }
 
     @Test

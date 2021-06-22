@@ -1,6 +1,7 @@
 package ch.ubique.swisscovid.cn.sdk.backend.data;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.transaction.annotation.Transactional;
 
 public class KPIDataServiceImpl implements KPIDataService {
 
@@ -29,18 +31,21 @@ public class KPIDataServiceImpl implements KPIDataService {
     }
 
     @Override
+    @Transactional
     public void insertCheckinCount(LocalDateTime uploadDate, int count) {
         if (count > 0) {
             var params = new MapSqlParameterSource();
             params.addValue("count", count);
+            final var timestamp = uploadDate.truncatedTo(ChronoUnit.DAYS).toInstant(ZoneOffset.UTC);
             params.addValue(
                     "upload_date",
-                    Date.from(uploadDate.truncatedTo(ChronoUnit.DAYS).toInstant(ZoneOffset.UTC)));
+                    Date.from(timestamp));
             pkiInsert.execute(params);
         }
     }
 
     @Override
+    @Transactional
     public int cleanDB(Duration retentionPeriod) {
         var retentionTime =
                 LocalDate.now().minus(retentionPeriod.toDays(), ChronoUnit.DAYS).atStartOfDay();

@@ -6,12 +6,14 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 public class KPIDataServiceImplTest extends BaseDataServiceTest {
 
     @Autowired KPIDataService kpiDataService;
 
     @Test
+    @Transactional
     public void insertCheckinCount() {
         LocalDateTime uploadTime = LocalDateTime.parse("2021-06-21T12:00:00");
         // Shouldn't throw
@@ -21,6 +23,7 @@ public class KPIDataServiceImplTest extends BaseDataServiceTest {
     }
 
     @Test
+    @Transactional
     public void cleanDB() {
         LocalDateTime uploadTime = LocalDateTime.now();
         // Shouldn't throw
