@@ -14,6 +14,8 @@ import ch.ubique.swisscovid.cn.sdk.backend.data.InteractionDurationDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.JDBCInteractionDurationDataServiceImpl;
 import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcPushRegistrationDataServiceImpl;
 import ch.ubique.swisscovid.cn.sdk.backend.data.JdbcSwissCovidDataServiceImpl;
+import ch.ubique.swisscovid.cn.sdk.backend.data.PKIDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.data.PKIDataServiceImpl;
 import ch.ubique.swisscovid.cn.sdk.backend.data.PushRegistrationDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataService;
@@ -87,36 +89,50 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
 
     @Value("${userupload.mpkHex}")
     String useruploadMpkHex;
+
     @Value("${userupload.mskHex}")
     String useruploadMskHex;
+
     @Value("${traceKey.bucketSizeInMs}")
     Long bucketSizeInMs;
+
     @Value("${userupload.requestTime}")
     Long requestTime;
+
     @Value("${traceKey.traceKeysCacheControlInMs}")
     Long traceKeysCacheControlInMs;
+
     @Value("${ws.headers.protected:}")
     List<String> protectedHeaders;
+
     @Value("${ws.headers.debug: false}")
     boolean setDebugHeaders;
+
     @Value(
             "#{${ws.security.headers: {'X-Content-Type-Options':'nosniff', 'X-Frame-Options':'DENY','X-Xss-Protection':'1; mode=block'}}}")
     Map<String, String> additionalHeaders;
+
     @Value("${git.commit.id}")
     private String commitId;
+
     @Value("${git.commit.id.abbrev}")
     private String commitIdAbbrev;
+
     @Value("${git.commit.time}")
     private String commitTime;
     // base64 encoded p8 file
     @Value("${push.ios.signingkey}")
     private String iosPushSigningKey;
+
     @Value("${push.ios.teamid}")
     private String iosPushTeamId;
+
     @Value("${push.ios.keyid}")
     private String iosPushKeyId;
+
     @Value("${push.ios.topic}")
     private String iosPushTopic;
+
     @Value("${traceKey.retentionDays:14}")
     private Integer retentionDays;
 
@@ -215,10 +231,14 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
     public InsertManager insertManager(
             final CryptoWrapper cryptoWrapper,
             final SwissCovidDataService swissCovidDataService,
-            final InteractionDurationDataService interactionDurationDataService) {
+            final InteractionDurationDataService interactionDurationDataService,
+            final PKIDataService pkiDataService) {
         final var insertManager =
                 new InsertManager(
-                        cryptoWrapper, swissCovidDataService, interactionDurationDataService);
+                        cryptoWrapper,
+                        swissCovidDataService,
+                        interactionDurationDataService,
+                        pkiDataService);
         insertManager.addModifier(new RemoveFinalIntervalModifier());
         insertManager.addFilter(new FakeRequestFilter());
         insertManager.addFilter(new IntervalThresholdFilter());
@@ -252,6 +272,11 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
     @Bean
     public PushRegistrationDataService pushRegistrationDataService(final DataSource dataSource) {
         return new JdbcPushRegistrationDataServiceImpl(dataSource);
+    }
+
+    @Bean
+    public PKIDataService pkiDataService(final DataSource dataSource) {
+        return new PKIDataServiceImpl(dataSource);
     }
 
     @Bean

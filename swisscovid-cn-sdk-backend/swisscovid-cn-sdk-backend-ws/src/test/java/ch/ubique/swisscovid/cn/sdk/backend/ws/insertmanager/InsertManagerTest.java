@@ -5,6 +5,7 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import ch.ubique.swisscovid.cn.sdk.backend.data.InteractionDurationDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.data.PKIDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UserUploadPayload;
@@ -47,6 +48,7 @@ public class InsertManagerTest {
 
     @Autowired SwissCovidDataService swissCovidDataService;
     @Autowired InteractionDurationDataService interactionDurationDataService;
+    @Autowired PKIDataService pkiDataService;
     @Autowired CryptoWrapper cryptoWrapper;
 
     @Autowired TransactionManager transactionManager;
@@ -63,7 +65,10 @@ public class InsertManagerTest {
         venueInfoHelper = new VenueInfoHelper(cryptoWrapper);
         insertManager =
                 new InsertManager(
-                        cryptoWrapper, swissCovidDataService, interactionDurationDataService);
+                        cryptoWrapper,
+                        swissCovidDataService,
+                        interactionDurationDataService,
+                        pkiDataService);
     }
 
     @Test
@@ -96,8 +101,8 @@ public class InsertManagerTest {
                         return new ArrayList<>();
                     }
                 };
-        final List<UploadVenueInfo> uploadVenueInfoList = new ArrayList<>(
-            createUploadVenueInfo(now, now.plus(1, ChronoUnit.HOURS), false));
+        final List<UploadVenueInfo> uploadVenueInfoList =
+                new ArrayList<>(createUploadVenueInfo(now, now.plus(1, ChronoUnit.HOURS), false));
         insertWith(
                 Collections.singletonList(removeAll),
                 uploadVenueInfoList,
@@ -120,8 +125,12 @@ public class InsertManagerTest {
                         return uploadVenueInfoList;
                     }
                 };
-        final List<UploadVenueInfo> uploadVenueInfoList = new ArrayList<>(createUploadVenueInfo(
-            now.minus(2, ChronoUnit.HOURS), now.minus(1, ChronoUnit.HOURS), false));
+        final List<UploadVenueInfo> uploadVenueInfoList =
+                new ArrayList<>(
+                        createUploadVenueInfo(
+                                now.minus(2, ChronoUnit.HOURS),
+                                now.minus(1, ChronoUnit.HOURS),
+                                false));
         insertWith(
                 Collections.singletonList(removeNone),
                 uploadVenueInfoList,
@@ -164,7 +173,9 @@ public class InsertManagerTest {
                 return Instant.now(clock);
             }
         };
-        assertEquals(validUpload.size(), swissCovidDataService.findTraceKeys(now.minus(1, ChronoUnit.DAYS)).size());
+        assertEquals(
+                validUpload.size(),
+                swissCovidDataService.findTraceKeys(now.minus(1, ChronoUnit.DAYS)).size());
     }
 
     private void insertWith(
