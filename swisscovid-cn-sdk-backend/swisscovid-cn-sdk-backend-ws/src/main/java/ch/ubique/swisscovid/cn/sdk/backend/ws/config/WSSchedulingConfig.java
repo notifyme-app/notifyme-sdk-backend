@@ -10,6 +10,7 @@
 
 package ch.ubique.swisscovid.cn.sdk.backend.ws.config;
 
+import ch.ubique.swisscovid.cn.sdk.backend.data.KPIDataService;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -42,6 +43,7 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
     private final InteractionDurationDataService interactionDurationDataService;
     private final UUIDDataService uuidDataService;
     private final IOSHeartbeatSilentPush phoneHeartbeatSilentPush;
+    private final KPIDataService kpiDataService;
 
     @Value("${db.cleanCron:0 0 * * * ?}")
     private String cleanCron;
@@ -53,14 +55,16 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
     private String heartBeatSilentPushCron;
 
     protected WSSchedulingConfig(
-            final SwissCovidDataService swissCovidDataService,
-            InteractionDurationDataService interactionDurationDataService,
-            UUIDDataService uuidDataService,            
-            @Nullable IOSHeartbeatSilentPush phoneHeartbeatSilentPush) {
+        final SwissCovidDataService swissCovidDataService,
+        InteractionDurationDataService interactionDurationDataService,
+        UUIDDataService uuidDataService,
+        @Nullable IOSHeartbeatSilentPush phoneHeartbeatSilentPush,
+        KPIDataService kpiDataService) {
         this.swissCovidDataService = swissCovidDataService;
         this.interactionDurationDataService = interactionDurationDataService;
         this.uuidDataService = uuidDataService;
         this.phoneHeartbeatSilentPush = phoneHeartbeatSilentPush;
+        this.kpiDataService = kpiDataService;
     }
 
     @Override
@@ -107,6 +111,21 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
                             } catch (Exception e) {
                                 logger.error(
                                         "Exception removing old interaction duration entries", e);
+                            }
+                        },
+                        new CronTrigger(cleanCron, TimeZone.getTimeZone("UTC"))));
+
+        taskRegistrar.addCronTask(
+                new CronTask(
+                        () -> {
+                            try {
+                                logger.info(
+                                        "removing checkin count entries older than {} days",
+                                        retentionDays);
+                                kpiDataService.cleanDB(Duration.ofDays(retentionDays));
+                            } catch (Exception e) {
+                                logger.error(
+                                        "Exception removing old checkin count entries", e);
                             }
                         },
                         new CronTrigger(cleanCron, TimeZone.getTimeZone("UTC"))));
