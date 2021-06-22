@@ -126,7 +126,7 @@ public class CryptoUtil {
         List<UserUploadPayloadOuterClass.UploadVenueInfo> uploadVenueInfoList) {
         var traceKeys = new ArrayList<TraceKey>();
         for (UserUploadPayloadOuterClass.UploadVenueInfo venueInfo : uploadVenueInfoList) {
-            if (!venueInfo.getFake()) {
+            if (venueInfo.getFake().toByteArray()[0] == 0) {
                 final var startInSeconds = venueInfo.getIntervalStartMs() / 1000;
                 byte[] identity =
                     cryptoHashSHA256(

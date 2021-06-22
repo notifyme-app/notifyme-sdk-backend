@@ -251,7 +251,8 @@ public class SwissCovidControllerV3 {
           InsertException.class
   })
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ResponseEntity<Object> invalidArguments() {
+  public ResponseEntity<Object> invalidArguments(InsertException e) {
+    logger.info("Returning status 400 due to invalid venueInfos format: {}", e.getClass().getSimpleName());
     return ResponseEntity.badRequest().build();
   }
 

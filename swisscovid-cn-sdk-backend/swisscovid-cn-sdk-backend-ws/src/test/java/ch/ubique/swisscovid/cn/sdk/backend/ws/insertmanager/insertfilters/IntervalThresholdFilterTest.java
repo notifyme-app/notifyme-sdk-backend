@@ -2,40 +2,35 @@ package ch.ubique.swisscovid.cn.sdk.backend.ws.insertmanager.insertfilters;
 
 import ch.ubique.swisscovid.cn.sdk.backend.model.UserUploadPayloadOuterClass.UploadVenueInfo;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
 public class IntervalThresholdFilterTest extends UploadInsertionFilterTest {
+
     @Override
-    List<UploadVenueInfo> getValidVenueInfo() {
-        final var venueInfoList = new ArrayList<UploadVenueInfo>();
+    List<List<UploadVenueInfo>> getValidVenueInfo() {
         LocalDateTime start = LocalDateTime.now();
         LocalDateTime end = start.plusMinutes(30);
         // Not an edge case
         final var venueInfoCase1 = getVenueInfo(start, end);
-        venueInfoList.add(venueInfoCase1);
-        start = LocalDateTime.now();
+        final var venueInfoList = new ArrayList<>(venueInfoCase1);
+        // Exactly 1 hour, spanning across midnight
+        start = LocalDateTime.now().truncatedTo(ChronoUnit.DAYS).minusMinutes(30);
         end = start.plusHours(1);
-        // Exactly 1 hour
         final var venueInfoCase2 = getVenueInfo(start, end);
-        venueInfoList.add(venueInfoCase2);
-        return venueInfoList;
+        venueInfoList.addAll(venueInfoCase2);
+        return List.of(venueInfoList);
     }
 
     @Override
-    List<UploadVenueInfo> getInvalidVenueInfo() {
-        final var venueInfoList = new ArrayList<UploadVenueInfo>();
+    List<List<UploadVenueInfo>> getInvalidVenueInfo() {
         LocalDateTime start = LocalDateTime.now();
         LocalDateTime end = start.plusHours(-1);
         // End < Start
         final var venueInfoCase1 = getVenueInfo(start, end);
-        venueInfoList.add(venueInfoCase1);
-        start = LocalDateTime.now();
-        end = start.plusHours(25);
-        // End - Start > 24
-        final var venueInfoCase2 = getVenueInfo(start, end);
-        venueInfoList.add(venueInfoCase2);
-        return venueInfoList;
+        final var venueInfoList = new ArrayList<>(venueInfoCase1);
+        return List.of(venueInfoList);
     }
 
     @Override

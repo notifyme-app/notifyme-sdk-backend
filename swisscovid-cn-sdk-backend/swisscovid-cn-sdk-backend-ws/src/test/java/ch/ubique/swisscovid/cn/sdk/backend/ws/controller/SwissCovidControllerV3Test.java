@@ -306,8 +306,8 @@ public class SwissCovidControllerV3Test extends BaseControllerTest {
     @Transactional
     public void testUserUploadOverlappingIntervals() throws Exception {
         final var now = LocalDateTime.now();
-        final var interval1 = getUploadVenueInfo(now.minusHours(1), now.minusMinutes(30), false);
-        final var interval2 = getUploadVenueInfo(now.minusMinutes(45), now.minusMinutes(15), false);
+        final var interval1 = getUploadVenueInfo(now.minusMinutes(90), now.minusMinutes(30), false);
+        final var interval2 = getUploadVenueInfo(now.minusMinutes(61), now.minusMinutes(1), false);
         final var userUploadPayload = getUserUploadPayload(interval1, interval2);
         final var payloadBytes = userUploadPayload.toByteArray();
         final var expiry = now.plusMinutes(5).toInstant(ZoneOffset.UTC);
@@ -407,9 +407,11 @@ public class SwissCovidControllerV3Test extends BaseControllerTest {
             LocalDateTime start, LocalDateTime end, boolean fake) {
         final var from = start.toInstant(ZoneOffset.UTC);
         final var to = end.toInstant(ZoneOffset.UTC);
+        final var fakeBytes = fake ? new byte[] {1} : new byte[] {0};
+
         var venueInfo =
                 UploadVenueInfo.newBuilder()
-                        .setFake(fake)
+                        .setFake(ByteString.copyFrom(fakeBytes))
                         .setPreId(ByteString.copyFromUtf8("preId"))
                         .setNotificationKey(ByteString.copyFromUtf8("notificationKey"))
                         .setTimeKey(ByteString.copyFromUtf8("timeKey"))

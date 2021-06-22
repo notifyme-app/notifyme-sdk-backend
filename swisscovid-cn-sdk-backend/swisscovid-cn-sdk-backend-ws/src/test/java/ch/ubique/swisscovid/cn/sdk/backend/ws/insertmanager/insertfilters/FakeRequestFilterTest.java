@@ -6,19 +6,17 @@ import java.util.List;
 
 public class FakeRequestFilterTest extends UploadInsertionFilterTest {
     @Override
-    List<UploadVenueInfo> getValidVenueInfo() {
-        final var venueInfoList = new ArrayList<UploadVenueInfo>();
+    List<List<UploadVenueInfo>> getValidVenueInfo() {
         final var venueInfo = getVenueInfo(false);
-        venueInfoList.add(venueInfo);
-        return venueInfoList;
+        final var venueInfoList = new ArrayList<>(venueInfo);
+        return List.of(venueInfoList);
     }
 
     @Override
-    List<UploadVenueInfo> getInvalidVenueInfo() {
-        final var venueInfoList = new ArrayList<UploadVenueInfo>();
+    List<List<UploadVenueInfo>> getInvalidVenueInfo() {
         final var venueInfo = getVenueInfo(true);
-        venueInfoList.add(venueInfo);
-        return venueInfoList;
+        final var venueInfoList = new ArrayList<>(venueInfo);
+        return List.of(venueInfoList);
     }
 
     @Override
