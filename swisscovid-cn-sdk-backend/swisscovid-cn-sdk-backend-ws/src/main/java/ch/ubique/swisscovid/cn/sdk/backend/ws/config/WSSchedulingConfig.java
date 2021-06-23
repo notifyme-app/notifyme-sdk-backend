@@ -10,32 +10,28 @@
 
 package ch.ubique.swisscovid.cn.sdk.backend.ws.config;
 
+import ch.ubique.swisscovid.cn.sdk.backend.data.InteractionDurationDataService;
 import ch.ubique.swisscovid.cn.sdk.backend.data.KPIDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataService;
+import ch.ubique.swisscovid.cn.sdk.backend.ws.service.IOSHeartbeatSilentPush;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.TimeZone;
-
 import javax.annotation.Nullable;
-
+import net.javacrumbs.shedlock.spring.annotation.EnableSchedulerLock;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.SchedulingConfigurer;
-import org.springframework.scheduling.config.CronTask;
-import org.springframework.scheduling.config.ScheduledTaskRegistrar;
-import org.springframework.scheduling.support.CronTrigger;
-
-import ch.ubique.swisscovid.cn.sdk.backend.data.InteractionDurationDataService;
-import ch.ubique.swisscovid.cn.sdk.backend.data.SwissCovidDataService;
-import ch.ubique.swisscovid.cn.sdk.backend.data.UUIDDataService;
-import ch.ubique.swisscovid.cn.sdk.backend.ws.service.IOSHeartbeatSilentPush;
+import org.springframework.scheduling.annotation.Scheduled;
 
 @Configuration
 @EnableScheduling
-public class WSSchedulingConfig implements SchedulingConfigurer {
+@EnableSchedulerLock(defaultLockAtMostFor = "PT15M")
+public class WSSchedulingConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(WSSchedulingConfig.class);
 
@@ -45,21 +41,15 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
     private final IOSHeartbeatSilentPush phoneHeartbeatSilentPush;
     private final KPIDataService kpiDataService;
 
-    @Value("${db.cleanCron:0 0 * * * ?}")
-    private String cleanCron;
-
     @Value("${traceKey.retentionDays:14}")
     private Integer retentionDays;
 
-    @Value("${ws.heartBeatSilentPushCron}")
-    private String heartBeatSilentPushCron;
-
     protected WSSchedulingConfig(
-        final SwissCovidDataService swissCovidDataService,
-        InteractionDurationDataService interactionDurationDataService,
-        UUIDDataService uuidDataService,
-        @Nullable IOSHeartbeatSilentPush phoneHeartbeatSilentPush,
-        KPIDataService kpiDataService) {
+            final SwissCovidDataService swissCovidDataService,
+            InteractionDurationDataService interactionDurationDataService,
+            UUIDDataService uuidDataService,
+            @Nullable IOSHeartbeatSilentPush phoneHeartbeatSilentPush,
+            KPIDataService kpiDataService) {
         this.swissCovidDataService = swissCovidDataService;
         this.interactionDurationDataService = interactionDurationDataService;
         this.uuidDataService = uuidDataService;
@@ -67,75 +57,53 @@ public class WSSchedulingConfig implements SchedulingConfigurer {
         this.kpiDataService = kpiDataService;
     }
 
-    @Override
-    public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-        taskRegistrar.addCronTask(
-                new CronTask(
-                        () -> {
-                            try {
-                                Instant removeBefore =
-                                        Instant.now().minus(retentionDays, ChronoUnit.DAYS);
-                                logger.info(
-                                        "removing trace keys with end_time before: {}",
-                                        removeBefore);
-                                int removeCount =
-                                        swissCovidDataService.removeTraceKeys(removeBefore);
-                                logger.info("removed {} trace keys from db", removeCount);
-                            } catch (Exception e) {
-                                logger.error("Exception removing old trace keys", e);
-                            }
-                        },
-                        new CronTrigger(cleanCron, TimeZone.getTimeZone("UTC"))));
+    @Scheduled(cron = "${db.cleanCron:0 0 * * * ?}", zone = "UTC")
+    public void cleanTraceKeys() {
+        try {
+            Instant removeBefore = Instant.now().minus(retentionDays, ChronoUnit.DAYS);
+            logger.info("removing trace keys with end_time before: {}", removeBefore);
+            int removeCount = swissCovidDataService.removeTraceKeys(removeBefore);
+            logger.info("removed {} trace keys from db", removeCount);
+        } catch (Exception e) {
+            logger.error("Exception removing old trace keys", e);
+        }
+    }
 
-        taskRegistrar.addCronTask(
-                new CronTask(
-                        () -> {
-                            try {
-                                logger.info("removing UUIDs older than {} days", retentionDays);
-                                uuidDataService.cleanDB(Duration.ofDays(retentionDays));
-                            } catch (Exception e) {
-                                logger.error("Exception removing old UUIDs", e);
-                            }
-                        },
-                        new CronTrigger(cleanCron, TimeZone.getTimeZone("UTC"))));
+    @Scheduled(cron = "${db.cleanCron:0 0 * * * ?}", zone = "UTC")
+    public void cleanUUIDs() {
+        try {
+            logger.info("removing UUIDs older than {} days", retentionDays);
+            uuidDataService.cleanDB(Duration.ofDays(retentionDays));
+        } catch (Exception e) {
+            logger.error("Exception removing old UUIDs", e);
+        }
+    }
 
-        taskRegistrar.addCronTask(
-                new CronTask(
-                        () -> {
-                            try {
-                                logger.info(
-                                        "removing interaction duration entries older than {} days",
-                                        retentionDays);
-                                interactionDurationDataService.removeDurations(
-                                        Duration.ofDays(retentionDays));
-                            } catch (Exception e) {
-                                logger.error(
-                                        "Exception removing old interaction duration entries", e);
-                            }
-                        },
-                        new CronTrigger(cleanCron, TimeZone.getTimeZone("UTC"))));
+    @Scheduled(cron = "${db.cleanCron:0 0 * * * ?}", zone = "UTC")
+    public void cleanInteractionDurations() {
+        try {
+            logger.info("removing interaction duration entries older than {} days", retentionDays);
+            interactionDurationDataService.removeDurations(Duration.ofDays(retentionDays));
+        } catch (Exception e) {
+            logger.error("Exception removing old interaction duration entries", e);
+        }
+    }
 
-        taskRegistrar.addCronTask(
-                new CronTask(
-                        () -> {
-                            try {
-                                logger.info(
-                                        "removing checkin count entries older than {} days",
-                                        retentionDays);
-                                kpiDataService.cleanDB(Duration.ofDays(retentionDays));
-                            } catch (Exception e) {
-                                logger.error(
-                                        "Exception removing old checkin count entries", e);
-                            }
-                        },
-                        new CronTrigger(cleanCron, TimeZone.getTimeZone("UTC"))));
+    @Scheduled(cron = "${db.cleanCron:0 0 * * * ?}", zone = "UTC")
+    public void cleanKPI() {
+        try {
+            logger.info("removing checkin count entries older than {} days", retentionDays);
+            kpiDataService.cleanDB(Duration.ofDays(retentionDays));
+        } catch (Exception e) {
+            logger.error("Exception removing old checkin count entries", e);
+        }
+    }
 
-        // push is optional, only trigger if set
+    @Scheduled(cron = "${ws.heartBeatSilentPushCron:-}", zone = "UTC")
+    @SchedulerLock(name = "silent_push", lockAtLeastFor = "PT15S")
+    public void silentPush() {
         if (phoneHeartbeatSilentPush != null) {
-	        taskRegistrar.addCronTask(
-	                new CronTask(
-	                        phoneHeartbeatSilentPush::sendHeartbeats,
-	                        new CronTrigger(heartBeatSilentPushCron, TimeZone.getTimeZone("UTC"))));
+            phoneHeartbeatSilentPush.sendHeartbeats();
         }
     }
 }
