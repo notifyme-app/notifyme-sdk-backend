@@ -13,6 +13,7 @@ package ch.ubique.swisscovid.cn.sdk.backend.model.tracekey;
 import ch.ubique.swisscovid.cn.sdk.backend.model.util.UrlBase64StringDeserializer;
 import ch.ubique.swisscovid.cn.sdk.backend.model.util.UrlBase64StringSerializer;
 import ch.ubique.openapi.docannotations.Documentation;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.time.Instant;
@@ -20,6 +21,7 @@ import javax.validation.constraints.NotNull;
 
 public class TraceKey {
 
+  @JsonIgnore
   private Integer id;
 
   @NotNull private int version;
@@ -38,6 +40,7 @@ public class TraceKey {
 
   @NotNull private Instant day;
 
+  @JsonIgnore
   private Instant createdAt;
 
   @JsonSerialize(using = UrlBase64StringSerializer.class)
