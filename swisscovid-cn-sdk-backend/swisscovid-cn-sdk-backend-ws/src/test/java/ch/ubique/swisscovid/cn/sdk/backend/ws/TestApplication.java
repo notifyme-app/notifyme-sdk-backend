@@ -12,5 +12,10 @@ package ch.ubique.swisscovid.cn.sdk.backend.ws;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication(scanBasePackages = {"ch.ubique.swisscovid.cn.sdk.backend.ws.config"})
+@SpringBootApplication(
+    scanBasePackages = {
+      "ch.ubique.swisscovid.cn.sdk.backend.ws.config",
+      "ch.admin.bag.covidcertificate.log",
+      "ch.admin.bag.covidcertificate.rest"
+    })
 public class TestApplication {}
