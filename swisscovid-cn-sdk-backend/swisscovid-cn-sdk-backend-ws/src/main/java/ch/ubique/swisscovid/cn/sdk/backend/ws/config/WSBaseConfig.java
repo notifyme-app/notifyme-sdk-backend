@@ -299,14 +299,19 @@ public abstract class WSBaseConfig implements WebMvcConfigurer {
 
     @Bean
     public String revision() {
+        String prettyTime;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-        ZonedDateTime zonedDateTime =
-                LocalDateTime.parse(commitTime, formatter).atZone(ZoneId.of("UTC"));
-        DateTimeFormatter prettyFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
-        String prettyTime =
-                zonedDateTime
-                        .withZoneSameInstant(ZoneId.of("Europe/Zurich"))
-                        .format(prettyFormatter);
+        try {
+            ZonedDateTime zonedDateTime =
+                    LocalDateTime.parse(commitTime, formatter).atZone(ZoneId.of("UTC"));
+            DateTimeFormatter prettyFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
+            prettyTime =
+                    zonedDateTime
+                            .withZoneSameInstant(ZoneId.of("Europe/Zurich"))
+                            .format(prettyFormatter);
+        } catch (Exception e) {
+            prettyTime = "N/A";
+        }
         return "Rev: " + commitId + "\n" + prettyTime;
     }
 

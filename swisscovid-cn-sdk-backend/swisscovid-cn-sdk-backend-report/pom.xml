@@ -6,7 +6,7 @@
     <parent>
         <artifactId>swisscovid-cn-sdk-backend</artifactId>
         <groupId>ch.ubique</groupId>
-        <version>2.0.0</version>
+        <version>2.0.1</version>
     </parent>
     <artifactId>swisscovid-cn-sdk-backend-report</artifactId>
     <name>SwissCovid CN SDK Backend Report</name>
@@ -22,17 +22,17 @@
         <dependency>
             <groupId>ch.ubique</groupId>
             <artifactId>swisscovid-cn-sdk-backend-model</artifactId>
-            <version>2.0.0</version>
+            <version>2.0.1</version>
         </dependency>
         <dependency>
             <groupId>ch.ubique</groupId>
             <artifactId>swisscovid-cn-sdk-backend-data</artifactId>
-            <version>2.0.0</version>
+            <version>2.0.1</version>
         </dependency>
         <dependency>
             <groupId>ch.ubique</groupId>
             <artifactId>swisscovid-cn-sdk-backend-ws</artifactId>
-            <version>2.0.0</version>
+            <version>2.0.1</version>
         </dependency>
     </dependencies>
 
