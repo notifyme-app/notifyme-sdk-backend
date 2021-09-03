@@ -18,12 +18,17 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ComponentScan(basePackages = {"ch.ubique.swisscovid.cn.sdk.backend.ws.config"})
+@ComponentScan(
+    basePackages = {
+      "ch.ubique.swisscovid.cn.sdk.backend.ws.config",
+      "ch.admin.bag.covidcertificate.log",
+      "ch.admin.bag.covidcertificate.rest"
+    })
 @EnableAutoConfiguration(
-        exclude = {SecurityAutoConfiguration.class, ManagementWebSecurityAutoConfiguration.class})
+    exclude = {SecurityAutoConfiguration.class, ManagementWebSecurityAutoConfiguration.class})
 public class Application {
 
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class);
-    }
+  public static void main(String[] args) {
+    SpringApplication.run(Application.class);
+  }
 }
